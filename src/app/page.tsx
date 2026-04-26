@@ -1,8 +1,8 @@
 "use client";
 
 /**
- * LOOMY landing: editorial hero, spring motion, Inter + Playfair (layout).
- * Accent: warm bronze on stone; generous rhythm for an inviting first impression.
+ * LOOMY landing — indhold er synligt uden at vente på scroll/motion (pålidelig i remote + ældre browsere).
+ * Accent og typografi følger Fashion Stylist / Luxe UI skills.
  */
 import { motion, useReducedMotion } from "framer-motion";
 import { Building2, Mail, Phone, Sparkles, Truck } from "lucide-react";
@@ -14,7 +14,7 @@ import { SplineScene } from "@/components/hero/spline-scene";
 import { TiltCard } from "@/components/hero/tilt-card";
 import { LumiHeader } from "@/components/lumi-header";
 import { useLumi } from "@/components/providers/lumi-provider";
-import { fadeUpItem, springSoft, staggerContainer } from "@/components/motion-config";
+import { springSoft } from "@/components/motion-config";
 
 const heroSlides = [
   {
@@ -63,29 +63,21 @@ export default function Home() {
           <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-[#d4af37]/35 to-transparent" />
 
           <div className="relative grid gap-10 lg:grid-cols-[1.08fr_0.92fr] lg:gap-12">
-            <motion.div
-              variants={staggerContainer}
-              initial="hidden"
-              animate="show"
-              className="space-y-6"
-            >
-              <motion.p
-                variants={fadeUpItem}
-                className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#d4af37]/90"
-              >
+            <div className="space-y-6">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#d4af37]/90">
                 LOOMY · København K
-              </motion.p>
-              <motion.div variants={fadeUpItem} className="relative">
+              </p>
+              <div className="relative">
                 <p
                   className="pointer-events-none select-none font-serif text-6xl font-medium leading-none tracking-tight text-white/[0.06] sm:text-7xl md:text-8xl"
                   aria-hidden
                 >
                   LOOMY
                 </p>
-              </motion.div>
+              </div>
               <motion.div
                 key={`slide-${slideIndex}`}
-                initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}
+                initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0.92, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={springSoft}
                 className="relative z-10 space-y-4"
@@ -97,7 +89,7 @@ export default function Home() {
                   {heroSlides[slideIndex].subtitle}
                 </p>
               </motion.div>
-              <motion.div variants={fadeUpItem} className="flex gap-2 pt-1">
+              <div className="flex gap-2 pt-1">
                 {heroSlides.map((slide, index) => (
                   <button
                     key={slide.title}
@@ -116,11 +108,13 @@ export default function Home() {
                     />
                   </button>
                 ))}
-              </motion.div>
-              <motion.div variants={fadeUpItem} className="flex flex-wrap gap-3 pt-2">
+              </div>
+              <div className="flex flex-wrap gap-3 pt-2">
                 <Button
                   className="bg-[#faf8f5] !text-stone-900 shadow-[0_12px_32px_rgba(0,0,0,0.2)] ring-0 hover:!bg-white"
-                  onClick={() => window.open("/shopping", "_blank", "noopener,noreferrer")}
+                  onClick={() => {
+                    window.location.href = "/shopping";
+                  }}
                 >
                   Gå til shop
                 </Button>
@@ -136,8 +130,8 @@ export default function Home() {
                 >
                   Læs mere
                 </Button>
-              </motion.div>
-            </motion.div>
+              </div>
+            </div>
 
             <div className="relative hidden min-h-[320px] lg:block">
               <div className="absolute inset-0 rounded-3xl border-[0.5px] border-white/15 bg-white/[0.04] p-2 backdrop-blur-[28px]">
@@ -146,12 +140,7 @@ export default function Home() {
               <div className="pointer-events-none absolute -bottom-8 left-1/2 h-12 w-2/3 -translate-x-1/2 rounded-full bg-black/40 blur-2xl" />
             </div>
 
-            <motion.div
-              variants={staggerContainer}
-              initial="hidden"
-              animate="show"
-              className="grid gap-3 sm:grid-cols-3 lg:col-span-2 lg:grid-cols-3"
-            >
+            <div className="grid gap-3 sm:grid-cols-3 lg:col-span-2 lg:grid-cols-3">
               {[
                 {
                   label: "Typisk levering",
@@ -169,7 +158,7 @@ export default function Home() {
                   tone: "from-amber-50/95 to-[#faf8f5]/95",
                 },
               ].map((item) => (
-                <motion.div key={item.label} variants={fadeUpItem} className="min-w-0">
+                <div key={item.label} className="min-w-0">
                   <TiltCard>
                     <div
                       className={`rounded-2xl border-[0.5px] border-white/25 bg-gradient-to-br ${item.tone} p-5 shadow-[0_16px_40px_rgba(12,10,9,0.2)] backdrop-blur-md`}
@@ -180,19 +169,13 @@ export default function Home() {
                       <p className="mt-2 font-serif text-2xl font-medium text-stone-900">{item.value}</p>
                     </div>
                   </TiltCard>
-                </motion.div>
+                </div>
               ))}
-            </motion.div>
+            </div>
           </div>
         </section>
 
-        <motion.section
-          initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.05, margin: "0px 0px 120px 0px" }}
-          transition={springSoft}
-          className="grid gap-6 md:grid-cols-3 md:gap-8"
-        >
+        <section className="grid gap-6 md:grid-cols-3 md:gap-8">
           {[
             {
               icon: <Sparkles size={20} strokeWidth={1.5} className="text-[#8b6914]" />,
@@ -226,16 +209,9 @@ export default function Home() {
               </motion.div>
             </TiltCard>
           ))}
-        </motion.section>
+        </section>
 
-        <motion.section
-          id="about"
-          initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.05, margin: "0px 0px 120px 0px" }}
-          transition={springSoft}
-          className="space-y-5"
-        >
+        <section id="about" className="space-y-5">
           <h2 className="font-serif text-2xl font-medium tracking-tight text-stone-900 md:text-3xl">
             Om LOOMY
           </h2>
@@ -258,16 +234,9 @@ export default function Home() {
               går hånd i hånd.
             </p>
           </Card>
-        </motion.section>
+        </section>
 
-        <motion.section
-          id="feedback"
-          initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.05, margin: "0px 0px 120px 0px" }}
-          transition={springSoft}
-          className="space-y-5"
-        >
+        <section id="feedback" className="space-y-5">
           <h2 className="font-serif text-2xl font-medium tracking-tight text-stone-900 md:text-3xl">
             Din stemme
           </h2>
@@ -284,16 +253,9 @@ export default function Home() {
               </Link>
             </div>
           </Card>
-        </motion.section>
+        </section>
 
-        <motion.section
-          id="contact"
-          initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.05, margin: "0px 0px 120px 0px" }}
-          transition={springSoft}
-          className="space-y-5 pb-8"
-        >
+        <section id="contact" className="space-y-5 pb-8">
           <h2 className="font-serif text-2xl font-medium tracking-tight text-stone-900 md:text-3xl">
             Kontakt
           </h2>
@@ -338,7 +300,7 @@ export default function Home() {
               </div>
             </div>
           </Card>
-        </motion.section>
+        </section>
       </main>
     </div>
   );

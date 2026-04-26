@@ -17,7 +17,7 @@ import {
   type SizeKey,
   type StoreData,
 } from "@/components/providers/lumi-provider";
-import { fadeUpItem, springSoft, staggerContainer } from "@/components/motion-config";
+import { springSoft } from "@/components/motion-config";
 
 const categories = ["New In", "Emergency Outfits", "Shoes", "Accessories"];
 
@@ -161,14 +161,9 @@ export default function ShoppingPage() {
                   </Button>
                 </Card>
               ) : (
-                <motion.div
-                  variants={staggerContainer}
-                  initial="hidden"
-                  animate="show"
-                  className="grid gap-6 md:grid-cols-2"
-                >
+                <div className="grid gap-6 md:grid-cols-2">
                   {filteredStores.map((storeItem) => (
-                    <motion.div key={storeItem.id} variants={fadeUpItem} className="min-w-0">
+                    <div key={storeItem.id} className="min-w-0">
                       <Card className="h-full border-[0.5px] border-stone-200/90 p-6 shadow-[0_12px_40px_rgba(28,25,23,0.05)]">
                         <div className="flex flex-wrap items-start justify-between gap-2">
                           <p className="font-serif text-lg font-medium text-stone-900 md:text-xl">
@@ -249,9 +244,9 @@ export default function ShoppingPage() {
                           })}
                         </div>
                       </Card>
-                    </motion.div>
+                    </div>
                   ))}
-                </motion.div>
+                </div>
               )}
             </section>
           </div>

@@ -32,6 +32,14 @@ export default function RootLayout({
       className={`${inter.variable} ${playfair.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans">
+        <noscript>
+          <div className="mx-auto max-w-lg p-6 text-center text-stone-800">
+            <p className="font-serif text-lg font-medium">LOOMY kræver JavaScript</p>
+            <p className="mt-2 text-sm text-stone-600">
+              Slå JavaScript til i din browser, eller åbn siden i en anden browser.
+            </p>
+          </div>
+        </noscript>
         <LumiProvider>{children}</LumiProvider>
       </body>
     </html>

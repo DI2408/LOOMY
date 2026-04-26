@@ -4,9 +4,11 @@
   "private": true,
   "scripts": {
     "cursor:sync": "node scripts/sync-loomy-cursor.mjs",
-    "dev": "next dev",
+    "dev": "next dev --turbo -H 0.0.0.0 -p 3000",
     "build": "next build",
-    "start": "next start",
+    "postbuild": "node scripts/verify-site.mjs",
+    "start": "next start -H 0.0.0.0 -p 3000",
+    "verify:site": "node scripts/verify-site.mjs",
     "lint": "eslint"
   },
   "dependencies": {
