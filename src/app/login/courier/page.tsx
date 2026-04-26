@@ -18,15 +18,15 @@ export default function CourierLoginPage() {
   const [error, setError] = useState("");
 
   return (
-    <div className="min-h-screen text-slate-900">
+    <div className="min-h-screen text-stone-900">
       <LumiHeader />
       <main className="mx-auto w-full max-w-xl px-4 py-10 md:px-6">
-        <Card className="border border-slate-200 bg-white text-slate-900 shadow-sm">
+        <Card className="border border-stone-200 bg-white text-stone-900 shadow-sm">
           <div className="mb-4 flex items-center gap-2">
-            <Bike size={18} className="text-[#d97745]" />
+            <Bike size={18} className="text-[#8b6914]" />
             <h1 className="text-xl font-bold">Courier Login</h1>
           </div>
-          <p className="mb-4 text-sm text-slate-600">
+          <p className="mb-4 text-sm text-stone-600">
             Sign in as courier to see nearby tasks, customer address, and slide each order to next step.
           </p>
           <div className="space-y-3">
@@ -39,14 +39,14 @@ export default function CourierLoginPage() {
               value={courierId}
               onChange={(event) => setCourierId(event.target.value)}
               placeholder="Courier ID"
-              className="h-12 w-full rounded-xl border border-slate-300 px-3 text-sm"
+              className="h-12 w-full rounded-xl border border-stone-300 px-3 text-sm"
             />
             <input
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               placeholder="Password"
               type="password"
-              className="h-12 w-full rounded-xl border border-slate-300 px-3 text-sm"
+              className="h-12 w-full rounded-xl border border-stone-300 px-3 text-sm"
             />
             <Button
               fullWidth

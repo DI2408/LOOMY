@@ -50,10 +50,10 @@ export default function Home() {
   }, [reduceMotion]);
 
   return (
-    <div className="min-h-screen overflow-x-hidden text-stone-900">
+    <div className="flex min-h-screen flex-col overflow-x-hidden text-stone-900">
       <LumiHeader />
 
-      <main className="mx-auto w-full max-w-7xl space-y-10 px-4 py-8 md:space-y-14 md:px-8 md:py-12">
+      <main className="mx-auto w-full max-w-7xl flex-1 space-y-10 px-4 py-8 md:space-y-14 md:px-8 md:py-12">
         <section className="relative overflow-hidden rounded-3xl border-[0.5px] border-stone-700/40 bg-gradient-to-br from-stone-900 via-stone-900 to-stone-950 p-8 shadow-[0_32px_80px_rgba(12,10,9,0.35)] md:p-12 lg:p-14">
           <div className="pointer-events-none absolute inset-0">
             <div className="mesh-float absolute -left-20 -top-24 h-80 w-80 rounded-full bg-[radial-gradient(circle,rgba(212,175,55,0.14)_0%,transparent_68%)] blur-3xl" />

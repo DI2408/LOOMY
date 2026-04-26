@@ -152,17 +152,17 @@ export default function StorePage() {
 
   if (role !== "store") {
     return (
-      <div className="min-h-screen text-slate-900">
+      <div className="min-h-screen text-stone-900">
         <LumiHeader />
         <main className="mx-auto w-full max-w-7xl px-4 py-10 md:px-6">
-          <Card className="border border-slate-200 bg-white text-slate-900 shadow-sm">
+          <Card className="border border-stone-200 bg-white text-stone-900 shadow-sm">
             <h1 className="text-xl font-bold">Store access required</h1>
-            <p className="mt-2 text-sm text-slate-600">
+            <p className="mt-2 text-sm text-stone-600">
               Please sign in from the dedicated store login page.
             </p>
             <Link
               href="/login/store"
-              className="mt-3 inline-flex rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-800"
+              className="mt-3 inline-flex rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm font-semibold text-stone-800"
             >
               Go to Store Login
             </Link>
@@ -173,17 +173,17 @@ export default function StorePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_right,#eef2ff_0%,#f8fafc_45%,#ffffff_100%)] text-slate-900">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_right,#faf8f5_0%,#faf8f5_45%,#ffffff_100%)] text-stone-900">
       <LumiHeader />
       <main className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-6 md:grid-cols-[1.2fr_0.8fr] md:px-6 md:py-10">
         <section className="space-y-4">
-          <div className="rounded-2xl border border-indigo-100 bg-white/80 p-5 shadow-[0_12px_30px_-20px_rgba(30,41,59,0.45)] backdrop-blur">
+          <div className="rounded-2xl border border-stone-200/90 bg-white/80 p-5 shadow-[0_12px_30px_-20px_rgba(30,41,59,0.45)] backdrop-blur">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-indigo-500">Store Operations Center</p>
-                <h1 className="mt-2 text-2xl font-bold text-slate-900">KPI Dashboard</h1>
+                <p className="text-xs uppercase tracking-[0.2em] text-[#8b6914]">Store Operations Center</p>
+                <h1 className="mt-2 text-2xl font-bold text-stone-900">KPI Dashboard</h1>
               </div>
-              <div className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white p-1">
+              <div className="inline-flex items-center gap-1 rounded-xl border border-stone-200 bg-white p-1">
                 {(["7d", "30d", "all"] as DateRange[]).map((option) => (
                   <button
                     key={option}
@@ -191,8 +191,8 @@ export default function StorePage() {
                     onClick={() => setRange(option)}
                     className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
                       range === option
-                        ? "bg-indigo-600 text-white shadow-sm"
-                        : "text-slate-600 hover:bg-slate-100"
+                        ? "bg-stone-900 text-white shadow-sm"
+                        : "text-stone-600 hover:bg-stone-100"
                     }`}
                   >
                     {option === "all" ? "All time" : option.toUpperCase()}
@@ -200,76 +200,76 @@ export default function StorePage() {
                 ))}
               </div>
             </div>
-            <p className="mt-2 text-sm text-slate-600">
+            <p className="mt-2 text-sm text-stone-600">
               Real-time overview of orders, top-selling items, inventory risk, and product interest.
             </p>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-            <Card className="border border-slate-200 bg-white/90 p-4 shadow-sm">
+            <Card className="border border-stone-200 bg-white/90 p-4 shadow-sm">
               <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Total Orders</p>
-                <ShoppingBag size={16} className="text-indigo-500" />
+                <p className="text-xs font-semibold uppercase tracking-wider text-stone-500">Total Orders</p>
+                <ShoppingBag size={16} className="text-[#8b6914]" />
               </div>
               <p className="mt-3 text-2xl font-bold">{dashboard.totalOrders}</p>
-              <p className="mt-1 text-xs text-slate-500">{dashboard.completedOrders} delivered</p>
+              <p className="mt-1 text-xs text-stone-500">{dashboard.completedOrders} delivered</p>
             </Card>
-            <Card className="border border-slate-200 bg-white/90 p-4 shadow-sm">
+            <Card className="border border-stone-200 bg-white/90 p-4 shadow-sm">
               <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Top Conversion</p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-stone-500">Top Conversion</p>
                 <TrendingUp size={16} className="text-emerald-500" />
               </div>
               <p className="mt-3 text-2xl font-bold">{dashboard.conversionRate}%</p>
-              <p className="mt-1 text-xs text-slate-500">Orders completed end-to-end</p>
+              <p className="mt-1 text-xs text-stone-500">Orders completed end-to-end</p>
             </Card>
-            <Card className="border border-slate-200 bg-white/90 p-4 shadow-sm">
+            <Card className="border border-stone-200 bg-white/90 p-4 shadow-sm">
               <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Product Views</p>
-                <Users size={16} className="text-cyan-500" />
+                <p className="text-xs font-semibold uppercase tracking-wider text-stone-500">Product Views</p>
+                <Users size={16} className="text-[#8b6914]" />
               </div>
               <p className="mt-3 text-2xl font-bold">{dashboard.estimatedViews.toLocaleString()}</p>
-              <p className="mt-1 text-xs text-slate-500">Estimated unique visits (30d)</p>
+              <p className="mt-1 text-xs text-stone-500">Estimated unique visits (30d)</p>
             </Card>
-            <Card className="border border-slate-200 bg-white/90 p-4 shadow-sm">
+            <Card className="border border-stone-200 bg-white/90 p-4 shadow-sm">
               <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Revenue</p>
-                <DollarSign size={16} className="text-violet-500" />
+                <p className="text-xs font-semibold uppercase tracking-wider text-stone-500">Revenue</p>
+                <DollarSign size={16} className="text-[#8b6914]" />
               </div>
               <p className="mt-3 text-2xl font-bold">{formatCurrency(dashboard.revenue)}</p>
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 text-xs text-stone-500">
                 Avg order: {formatCurrency(dashboard.avgOrderValue)}
               </p>
             </Card>
-            <Card className="border border-slate-200 bg-white/90 p-4 shadow-sm">
+            <Card className="border border-stone-200 bg-white/90 p-4 shadow-sm">
               <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Live Stock</p>
-                <Activity size={16} className="text-fuchsia-500" />
+                <p className="text-xs font-semibold uppercase tracking-wider text-stone-500">Live Stock</p>
+                <Activity size={16} className="text-stone-600" />
               </div>
               <p className="mt-3 text-2xl font-bold">{dashboard.liveStockUnits}</p>
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 text-xs text-stone-500">
                 {dashboard.lowStockCount} low stock · {dashboard.outOfStockCount} sold out
               </p>
             </Card>
           </div>
 
           <div className="grid gap-4 lg:grid-cols-2">
-            <Card className="border border-slate-200 bg-white/85 shadow-sm">
+            <Card className="border border-stone-200 bg-white/85 shadow-sm">
               <div className="flex items-center gap-2">
-                <TrendingUp size={16} className="text-indigo-500" />
+                <TrendingUp size={16} className="text-[#8b6914]" />
                 <h2 className="text-lg font-semibold">Top-selling products</h2>
               </div>
-              <p className="mt-1 text-xs text-slate-500">Based on current date filter</p>
+              <p className="mt-1 text-xs text-stone-500">Based on current date filter</p>
               <div className="mt-4 space-y-2">
                 {dashboard.topProducts.length === 0 ? (
-                  <p className="text-sm text-slate-600">No completed sales data yet.</p>
+                  <p className="text-sm text-stone-600">No completed sales data yet.</p>
                 ) : (
                   dashboard.topProducts.map((item, index) => (
                     <div
                       key={`${item.name}-${index}`}
-                      className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2"
+                      className="flex items-center justify-between rounded-xl border border-stone-200 bg-stone-50 px-3 py-2"
                     >
-                      <p className="text-sm font-semibold text-slate-800">{item.name}</p>
-                      <span className="rounded-full bg-indigo-100 px-2 py-1 text-xs font-semibold text-indigo-700">
+                      <p className="text-sm font-semibold text-stone-800">{item.name}</p>
+                      <span className="rounded-full bg-[#8b6914]/15 px-2 py-1 text-xs font-semibold text-[#6b4f0a]">
                         {item.qty} sold
                       </span>
                     </div>
@@ -277,25 +277,25 @@ export default function StorePage() {
                 )}
               </div>
             </Card>
-            <Card className="border border-slate-200 bg-white/85 shadow-sm">
+            <Card className="border border-stone-200 bg-white/85 shadow-sm">
               <div className="flex items-center gap-2">
-                <CalendarDays size={16} className="text-cyan-500" />
+                <CalendarDays size={16} className="text-[#8b6914]" />
                 <h2 className="text-lg font-semibold">Order trend</h2>
               </div>
-              <p className="mt-1 text-xs text-slate-500">Last 7 days performance</p>
+              <p className="mt-1 text-xs text-stone-500">Last 7 days performance</p>
               <div className="mt-4 flex items-end gap-2">
                 {dashboard.orderTrend.map((entry) => (
                   <div key={entry.label} className="flex flex-1 flex-col items-center gap-1">
-                    <div className="text-[10px] font-semibold text-slate-500">{entry.count}</div>
-                    <div className="flex h-24 w-full items-end rounded-md bg-slate-100 p-1">
+                    <div className="text-[10px] font-semibold text-stone-500">{entry.count}</div>
+                    <div className="flex h-24 w-full items-end rounded-md bg-stone-100 p-1">
                       <div
-                        className="w-full rounded bg-gradient-to-t from-indigo-500 to-cyan-400"
+                        className="w-full rounded bg-gradient-to-t from-stone-800 to-amber-600"
                         style={{
                           height: `${Math.max(10, (entry.count / dashboard.maxTrendCount) * 100)}%`,
                         }}
                       />
                     </div>
-                    <div className="text-[10px] text-slate-500">{entry.label}</div>
+                    <div className="text-[10px] text-stone-500">{entry.label}</div>
                   </div>
                 ))}
               </div>
@@ -316,12 +316,12 @@ export default function StorePage() {
           {activeStores.map((store) => (
             <Card
               key={store.id}
-              className="border border-slate-200 bg-white/90 text-slate-900 shadow-[0_12px_30px_-24px_rgba(15,23,42,0.7)]"
+              className="border border-stone-200 bg-white/90 text-stone-900 shadow-[0_12px_30px_-24px_rgba(15,23,42,0.7)]"
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
                   <h2 className="text-lg font-semibold">{store.name}</h2>
-                  <p className="text-xs text-slate-500">{store.address}</p>
+                  <p className="text-xs text-stone-500">{store.address}</p>
                 </div>
                 <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
                   Inventory live
@@ -331,11 +331,11 @@ export default function StorePage() {
                 {store.products.map((product) => (
                   <div
                     key={product.id}
-                    className="rounded-xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]"
+                    className="rounded-xl border border-stone-200 bg-gradient-to-br from-stone-50 to-white p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]"
                   >
                     <div className="flex items-center justify-between gap-2">
                       <p className="font-semibold">{product.name}</p>
-                      <span className="rounded-full bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-600">
+                      <span className="rounded-full bg-stone-100 px-2 py-1 text-[11px] font-semibold text-stone-600">
                         {sizes.reduce((sum, size) => sum + product.sizes[size], 0)} units
                       </span>
                     </div>
@@ -343,7 +343,7 @@ export default function StorePage() {
                       {sizes.map((size) => (
                         <label
                           key={`${product.id}-${size}`}
-                          className="rounded-lg border border-slate-200 bg-white p-2 text-xs shadow-sm"
+                          className="rounded-lg border border-stone-200 bg-white p-2 text-xs shadow-sm"
                         >
                           <div className="mb-1 flex items-center justify-between">
                             <span className="font-semibold">{size}</span>
@@ -375,9 +375,9 @@ export default function StorePage() {
                                 quantity: Number(event.target.value),
                               })
                             }
-                            className="w-full rounded border border-slate-200 px-2 py-1 text-slate-800 focus:border-indigo-300 focus:outline-none"
+                            className="w-full rounded border border-stone-200 px-2 py-1 text-stone-800 focus:border-[#8b6914]/40 focus:outline-none"
                           />
-                          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-100">
+                          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-stone-100">
                             <div
                               className={`h-full rounded-full ${
                                 product.sizes[size] === 0
@@ -399,7 +399,7 @@ export default function StorePage() {
                                 quantity: product.sizes[size] + 5,
                               })
                             }
-                            className="mt-2 inline-flex w-full items-center justify-center gap-1 rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-[10px] font-semibold text-slate-700 transition hover:bg-slate-100"
+                            className="mt-2 inline-flex w-full items-center justify-center gap-1 rounded-md border border-stone-200 bg-stone-50 px-2 py-1 text-[10px] font-semibold text-stone-700 transition hover:bg-stone-100"
                           >
                             <RotateCw size={10} />
                             Quick restock +5
@@ -415,26 +415,26 @@ export default function StorePage() {
         </section>
 
         <section className="space-y-4">
-          <Card className="border border-slate-200 bg-white/90 text-slate-900 shadow-sm">
+          <Card className="border border-stone-200 bg-white/90 text-stone-900 shadow-sm">
             <div className="mb-3 flex items-center gap-2">
-              <PackageCheck size={18} className="text-[#d97745]" />
+              <PackageCheck size={18} className="text-[#8b6914]" />
               <h2 className="text-lg font-semibold">Incoming Orders</h2>
             </div>
             <div className="space-y-3">
               {activeOrders.length === 0 ? (
-                <p className="text-sm text-slate-600">No orders waiting for store action.</p>
+                <p className="text-sm text-stone-600">No orders waiting for store action.</p>
               ) : (
                 activeOrders.map((order) => (
-                    <div key={order.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                    <div key={order.id} className="rounded-xl border border-stone-200 bg-stone-50 p-3">
                       <p className="text-sm font-semibold">{order.id}</p>
-                      <p className="text-xs text-slate-600">Store: {order.storeName}</p>
-                      <p className="text-xs text-slate-600">
+                      <p className="text-xs text-stone-600">Store: {order.storeName}</p>
+                      <p className="text-xs text-stone-600">
                         Customer: {order.customerName} - {order.customerAddress}
                       </p>
-                      <p className="text-xs text-slate-600">
+                      <p className="text-xs text-stone-600">
                         Product: {order.productName} - Size {order.size}
                       </p>
-                      <p className="mb-2 text-xs text-slate-600">
+                      <p className="mb-2 text-xs text-stone-600">
                         Current step: {order.status.replaceAll("_", " ")}
                       </p>
                       <SlideAction

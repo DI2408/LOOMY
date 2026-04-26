@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import Image from "next/image";
 import { ChevronDown, MapPin, Menu, Search, ShoppingBag } from "lucide-react";
@@ -10,7 +11,15 @@ import { useLumi } from "@/components/providers/lumi-provider";
 
 const menuSpring = { type: "spring" as const, stiffness: 420, damping: 32 };
 
+const mainNav = [
+  { href: "/", label: "Hjem" },
+  { href: "/shopping", label: "Shop" },
+  { href: "/about", label: "Om os" },
+  { href: "/feedback", label: "Feedback" },
+] as const;
+
 export function LumiHeader() {
+  const pathname = usePathname();
   const reduceMotion = useReducedMotion();
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -20,27 +29,56 @@ export function LumiHeader() {
     role === "customer" ? "Kunde" : role === "store" ? "Butik" : "Bud";
 
   return (
-    <header className="sticky top-0 z-50 border-b-[0.5px] border-stone-200/80 bg-[#faf8f5]/75 backdrop-blur-md">
-      <div className="mx-auto flex w-full max-w-7xl items-center gap-3 px-4 py-3 md:gap-4 md:px-8">
+    <header className="sticky top-0 z-50 border-b-[0.5px] border-stone-200/80 bg-[#faf8f5]/80 backdrop-blur-md">
+      <div className="mx-auto flex w-full max-w-7xl items-center gap-2 px-4 py-3 md:gap-3 md:px-8 md:py-4">
         <Link
           href="/"
-          className="group flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-xl border-[0.5px] border-stone-200/90 bg-white/90 shadow-[0_4px_20px_rgba(28,25,23,0.06)] ring-stone-900/5 transition hover:shadow-[0_8px_28px_rgba(28,25,23,0.08)]"
+          className="group flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-xl border-[0.5px] border-stone-200/90 bg-white/95 shadow-sm ring-stone-900/5 transition hover:shadow-md"
         >
           <Image
             src="/loomy-logo.png"
             alt="LOOMY"
             width={40}
             height={40}
-            className="h-9 w-9 rounded-lg object-cover transition group-hover:scale-[1.02]"
+            className="h-9 w-9 rounded-lg object-cover transition-transform duration-300 group-hover:scale-[1.02]"
             priority
           />
         </Link>
 
-        <div className="hidden min-h-11 flex-1 items-center gap-2 rounded-xl border-[0.5px] border-stone-200/90 bg-white/80 px-4 backdrop-blur-sm md:flex">
+        <nav
+          className="ml-1 hidden items-center gap-1 rounded-2xl border-[0.5px] border-stone-200/70 bg-white/60 p-1 md:flex"
+          aria-label="Hovedmenu"
+        >
+          {mainNav.map((item) => {
+            const active = pathname === item.href;
+            return (
+              <Link key={item.href} href={item.href}>
+                <motion.span
+                  whileTap={{ scale: 0.97 }}
+                  transition={menuSpring}
+                  className={`relative flex min-h-10 items-center rounded-xl px-4 text-sm font-medium transition-colors ${
+                    active ? "text-stone-900" : "text-stone-600 hover:text-stone-900"
+                  }`}
+                >
+                  {active ? (
+                    <motion.span
+                      layoutId="nav-pill"
+                      className="absolute inset-0 rounded-xl bg-[#faf8f5] shadow-[inset_0_0_0_1px_rgba(139,105,20,0.12)]"
+                      transition={menuSpring}
+                    />
+                  ) : null}
+                  <span className="relative z-10">{item.label}</span>
+                </motion.span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="hidden min-h-11 min-w-0 flex-1 items-center gap-2 rounded-xl border-[0.5px] border-stone-200/90 bg-white/85 px-4 backdrop-blur-sm lg:flex">
           <Search size={17} className="shrink-0 text-stone-400" aria-hidden />
           <input
             placeholder="Søg butikker eller styles…"
-            className="min-h-10 w-full bg-transparent text-sm text-stone-800 placeholder:text-stone-400 focus:outline-none"
+            className="min-h-10 w-full min-w-0 bg-transparent text-sm text-stone-800 placeholder:text-stone-400 focus:outline-none"
             aria-label="Søg"
           />
         </div>
@@ -50,10 +88,10 @@ export function LumiHeader() {
           whileTap={{ scale: 0.97 }}
           whileHover={reduceMotion ? undefined : { scale: 1.02 }}
           transition={menuSpring}
-          className="hidden min-h-11 items-center gap-2 rounded-xl border-[0.5px] border-stone-200/90 bg-white/80 px-4 text-sm font-medium text-stone-800 backdrop-blur-sm transition hover:bg-white md:flex"
+          className="hidden min-h-11 shrink-0 items-center gap-2 rounded-xl border-[0.5px] border-stone-200/90 bg-white/85 px-3 text-sm font-medium text-stone-800 backdrop-blur-sm transition hover:bg-white xl:flex"
         >
           <MapPin size={16} className="text-[#8b6914]" aria-hidden />
-          København K
+          <span className="max-w-[8rem] truncate">København K</span>
         </motion.button>
 
         <motion.button
@@ -61,7 +99,7 @@ export function LumiHeader() {
           whileTap={{ scale: 0.97 }}
           whileHover={reduceMotion ? undefined : { scale: 1.02 }}
           transition={menuSpring}
-          className="relative ml-auto flex min-h-11 min-w-11 items-center justify-center rounded-xl border-[0.5px] border-stone-200/90 bg-white/90 text-stone-800 shadow-sm md:ml-0"
+          className="relative ml-auto flex min-h-11 min-w-11 items-center justify-center rounded-xl border-[0.5px] border-stone-200/90 bg-white/95 text-stone-800 shadow-sm md:ml-0"
           aria-label="Kurv"
         >
           <ShoppingBag size={20} strokeWidth={1.75} />
@@ -73,12 +111,12 @@ export function LumiHeader() {
             onClick={() => setMenuOpen((prev) => !prev)}
             whileTap={{ scale: 0.98 }}
             transition={menuSpring}
-            className="flex min-h-11 items-center gap-2 rounded-xl border-[0.5px] border-stone-900/10 bg-stone-900 px-4 text-sm font-medium text-[#faf8f5] shadow-[0_10px_28px_rgba(28,25,23,0.2)] transition hover:bg-stone-800"
+            className="flex min-h-11 items-center gap-2 rounded-xl border-[0.5px] border-stone-900/10 bg-stone-900 px-3 text-sm font-medium text-[#faf8f5] shadow-md transition hover:bg-stone-800 md:px-4"
             aria-expanded={menuOpen}
             aria-haspopup="true"
           >
             <Menu size={17} strokeWidth={1.75} className="md:hidden" aria-hidden />
-            <span className="hidden md:inline">Menu</span>
+            <span className="hidden md:inline">Mere</span>
             <ChevronDown
               size={16}
               className={`hidden transition md:block ${menuOpen ? "rotate-180" : "rotate-0"}`}
@@ -92,16 +130,18 @@ export function LumiHeader() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 8, scale: 0.98 }}
                 transition={menuSpring}
-                className="absolute right-0 z-50 mt-2 w-56 rounded-2xl border-[0.5px] border-stone-200/90 bg-white/95 p-2 shadow-[0_20px_50px_rgba(28,25,23,0.12)] backdrop-blur-xl"
+                className="absolute right-0 z-50 mt-2 w-60 rounded-2xl border-[0.5px] border-stone-200/90 bg-white/98 p-2 shadow-[0_24px_56px_rgba(28,25,23,0.12)] backdrop-blur-xl"
               >
                 <p className="px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-stone-400">
-                  LOOMY
+                  Genveje
                 </p>
                 {[
                   { href: "/shopping", label: "Shop" },
                   { href: "/about", label: "Om os" },
                   { href: "/feedback", label: "Feedback" },
                   { href: "/#contact", label: "Kontakt" },
+                  { href: "/login/store", label: "Butikslogin" },
+                  { href: "/login/courier", label: "Budlogin" },
                 ].map((item) => (
                   <Link
                     key={item.href}
@@ -120,10 +160,10 @@ export function LumiHeader() {
           </AnimatePresence>
         </div>
 
-        <div className="relative">
+        <div className="relative shrink-0">
           <Button
             variant="secondary"
-            className="min-h-11 border-[0.5px] border-stone-200 bg-white px-4 font-medium !text-stone-900 shadow-sm"
+            className="min-h-11 border-[0.5px] border-stone-200 bg-white px-3 font-medium !text-stone-900 shadow-sm md:px-4"
             onClick={() => setOpen((prev) => !prev)}
           >
             {role === "customer" ? "Log ind" : roleLabel}

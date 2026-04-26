@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { LumiProvider } from "@/components/providers/lumi-provider";
+import { LumiShell } from "@/components/lumi-shell";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -31,7 +32,7 @@ export default function RootLayout({
       lang="da"
       className={`${inter.variable} ${playfair.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-sans">
+      <body className="min-h-full flex flex-col font-sans text-stone-900">
         <noscript>
           <div className="mx-auto max-w-lg p-6 text-center text-stone-800">
             <p className="font-serif text-lg font-medium">LOOMY kræver JavaScript</p>
@@ -40,7 +41,9 @@ export default function RootLayout({
             </p>
           </div>
         </noscript>
-        <LumiProvider>{children}</LumiProvider>
+        <LumiProvider>
+          <LumiShell>{children}</LumiShell>
+        </LumiProvider>
       </body>
     </html>
   );

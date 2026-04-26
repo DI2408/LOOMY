@@ -26,7 +26,7 @@ function SplineFallback() {
       >
         <div className="flex items-center gap-2 text-white/90">
           <Sparkles size={16} />
-          <p className="text-xs font-semibold uppercase tracking-[0.22em]">LUMI Live View</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em]">LOOMY Live</p>
         </div>
         <p className="mt-3 text-2xl font-black leading-tight">Fashion Flow in Motion</p>
         <p className="mt-1 text-xs text-white/80">

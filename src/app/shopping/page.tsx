@@ -61,10 +61,10 @@ export default function ShoppingPage() {
   }, [stores, selectedCategory, query]);
 
   return (
-    <div className="min-h-screen overflow-x-hidden text-stone-900">
+    <div className="flex min-h-screen flex-col overflow-x-hidden text-stone-900">
       <LumiHeader />
 
-      <main className="mx-auto w-full max-w-7xl space-y-10 px-4 py-8 md:space-y-12 md:px-8 md:py-12">
+      <main className="mx-auto w-full max-w-7xl flex-1 space-y-10 px-4 py-8 md:space-y-12 md:px-8 md:py-12">
         <motion.section
           initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

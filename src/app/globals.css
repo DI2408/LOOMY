@@ -20,6 +20,16 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
 body {
   background-color: var(--background);
   background-image:
@@ -28,6 +38,11 @@ body {
     radial-gradient(circle at 0% 100%, rgba(214, 211, 209, 0.35), transparent 45%);
   color: var(--foreground);
   font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+::selection {
+  background-color: rgba(139, 105, 20, 0.18);
+  color: var(--loomy-ink);
 }
 
 @keyframes shimmer {

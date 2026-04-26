@@ -9,12 +9,12 @@ export function Input({ label, className = "", id, ...props }: InputProps) {
 
   return (
     <div className="space-y-2">
-      <label htmlFor={inputId} className="text-xs font-medium text-slate-300">
+      <label htmlFor={inputId} className="text-xs font-medium text-stone-600">
         {label}
       </label>
       <input
         id={inputId}
-        className={`h-11 w-full rounded-xl border border-white/15 bg-white/5 px-3 text-sm text-white placeholder:text-slate-400 focus:border-[#f9a26c] focus:outline-none ${className}`}
+        className={`h-11 w-full rounded-xl border-[0.5px] border-stone-200 bg-white px-3 text-sm text-stone-900 placeholder:text-stone-400 focus:border-[#8b6914]/50 focus:outline-none focus:ring-2 focus:ring-[#8b6914]/15 ${className}`}
         {...props}
       />
     </div>
