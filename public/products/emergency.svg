@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900">
+  <defs>
+    <linearGradient id="bg2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#dbe4f8"/>
+      <stop offset="100%" stop-color="#b7c8ec"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="900" fill="url(#bg2)"/>
+  <rect x="180" y="150" width="840" height="600" rx="42" fill="#fff" opacity="0.9"/>
+  <rect x="320" y="260" width="560" height="360" rx="36" fill="#2e3b57"/>
+  <rect x="450" y="210" width="300" height="70" rx="35" fill="#2e3b57"/>
+  <circle cx="520" cy="500" r="18" fill="#fff"/>
+  <circle cx="680" cy="500" r="18" fill="#fff"/>
+  <text x="600" y="805" text-anchor="middle" font-family="Arial, sans-serif" font-size="52" fill="#2e3b57">EMERGENCY OUTFIT</text>
+</svg>

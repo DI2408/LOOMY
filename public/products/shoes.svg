@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900">
+  <defs>
+    <linearGradient id="bg3" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#e8edf3"/>
+      <stop offset="100%" stop-color="#cfd8e4"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="900" fill="url(#bg3)"/>
+  <rect x="170" y="160" width="860" height="580" rx="42" fill="#fff" opacity="0.9"/>
+  <path d="M280 520c120-25 240-40 320-35 110 5 195 70 320 90 70 11 120 42 120 79v26H280v-130z" fill="#364152"/>
+  <path d="M320 560h630" stroke="#d9dee7" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="410" cy="700" r="24" fill="#1f2937"/>
+  <circle cx="850" cy="700" r="24" fill="#1f2937"/>
+  <text x="600" y="808" text-anchor="middle" font-family="Arial, sans-serif" font-size="58" fill="#364152">SHOES</text>
+</svg>

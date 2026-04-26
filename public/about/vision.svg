@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900">
+  <defs>
+    <linearGradient id="a" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#111c3d"/>
+      <stop offset="100%" stop-color="#4a2a76"/>
+    </linearGradient>
+  </defs>
+  <rect width="1400" height="900" fill="url(#a)"/>
+  <circle cx="260" cy="170" r="220" fill="#f8c56b" opacity="0.25"/>
+  <circle cx="1120" cy="740" r="260" fill="#78a1ff" opacity="0.2"/>
+  <rect x="210" y="170" width="980" height="560" rx="42" fill="#ffffff" opacity="0.88"/>
+  <path d="M360 560c130-230 550-230 680 0" fill="none" stroke="#2d3a7a" stroke-width="28" stroke-linecap="round"/>
+  <circle cx="700" cy="500" r="145" fill="none" stroke="#2d3a7a" stroke-width="18"/>
+  <circle cx="700" cy="500" r="26" fill="#f7a11f"/>
+  <text x="700" y="805" text-anchor="middle" font-family="Arial, sans-serif" font-size="54" fill="#f7dba6">VISION</text>
+</svg>

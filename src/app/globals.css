@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f3f6fb;
+  --foreground: #0f172a;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background:
+    radial-gradient(circle at 10% 0%, rgba(249, 162, 108, 0.18), transparent 35%),
+    radial-gradient(circle at 85% 18%, rgba(88, 111, 158, 0.2), transparent 35%),
+    #f3f6fb;
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes meshFloat {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(16px, -10px, 0) scale(1.05);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.mesh-float {
+  animation: meshFloat 10s ease-in-out infinite;
+}
