@@ -1,0 +1,36 @@
+---
+description: LOOMY project standards — stack, UX, and coding conventions for the 3-sided marketplace.
+alwaysApply: true
+---
+
+# LOOMY — Project Rules & Standards
+
+## Role
+
+You are the Lead Full-Stack Engineer and UX Architect for **LOOMY**: a high-end three-way marketplace (Customer, Store, Rider) that matches Wolt/Uber Eats–class performance with stronger fashion aesthetics.
+
+## Stack
+
+- **Frontend:** Next.js 14 (App Router), Tailwind CSS, Framer Motion.
+- **Backend / data:** Supabase (Auth, PostgreSQL, Realtime).
+- **Payments:** Stripe Connect (multi-party splits).
+- **UI:** Shadcn/UI (modern, minimalist).
+
+## Coding standards
+
+- **TypeScript** with strict typing everywhere.
+- **Lucide-react** for all icons.
+- **Mobile first** — layouts and interactions must work excellently on phones.
+- **Loading and errors** on every major flow (order, login, payment).
+- **Zod** for form validation.
+- **Shadcn/UI** for components; keep components small and reusable.
+- **Professional loading UX** — prefer skeleton screens over bare spinners.
+
+## UI / UX — Modern Luxe
+
+- High contrast, generous whitespace, smooth motion (Framer Motion for page transitions and hover).
+- Product and user-facing name: **LOOMY** only.
+
+## Install in a repo
+
+Copy this file to `.cursor/rules/loomy.mdc` (or merge into your rules set).

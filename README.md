@@ -29,6 +29,23 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
+## Cursor: LOOMY app + loomy-cursor-skills
+
+This repo stays the **Next.js app** ([LOOMY](https://github.com/DI2408/LOOMY)). Shared Cursor **rules** and **agent skills** live in a separate repo and are wired in as a **git submodule**:
+
+- Submodule: [DI2408/loomy-cursor-skills](https://github.com/DI2408/loomy-cursor-skills) at `.cursor/loomy-cursor-skills/`
+
+After clone, initialize the submodule and sync files into the paths Cursor reads:
+
+```bash
+git submodule update --init --recursive
+npm run cursor:sync
+```
+
+`npm run cursor:sync` copies `rules/loomy.mdc` → `.cursor/rules/loomy.mdc` and each skill folder from the submodule into `.cursor/skills/<name>/`. Other skill folders under `.cursor/skills/` that only exist in this repo are left unchanged.
+
+When the skills repo updates: `cd .cursor/loomy-cursor-skills && git pull` (or `git submodule update --remote`) then `npm run cursor:sync` from the project root.
+
 ## Deploy on Vercel
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
