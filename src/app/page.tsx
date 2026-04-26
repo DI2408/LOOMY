@@ -85,7 +85,7 @@ export default function Home() {
               </motion.div>
               <motion.div
                 key={`slide-${slideIndex}`}
-                initial={reduceMotion ? false : { opacity: 0, y: 14 }}
+                initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={springSoft}
                 className="relative z-10 space-y-4"
@@ -187,9 +187,9 @@ export default function Home() {
         </section>
 
         <motion.section
-          initial={reduceMotion ? false : { opacity: 0, y: 24 }}
+          initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
+          viewport={{ once: true, amount: 0.05, margin: "0px 0px 120px 0px" }}
           transition={springSoft}
           className="grid gap-6 md:grid-cols-3 md:gap-8"
         >
@@ -230,9 +230,9 @@ export default function Home() {
 
         <motion.section
           id="about"
-          initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+          initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
+          viewport={{ once: true, amount: 0.05, margin: "0px 0px 120px 0px" }}
           transition={springSoft}
           className="space-y-5"
         >
@@ -262,9 +262,9 @@ export default function Home() {
 
         <motion.section
           id="feedback"
-          initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+          initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
+          viewport={{ once: true, amount: 0.05, margin: "0px 0px 120px 0px" }}
           transition={springSoft}
           className="space-y-5"
         >
@@ -288,9 +288,9 @@ export default function Home() {
 
         <motion.section
           id="contact"
-          initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+          initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
+          viewport={{ once: true, amount: 0.05, margin: "0px 0px 120px 0px" }}
           transition={springSoft}
           className="space-y-5 pb-8"
         >

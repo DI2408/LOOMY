@@ -6,15 +6,15 @@
  */
 export const springSnappy = { type: "spring" as const, stiffness: 380, damping: 28 };
 export const springSoft = { type: "spring" as const, stiffness: 260, damping: 32 };
+/** Parent only orchestrates stagger — keep opacity on children so hero never stays blank. */
 export const staggerContainer = {
-  hidden: { opacity: 0 },
+  hidden: {},
   show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.08, delayChildren: 0.06 },
+    transition: { staggerChildren: 0.07, delayChildren: 0.04 },
   },
 };
 export const fadeUpItem = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 16 },
   show: {
     opacity: 1,
     y: 0,

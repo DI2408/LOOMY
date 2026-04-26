@@ -66,7 +66,7 @@ export default function ShoppingPage() {
 
       <main className="mx-auto w-full max-w-7xl space-y-10 px-4 py-8 md:space-y-12 md:px-8 md:py-12">
         <motion.section
-          initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+          initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={springSoft}
           className="relative overflow-hidden rounded-3xl border-[0.5px] border-stone-200/90 bg-gradient-to-br from-white via-[#faf8f5] to-stone-100/80 p-8 shadow-[0_20px_60px_rgba(28,25,23,0.08)] md:p-12"
