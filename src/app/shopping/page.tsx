@@ -1,8 +1,12 @@
 "use client";
 
-import { CheckCircle2, Clock3, ShieldCheck, X } from "lucide-react";
+/**
+ * LOOMY shopping: warm neutrals, hairline cards, spring product tiles, skeleton-friendly structure.
+ */
+import { CheckCircle2, Clock3, Package, ShieldCheck, Sparkles, X } from "lucide-react";
 import Image from "next/image";
 import { useMemo, useRef, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { LumiHeader } from "@/components/lumi-header";
@@ -13,16 +17,19 @@ import {
   type SizeKey,
   type StoreData,
 } from "@/components/providers/lumi-provider";
+import { fadeUpItem, springSoft, staggerContainer } from "@/components/motion-config";
 
 const categories = ["New In", "Emergency Outfits", "Shoes", "Accessories"];
 
 const statusSteps: { id: OrderStatus; label: string; owner: string }[] = [
-  { id: "order_placed", label: "Order placed", owner: "Customer App" },
-  { id: "store_packing", label: "Store confirms & packs", owner: "Store Partner" },
-  { id: "courier_pickup", label: "Courier pickup", owner: "Courier App" },
-  { id: "on_the_way", label: "On the way", owner: "Courier App" },
-  { id: "delivered", label: "Delivered", owner: "Customer + Store" },
+  { id: "order_placed", label: "Bestilt", owner: "Kunde" },
+  { id: "store_packing", label: "Butik pakker", owner: "Butik" },
+  { id: "courier_pickup", label: "Bud afhenter", owner: "Bud" },
+  { id: "on_the_way", label: "På vej", owner: "Bud" },
+  { id: "delivered", label: "Leveret", owner: "Alle" },
 ];
+
+const modalSpring = { type: "spring" as const, stiffness: 400, damping: 34 };
 
 export default function ShoppingPage() {
   const { stores, orders, placeOrder, loginAs } = useLumi();
@@ -34,6 +41,7 @@ export default function ShoppingPage() {
   const [selected, setSelected] = useState<{ store: StoreData; product: Product } | null>(null);
   const [selectedSize, setSelectedSize] = useState<SizeKey | null>(null);
   const storeSectionRef = useRef<HTMLElement | null>(null);
+  const reduceMotion = useReducedMotion();
 
   const filteredStores = useMemo(() => {
     return stores
@@ -53,193 +61,263 @@ export default function ShoppingPage() {
   }, [stores, selectedCategory, query]);
 
   return (
-    <div className="min-h-screen text-slate-900">
+    <div className="min-h-screen overflow-x-hidden text-stone-900">
       <LumiHeader />
 
-      <main className="mx-auto w-full max-w-7xl space-y-6 px-4 py-6 md:px-6 md:py-10">
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
-          <h1 className="text-2xl font-black md:text-4xl">Shopping</h1>
-          <p className="mt-2 text-sm text-slate-600 md:text-base">
-            Alle butikker og valgmuligheder samlet i ét shopping-vindue.
+      <main className="mx-auto w-full max-w-7xl space-y-10 px-4 py-8 md:space-y-12 md:px-8 md:py-12">
+        <motion.section
+          initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={springSoft}
+          className="relative overflow-hidden rounded-3xl border-[0.5px] border-stone-200/90 bg-gradient-to-br from-white via-[#faf8f5] to-stone-100/80 p-8 shadow-[0_20px_60px_rgba(28,25,23,0.08)] md:p-12"
+        >
+          <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[#8b6914]/[0.06] blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-16 left-1/4 h-48 w-48 rounded-full bg-stone-300/20 blur-3xl" />
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#8b6914]">
+            Shop · LOOMY
           </p>
-          <div className="mt-4">
+          <h1 className="mt-3 max-w-3xl font-serif text-3xl font-medium leading-tight tracking-tight md:text-5xl">
+            Find dit næste outfit fra byens bedste butikker.
+          </h1>
+          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-stone-600 md:text-base">
+            Alt samlet ét sted — live lager, klare priser og levering der følger ordren hele
+            vejen.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-3">
             <Button
               onClick={() =>
                 storeSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
               }
             >
-              Go to Stores
+              Se butikker
+            </Button>
+            <Button variant="secondary" href="/">
+              Til forsiden
             </Button>
           </div>
-        </section>
+        </motion.section>
 
-        <section className="grid gap-6 lg:grid-cols-[1.45fr_0.55fr]">
-          <div className="space-y-6">
-            <section className="space-y-3">
-              <h2 className="text-xl font-bold text-slate-900">Categories</h2>
+        <div className="grid gap-10 lg:grid-cols-[1.4fr_0.6fr] lg:gap-12">
+          <div className="space-y-10">
+            <section className="space-y-4">
+              <h2 className="font-serif text-xl font-medium text-stone-900 md:text-2xl">Kategori</h2>
               <div className="flex flex-wrap gap-2">
-                {["All", ...categories].map((category) => (
-                  <button
-                    key={category}
-                    onClick={() => setSelectedCategory(category)}
-                    className={`rounded-lg px-3 py-1.5 text-xs font-medium ${
-                      selectedCategory === category
-                        ? "bg-slate-900 text-white"
-                        : "border border-slate-300 bg-white text-slate-700"
-                    }`}
-                  >
-                    {category}
-                  </button>
-                ))}
+                {["All", ...categories].map((category) => {
+                  const active = selectedCategory === category;
+                  return (
+                    <motion.button
+                      key={category}
+                      type="button"
+                      onClick={() => setSelectedCategory(category)}
+                      whileTap={{ scale: 0.97 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 28 }}
+                      className={`min-h-11 rounded-full border-[0.5px] px-4 text-xs font-medium transition ${
+                        active
+                          ? "border-stone-900 bg-stone-900 text-[#faf8f5] shadow-md"
+                          : "border-stone-200/90 bg-white/90 text-stone-700 hover:border-stone-300 hover:bg-white"
+                      }`}
+                    >
+                      {category === "All" ? "Alle" : category}
+                    </motion.button>
+                  );
+                })}
               </div>
             </section>
 
-            <section id="stores" className="space-y-3" ref={storeSectionRef}>
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <h2 className="text-xl font-bold text-slate-900">Indre By Boutiques</h2>
-                <input
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 md:w-80"
-                  placeholder="Search products in catalog..."
-                />
+            <section id="stores" className="space-y-5" ref={storeSectionRef}>
+              <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
+                <h2 className="font-serif text-xl font-medium text-stone-900 md:text-2xl">
+                  Butikker i Indre By
+                </h2>
+                <label className="w-full sm:w-80">
+                  <span className="sr-only">Søg produkter</span>
+                  <input
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
+                    className="min-h-11 w-full rounded-xl border-[0.5px] border-stone-200/90 bg-white/90 px-4 text-sm text-stone-800 shadow-sm backdrop-blur-sm placeholder:text-stone-400 focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-[#8b6914]/20"
+                    placeholder="Søg i kataloget…"
+                  />
+                </label>
               </div>
-              <div className="grid gap-3 md:grid-cols-2">
-                {filteredStores.map((storeItem) => (
-                  <div key={storeItem.id}>
-                    <Card className="border border-slate-200 bg-white text-slate-900 shadow-sm">
-                      <div className="flex items-center justify-between">
-                        <p className="text-lg font-semibold">{storeItem.name}</p>
-                        <span className="rounded-full bg-[#fff3ed] px-2 py-1 text-xs font-medium text-[#c86436]">
-                          {storeItem.etaMinutes} min
-                        </span>
-                      </div>
-                      <p className="mt-1 text-sm text-slate-600">
-                        {storeItem.neighborhood} • {storeItem.address}
-                      </p>
-                      <p className="mt-1 text-sm text-slate-600">Rating {storeItem.rating.toFixed(1)}</p>
-                      {storeItem.products.map((product) => {
-                        const totalStock = Object.values(product.sizes).reduce(
-                          (sum, qty) => sum + qty,
-                          0,
-                        );
-                        const stockTone =
-                          totalStock === 0
-                            ? "bg-rose-100 text-rose-700"
-                            : totalStock < 6
-                              ? "bg-amber-100 text-amber-700"
-                              : "bg-emerald-100 text-emerald-700";
-                        const stockLabel =
-                          totalStock === 0
-                            ? "Sold out"
-                            : totalStock < 6
-                              ? `Low stock (${totalStock})`
-                              : `${totalStock} in stock`;
 
-                        return (
-                          <button
-                            key={product.id}
-                            onClick={() => {
-                              setSelected({ store: storeItem, product });
-                              setSelectedSize(null);
-                            }}
-                            className="mt-3 w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-left transition hover:border-slate-300 hover:bg-slate-100"
-                          >
-                            <div className="mb-2 aspect-[4/3] overflow-hidden rounded-lg border border-slate-200 bg-white">
-                              <Image
-                                src={product.imageUrl}
-                                alt={product.name}
-                                width={900}
-                                height={700}
-                                className="h-full w-full object-cover"
-                              />
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <p className="text-sm font-semibold text-slate-800">{product.name}</p>
-                              <p className="text-sm font-semibold text-slate-700">{product.price} DKK</p>
-                            </div>
-                            <p className="mt-1 text-xs text-slate-600">{product.description}</p>
-                            <div className="mt-2 flex items-center justify-between">
-                              <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
-                                {product.category}
-                              </p>
-                              <span
-                                className={`rounded-full px-2 py-1 text-[11px] font-semibold ${stockTone}`}
-                              >
-                                {stockLabel}
-                              </span>
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </Card>
+              {filteredStores.length === 0 ? (
+                <Card className="flex flex-col items-center gap-4 border-dashed border-stone-300/80 bg-stone-50/50 py-14 text-center">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#8b6914]/10">
+                    <Sparkles className="text-[#8b6914]" size={26} strokeWidth={1.5} />
                   </div>
-                ))}
-              </div>
+                  <p className="max-w-sm font-medium text-stone-800">Ingen styles matcher lige nu</p>
+                  <p className="max-w-md text-sm text-stone-600">
+                    Prøv en anden kategori eller ryd søgefeltet — der er mere på vej fra vores
+                    partnere.
+                  </p>
+                  <Button
+                    variant="secondary"
+                    onClick={() => {
+                      setQuery("");
+                      setSelectedCategory("All");
+                    }}
+                  >
+                    Nulstil filtre
+                  </Button>
+                </Card>
+              ) : (
+                <motion.div
+                  variants={staggerContainer}
+                  initial="hidden"
+                  animate="show"
+                  className="grid gap-6 md:grid-cols-2"
+                >
+                  {filteredStores.map((storeItem) => (
+                    <motion.div key={storeItem.id} variants={fadeUpItem} className="min-w-0">
+                      <Card className="h-full border-[0.5px] border-stone-200/90 p-6 shadow-[0_12px_40px_rgba(28,25,23,0.05)]">
+                        <div className="flex flex-wrap items-start justify-between gap-2">
+                          <p className="font-serif text-lg font-medium text-stone-900 md:text-xl">
+                            {storeItem.name}
+                          </p>
+                          <span className="shrink-0 rounded-full border-[0.5px] border-[#8b6914]/25 bg-[#8b6914]/[0.08] px-3 py-1 text-xs font-medium text-[#6b4f0a]">
+                            ~{storeItem.etaMinutes} min
+                          </span>
+                        </div>
+                        <p className="mt-2 text-sm text-stone-600">
+                          {storeItem.neighborhood} · {storeItem.address}
+                        </p>
+                        <p className="mt-1 text-xs text-stone-500">
+                          {storeItem.rating.toFixed(1)} ★ fra kunder
+                        </p>
+                        <div className="mt-5 space-y-4">
+                          {storeItem.products.map((product) => {
+                            const totalStock = Object.values(product.sizes).reduce(
+                              (sum, qty) => sum + qty,
+                              0,
+                            );
+                            const stockTone =
+                              totalStock === 0
+                                ? "border-rose-200/80 bg-rose-50 text-rose-800"
+                                : totalStock < 6
+                                  ? "border-amber-200/80 bg-amber-50 text-amber-900"
+                                  : "border-emerald-200/80 bg-emerald-50 text-emerald-900";
+                            const stockLabel =
+                              totalStock === 0
+                                ? "Udsolgt"
+                                : totalStock < 6
+                                  ? `Få tilbage (${totalStock})`
+                                  : `${totalStock} på lager`;
+
+                            return (
+                              <motion.button
+                                key={product.id}
+                                type="button"
+                                onClick={() => {
+                                  setSelected({ store: storeItem, product });
+                                  setSelectedSize(null);
+                                }}
+                                whileHover={reduceMotion ? undefined : { scale: 1.015 }}
+                                whileTap={{ scale: 0.985 }}
+                                transition={{ type: "spring", stiffness: 380, damping: 26 }}
+                                className="w-full overflow-hidden rounded-2xl border-[0.5px] border-stone-200/90 bg-stone-50/50 p-3 text-left shadow-sm transition hover:border-stone-300/90 hover:bg-white hover:shadow-md"
+                              >
+                                <div className="relative mb-3 aspect-[4/3] overflow-hidden rounded-xl border-[0.5px] border-stone-200/80 bg-white">
+                                  <Image
+                                    src={product.imageUrl}
+                                    alt={product.name}
+                                    width={900}
+                                    height={700}
+                                    className="h-full w-full object-cover transition duration-500 ease-out hover:scale-[1.03]"
+                                  />
+                                </div>
+                                <div className="flex items-start justify-between gap-2 px-0.5">
+                                  <p className="text-sm font-medium text-stone-900">{product.name}</p>
+                                  <p className="shrink-0 text-sm font-medium tabular-nums text-stone-800">
+                                    {product.price} kr
+                                  </p>
+                                </div>
+                                <p className="mt-1 px-0.5 text-xs leading-relaxed text-stone-600">
+                                  {product.description}
+                                </p>
+                                <div className="mt-2 flex flex-wrap items-center justify-between gap-2 px-0.5">
+                                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-stone-500">
+                                    {product.category}
+                                  </p>
+                                  <span
+                                    className={`rounded-full border-[0.5px] px-2.5 py-0.5 text-[11px] font-medium ${stockTone}`}
+                                  >
+                                    {stockLabel}
+                                  </span>
+                                </div>
+                              </motion.button>
+                            );
+                          })}
+                        </div>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              )}
             </section>
           </div>
 
-          <div className="space-y-4">
-            <Card className="border border-slate-200 bg-white text-slate-900 shadow-sm">
-              <p className="mb-3 text-sm font-semibold">Customer Login</p>
+          <div className="space-y-6 lg:sticky lg:top-24 lg:self-start">
+            <Card className="p-6">
+              <p className="mb-4 font-serif text-lg font-medium text-stone-900">Log ind som kunde</p>
               <div className="space-y-3">
                 <Button
                   fullWidth
                   onClick={() => {
                     loginAs("customer");
-                    setLoginMessage("Signed in with Google.");
+                    setLoginMessage("Velkommen — demo med Google.");
                   }}
                 >
-                  Continue with Google
+                  Fortsæt med Google
                 </Button>
                 <Button
                   variant="secondary"
                   fullWidth
-                  className="border border-slate-300 bg-white text-slate-800"
                   onClick={() => {
                     loginAs("customer");
-                    setLoginMessage("Signed in with Apple.");
+                    setLoginMessage("Velkommen — demo med Apple.");
                   }}
                 >
-                  Continue with Apple
+                  Fortsæt med Apple
                 </Button>
                 <Button
                   variant="secondary"
                   fullWidth
-                  className="border border-slate-300 bg-white text-slate-800"
                   onClick={() => {
                     loginAs("customer");
-                    setLoginMessage("Magic link sent (demo).");
+                    setLoginMessage("Magic link sendt (demo).");
                   }}
                 >
-                  Send Magic Link
+                  Send magic link
                 </Button>
                 {loginMessage ? (
-                  <p className="rounded-lg bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
+                  <p className="rounded-xl border-[0.5px] border-emerald-200/80 bg-emerald-50/90 px-3 py-2.5 text-xs text-emerald-900">
                     {loginMessage}
                   </p>
                 ) : null}
               </div>
             </Card>
 
-            <Card className="border border-slate-200 bg-white text-slate-900 shadow-sm">
-              <h2 className="mb-3 text-lg font-bold">Live Order Flow</h2>
+            <Card className="p-6">
+              <h2 className="mb-4 font-serif text-lg font-medium text-stone-900">Live ordreflow</h2>
               <div className="space-y-4">
                 {orders.length === 0 ? (
-                  <p className="text-sm text-slate-600">
-                    Place an order from a product card to start the full automated flow.
-                  </p>
+                  <div className="rounded-2xl border-[0.5px] border-dashed border-stone-200 bg-stone-50/60 px-4 py-8 text-center">
+                    <Package className="mx-auto mb-3 text-stone-400" size={28} strokeWidth={1.25} />
+                    <p className="text-sm text-stone-600">
+                      Bestil fra et produkt for at se hele flowet — fra butik til bud.
+                    </p>
+                  </div>
                 ) : (
                   orders.slice(0, 3).map((order) => (
                     <div
                       key={order.id}
-                      className="rounded-xl border border-slate-200 bg-slate-50 p-3"
+                      className="rounded-2xl border-[0.5px] border-stone-200/90 bg-stone-50/50 p-4"
                     >
-                      <p className="mb-2 text-sm font-semibold">Order {order.id}</p>
-                      <p className="mb-2 text-xs text-slate-600">
-                        Product size: {order.size} • Qty: {order.qty}
+                      <p className="text-sm font-medium text-stone-900">Ordre {order.id}</p>
+                      <p className="mt-1 text-xs text-stone-600">
+                        Str. {order.size} · Antal {order.qty}
                       </p>
-                      <div className="space-y-2">
+                      <div className="mt-3 space-y-2">
                         {statusSteps.map((step) => {
                           const reached =
                             statusSteps.findIndex((item) => item.id === order.status) >=
@@ -247,21 +325,21 @@ export default function ShoppingPage() {
                           return (
                             <div
                               key={`${order.id}-${step.id}`}
-                              className={`rounded-lg border p-2 ${
+                              className={`rounded-xl border-[0.5px] p-2.5 ${
                                 reached
-                                  ? "border-emerald-200 bg-emerald-50"
-                                  : "border-slate-200 bg-white"
+                                  ? "border-emerald-200/90 bg-emerald-50/80"
+                                  : "border-stone-200/80 bg-white/80"
                               }`}
                             >
-                              <div className="flex items-center justify-between">
-                                <p className="text-xs font-semibold">{step.label}</p>
+                              <div className="flex items-center justify-between gap-2">
+                                <p className="text-xs font-medium text-stone-900">{step.label}</p>
                                 {reached ? (
-                                  <CheckCircle2 size={14} className="text-emerald-600" />
+                                  <CheckCircle2 size={15} className="shrink-0 text-emerald-700" />
                                 ) : (
-                                  <Clock3 size={14} className="text-slate-500" />
+                                  <Clock3 size={15} className="shrink-0 text-stone-400" />
                                 )}
                               </div>
-                              <p className="text-[11px] text-slate-600">Owner: {step.owner}</p>
+                              <p className="text-[10px] text-stone-500">{step.owner}</p>
                             </div>
                           );
                         })}
@@ -272,33 +350,30 @@ export default function ShoppingPage() {
               </div>
             </Card>
 
-            <Card className="border border-slate-200 bg-white text-slate-900 shadow-sm">
-              <h2 className="mb-3 text-lg font-bold">Automatic Handoff</h2>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 font-semibold">
-                  <ShieldCheck size={14} />
-                  Automatic handoff enabled
-                </div>
-                <p className="mt-1 text-sm text-slate-600">
-                  Orders are routed instantly to the responsible store, then handed to
-                  an available courier when packing is complete.
+            <Card className="p-6">
+              <h2 className="mb-3 font-serif text-lg font-medium text-stone-900">Tryg overdragelse</h2>
+              <div className="flex items-start gap-3">
+                <ShieldCheck size={18} className="mt-0.5 shrink-0 text-[#8b6914]" strokeWidth={1.75} />
+                <p className="text-sm leading-relaxed text-stone-600">
+                  Ordrer sendes straks til den rette butik og videre til et ledigt bud, når pakken er
+                  klar.
                 </p>
               </div>
             </Card>
 
-            <Card id="feedback" className="border border-slate-200 bg-white text-slate-900 shadow-sm">
-              <h2 className="mb-3 text-lg font-bold">Feedback</h2>
+            <Card id="feedback" className="p-6">
+              <h2 className="mb-3 font-serif text-lg font-medium text-stone-900">Feedback</h2>
               <textarea
                 value={feedback}
                 onChange={(event) => {
                   setFeedback(event.target.value);
                   setFeedbackSent(false);
                 }}
-                className="min-h-24 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800"
-                placeholder="Del gerne din feedback om oplevelsen..."
+                className="min-h-28 w-full rounded-xl border-[0.5px] border-stone-200/90 bg-white px-3 py-2.5 text-sm text-stone-800 placeholder:text-stone-400 focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-[#8b6914]/15"
+                placeholder="Hvad kan vi gøre bedre?"
               />
               <Button
-                className="mt-3"
+                className="mt-4"
                 fullWidth
                 onClick={() => {
                   if (!feedback.trim()) return;
@@ -309,94 +384,120 @@ export default function ShoppingPage() {
                 Send feedback
               </Button>
               {feedbackSent ? (
-                <p className="mt-2 rounded-lg bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
-                  Tak for din feedback! Vi bruger den til at forbedre LOOMY.
+                <p className="mt-3 rounded-xl border-[0.5px] border-emerald-200/80 bg-emerald-50 px-3 py-2 text-xs text-emerald-900">
+                  Tak — vi bruger det til at gøre LOOMY bedre.
                 </p>
               ) : null}
             </Card>
           </div>
-        </section>
+        </div>
       </main>
 
-      {selected ? (
-        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-slate-900/55 p-3 md:items-center">
-          <div className="w-full max-w-3xl rounded-2xl border border-slate-200 bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 md:px-6">
-              <div>
-                <p className="text-xs uppercase tracking-wide text-slate-500">
-                  {selected.store.name} • {selected.store.neighborhood}
-                </p>
-                <h3 className="text-lg font-bold text-slate-900">{selected.product.name}</h3>
-              </div>
-              <button
-                onClick={() => setSelected(null)}
-                className="rounded-lg border border-slate-300 p-2 text-slate-600 hover:bg-slate-100"
-              >
-                <X size={16} />
-              </button>
-            </div>
-
-            <div className="grid gap-4 p-4 md:grid-cols-[1.1fr_0.9fr] md:p-6">
-              <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
-                <Image
-                  src={selected.product.imageUrl}
-                  alt={selected.product.name}
-                  width={900}
-                  height={700}
-                  className="h-full min-h-64 w-full object-cover"
-                />
-              </div>
-              <div className="space-y-3">
-                <p className="text-sm text-slate-600">{selected.product.description}</p>
-                <p className="text-sm font-semibold text-slate-800">{selected.product.price} DKK</p>
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  {selected.product.category}
-                </p>
-
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                  <p className="mb-2 text-sm font-semibold">Sizes and stock</p>
-                  <div className="grid grid-cols-2 gap-2">
-                    {(Object.entries(selected.product.sizes) as [SizeKey, number][]).map(
-                      ([size, amount]) => (
-                        <button
-                          key={`modal-${selected.product.id}-${size}`}
-                          onClick={() => setSelectedSize(size)}
-                          disabled={amount <= 0}
-                          className={`rounded-lg border px-3 py-2 text-left text-xs ${
-                            selectedSize === size
-                              ? "border-slate-900 bg-slate-900 text-white"
-                              : amount > 0
-                                ? "border-slate-300 bg-white text-slate-800 hover:bg-slate-100"
-                                : "cursor-not-allowed border-rose-200 bg-rose-50 text-rose-700"
-                          }`}
-                        >
-                          <span className="block font-semibold">{size}</span>
-                          <span>{amount} left</span>
-                        </button>
-                      ),
-                    )}
-                  </div>
+      <AnimatePresence>
+        {selected ? (
+          <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="product-modal-title"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: reduceMotion ? 0.15 : 0.22 }}
+            className="fixed inset-0 z-[60] flex items-end justify-center bg-stone-900/50 p-3 backdrop-blur-[2px] md:items-center"
+            onClick={() => setSelected(null)}
+          >
+            <motion.div
+              initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 28, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 16, scale: 0.98 }}
+              transition={modalSpring}
+              onClick={(e) => e.stopPropagation()}
+              className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-2xl border-[0.5px] border-stone-200/90 bg-[#faf8f5] shadow-[0_32px_80px_rgba(12,10,9,0.25)]"
+            >
+              <div className="flex items-start justify-between gap-4 border-b-[0.5px] border-stone-200/90 px-5 py-4 md:px-8">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-stone-500">
+                    {selected.store.name} · {selected.store.neighborhood}
+                  </p>
+                  <h3 id="product-modal-title" className="font-serif text-xl font-medium text-stone-900 md:text-2xl">
+                    {selected.product.name}
+                  </h3>
                 </div>
-                <Button
-                  fullWidth
-                  onClick={() => {
-                    if (!selectedSize) return;
-                    placeOrder({
-                      storeId: selected.store.id,
-                      productId: selected.product.id,
-                      size: selectedSize,
-                    });
-                    setSelected(null);
-                  }}
-                  disabled={!selectedSize}
+                <motion.button
+                  type="button"
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setSelected(null)}
+                  className="flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-xl border-[0.5px] border-stone-200 bg-white text-stone-600 transition hover:bg-stone-50"
+                  aria-label="Luk"
                 >
-                  {selectedSize ? `Order size ${selectedSize}` : "Select size to order"}
-                </Button>
+                  <X size={18} />
+                </motion.button>
               </div>
-            </div>
-          </div>
-        </div>
-      ) : null}
+
+              <div className="grid gap-6 p-5 md:grid-cols-[1.05fr_0.95fr] md:gap-8 md:p-8">
+                <div className="overflow-hidden rounded-2xl border-[0.5px] border-stone-200/90 bg-white">
+                  <Image
+                    src={selected.product.imageUrl}
+                    alt={selected.product.name}
+                    width={900}
+                    height={700}
+                    className="h-full min-h-56 w-full object-cover md:min-h-72"
+                  />
+                </div>
+                <div className="space-y-4">
+                  <p className="text-sm leading-relaxed text-stone-600">{selected.product.description}</p>
+                  <p className="text-lg font-medium tabular-nums text-stone-900">{selected.product.price} kr</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-stone-500">
+                    {selected.product.category}
+                  </p>
+
+                  <div className="rounded-2xl border-[0.5px] border-stone-200/90 bg-white/80 p-4">
+                    <p className="mb-3 text-sm font-medium text-stone-900">Størrelser</p>
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                      {(Object.entries(selected.product.sizes) as [SizeKey, number][]).map(
+                        ([size, amount]) => (
+                          <motion.button
+                            key={`modal-${selected.product.id}-${size}`}
+                            type="button"
+                            onClick={() => setSelectedSize(size)}
+                            disabled={amount <= 0}
+                            whileTap={amount > 0 ? { scale: 0.97 } : undefined}
+                            className={`rounded-xl border-[0.5px] px-3 py-2.5 text-left text-xs transition ${
+                              selectedSize === size
+                                ? "border-stone-900 bg-stone-900 text-[#faf8f5]"
+                                : amount > 0
+                                  ? "border-stone-200 bg-white text-stone-800 hover:border-stone-300"
+                                  : "cursor-not-allowed border-rose-200/80 bg-rose-50 text-rose-700"
+                            }`}
+                          >
+                            <span className="block font-semibold">{size}</span>
+                            <span>{amount <= 0 ? "Udsolgt" : `${amount} tilbage`}</span>
+                          </motion.button>
+                        ),
+                      )}
+                    </div>
+                  </div>
+                  <Button
+                    fullWidth
+                    onClick={() => {
+                      if (!selectedSize) return;
+                      placeOrder({
+                        storeId: selected.store.id,
+                        productId: selected.product.id,
+                        size: selectedSize,
+                      });
+                      setSelected(null);
+                    }}
+                    disabled={!selectedSize}
+                  >
+                    {selectedSize ? `Bestil str. ${selectedSize}` : "Vælg størrelse"}
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 }

@@ -1,15 +1,19 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f3f6fb;
-  --foreground: #0f172a;
+  --background: #faf8f5;
+  --foreground: #1c1917;
+  --loomy-accent: #8b6914;
+  --loomy-accent-soft: rgba(139, 105, 20, 0.12);
+  --loomy-ink: #0c0a09;
+  --loomy-mist: rgba(255, 255, 255, 0.72);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-playfair), ui-serif, Georgia, serif;
 }
 
 * {
@@ -17,12 +21,13 @@
 }
 
 body {
-  background:
-    radial-gradient(circle at 10% 0%, rgba(249, 162, 108, 0.18), transparent 35%),
-    radial-gradient(circle at 85% 18%, rgba(88, 111, 158, 0.2), transparent 35%),
-    #f3f6fb;
+  background-color: var(--background);
+  background-image:
+    radial-gradient(ellipse 120% 80% at 50% -20%, rgba(139, 105, 20, 0.08), transparent 55%),
+    radial-gradient(circle at 100% 0%, rgba(120, 113, 108, 0.06), transparent 40%),
+    radial-gradient(circle at 0% 100%, rgba(214, 211, 209, 0.35), transparent 45%);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
 @keyframes shimmer {

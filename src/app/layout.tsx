@@ -1,22 +1,24 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { LumiProvider } from "@/components/providers/lumi-provider";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "LUMI | Fashion Q-Commerce Platform",
+  title: "LOOMY | Mode leveret fra København K",
   description:
-    "LUMI is a multi-tenant platform for customers and fashion store partners.",
+    "LOOMY matcher dig med udvalgte butikker, live lager og hurtig levering — kunde, butik og bud i ét flow.",
 };
 
 export default function RootLayout({
@@ -26,10 +28,10 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      lang="da"
+      className={`${inter.variable} ${playfair.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col font-sans">
         <LumiProvider>{children}</LumiProvider>
       </body>
     </html>
