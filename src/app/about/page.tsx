@@ -39,13 +39,15 @@ export default function AboutPage() {
             transition={springSoft}
           >
             <Card className="h-full overflow-hidden border-[0.5px] border-stone-200/90 p-0 shadow-[0_16px_48px_rgba(28,25,23,0.06)]">
-              <div className="overflow-hidden border-b-[0.5px] border-stone-200/80">
+              <div className="relative aspect-[21/10] overflow-hidden border-b-[0.5px] border-stone-200/80 bg-stone-100/50">
+                <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.12)_0%,transparent_40%,rgba(28,25,23,0.04)_100%)]" />
                 <Image
                   src="/about/vision.svg"
-                  alt="LOOMY vision"
+                  alt="LOOMY vision — horisont og retning"
                   width={1400}
                   height={900}
-                  className="h-52 w-full object-cover transition duration-500 hover:scale-[1.02] md:h-64"
+                  className="h-full w-full object-cover object-center transition duration-700 ease-out hover:scale-[1.03]"
+                  priority
                 />
               </div>
               <div className="p-6 md:p-8">
@@ -69,13 +71,14 @@ export default function AboutPage() {
             transition={springSoft}
           >
             <Card className="h-full overflow-hidden border-[0.5px] border-stone-200/90 p-0 shadow-[0_16px_48px_rgba(28,25,23,0.06)]">
-              <div className="overflow-hidden border-b-[0.5px] border-stone-200/80">
+              <div className="relative aspect-[21/10] overflow-hidden border-b-[0.5px] border-stone-200/80 bg-stone-100/50">
+                <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.1)_0%,transparent_45%,rgba(28,25,23,0.05)_100%)]" />
                 <Image
                   src="/about/mission.svg"
-                  alt="LOOMY mission"
+                  alt="LOOMY mission — forbindelse og flow"
                   width={1400}
                   height={900}
-                  className="h-52 w-full object-cover transition duration-500 hover:scale-[1.02] md:h-64"
+                  className="h-full w-full object-cover object-center transition duration-700 ease-out hover:scale-[1.03]"
                 />
               </div>
               <div className="p-6 md:p-8">
