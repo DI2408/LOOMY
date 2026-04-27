@@ -153,8 +153,8 @@ export default function Home() {
                   tone: "from-stone-100/95 to-stone-50/95",
                 },
                 {
-                  label: "Styling match",
-                  value: "AI + Live",
+                  label: "Lager",
+                  value: "Live",
                   tone: "from-amber-50/95 to-[#faf8f5]/95",
                 },
               ].map((item) => (
@@ -180,7 +180,7 @@ export default function Home() {
             {
               icon: <Sparkles size={20} strokeWidth={1.5} className="text-[#8b6914]" />,
               title: "Kuraterede drops",
-              text: "Redigerede kollektioner frem for støjende kataloger.",
+              text: "Kuraterede kollektioner frem for støjende kataloger.",
             },
             {
               icon: <Truck size={20} strokeWidth={1.5} className="text-[#8b6914]" />,

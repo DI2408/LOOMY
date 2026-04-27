@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import Image from "next/image";
 import { ChevronDown, MapPin, Menu, Search } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -33,16 +32,9 @@ export function LumiHeader() {
       <div className="mx-auto flex w-full max-w-7xl items-center gap-2 px-4 py-3 md:gap-3 md:px-8 md:py-4">
         <Link
           href="/"
-          className="group flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-xl border-[0.5px] border-stone-200/90 bg-white/95 shadow-sm ring-stone-900/5 transition hover:shadow-md"
+          className="group flex min-h-11 shrink-0 items-center rounded-lg px-1.5 text-stone-900 transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7c5a10]/30 focus-visible:ring-offset-2 focus-visible:ring-offset-[#f6f4ef]"
         >
-          <Image
-            src="/loomy-logo.png"
-            alt="LOOMY"
-            width={40}
-            height={40}
-            className="h-9 w-9 rounded-lg object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-            priority
-          />
+          <span className="font-serif text-lg font-medium tracking-[0.12em] sm:text-xl">LOOMY</span>
         </Link>
 
         <nav
@@ -94,19 +86,7 @@ export function LumiHeader() {
           <span className="max-w-[8rem] truncate">København K</span>
         </motion.button>
 
-        <motion.div
-          whileTap={{ scale: 0.99 }}
-          whileHover={reduceMotion ? undefined : { y: -1 }}
-          transition={menuSpring}
-          className="relative ml-auto flex min-h-11 items-center justify-center px-1 text-stone-900 md:ml-0"
-          aria-label="LOOMY"
-        >
-          <span className="font-serif text-[15px] font-medium tracking-[0.24em] text-stone-900/95">
-            LOOMY
-          </span>
-        </motion.div>
-
-        <div className="relative">
+        <div className="relative ml-auto md:ml-0">
           <motion.button
             type="button"
             onClick={() => setMenuOpen((prev) => !prev)}
