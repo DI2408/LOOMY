@@ -95,13 +95,15 @@ export function LumiHeader() {
         </motion.button>
 
         <motion.div
-          whileTap={{ scale: 0.97 }}
-          whileHover={reduceMotion ? undefined : { scale: 1.02 }}
+          whileTap={{ scale: 0.99 }}
+          whileHover={reduceMotion ? undefined : { y: -1 }}
           transition={menuSpring}
-          className="relative ml-auto flex min-h-11 items-center justify-center rounded-xl border-[0.5px] border-stone-200/90 bg-white px-4 text-stone-900 shadow-sm md:ml-0"
+          className="relative ml-auto flex min-h-11 items-center justify-center px-1 text-stone-900 md:ml-0"
           aria-label="LOOMY"
         >
-          <span className="font-serif text-sm font-semibold tracking-[0.18em]">LOOMY</span>
+          <span className="font-serif text-[15px] font-medium tracking-[0.24em] text-stone-900/95">
+            LOOMY
+          </span>
         </motion.div>
 
         <div className="relative">
