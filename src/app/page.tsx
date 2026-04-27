@@ -111,7 +111,8 @@ export default function Home() {
               </div>
               <div className="flex flex-wrap gap-3 pt-2">
                 <Button
-                  className="bg-[#faf8f5] !text-stone-900 shadow-[0_12px_32px_rgba(0,0,0,0.24)] ring-0 hover:!bg-white"
+                  variant="secondary"
+                  className="!border-white/25 !bg-white/10 !text-[#faf8f5] backdrop-blur-md hover:!border-white/35 hover:!bg-white/15"
                   onClick={() => {
                     window.location.href = "/shopping";
                   }}
@@ -120,7 +121,7 @@ export default function Home() {
                 </Button>
                 <Button
                   variant="secondary"
-                  className="!border-white/25 !bg-white/10 !text-[#faf8f5] backdrop-blur-md"
+                  className="!border-white/25 !bg-white/10 !text-[#faf8f5] backdrop-blur-md hover:!border-white/35 hover:!bg-white/15"
                   onClick={() =>
                     document.getElementById("about")?.scrollIntoView({
                       behavior: "smooth",
