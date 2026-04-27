@@ -29,7 +29,7 @@ export function LumiHeader() {
     role === "customer" ? "Kunde" : role === "store" ? "Butik" : "Bud";
 
   return (
-    <header className="sticky top-0 z-50 border-b-[0.5px] border-stone-200/80 bg-[#faf8f5]/80 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b-[0.5px] border-stone-200/80 bg-[#f6f4ef]/80 backdrop-blur-md">
       <div className="mx-auto flex w-full max-w-7xl items-center gap-2 px-4 py-3 md:gap-3 md:px-8 md:py-4">
         <Link
           href="/"
@@ -46,7 +46,7 @@ export function LumiHeader() {
         </Link>
 
         <nav
-          className="ml-1 hidden items-center gap-1 rounded-2xl border-[0.5px] border-stone-200/70 bg-white/60 p-1 md:flex"
+          className="ml-1 hidden items-center gap-1 rounded-2xl border-[0.5px] border-stone-200/70 bg-white/70 p-1 md:flex"
           aria-label="Hovedmenu"
         >
           {mainNav.map((item) => {
@@ -63,7 +63,7 @@ export function LumiHeader() {
                   {active ? (
                     <motion.span
                       layoutId="nav-pill"
-                      className="absolute inset-0 rounded-xl bg-[#faf8f5] shadow-[inset_0_0_0_1px_rgba(139,105,20,0.12)]"
+                      className="absolute inset-0 rounded-xl bg-[#f6f4ef] shadow-[inset_0_0_0_1px_rgba(124,90,16,0.14)]"
                       transition={menuSpring}
                     />
                   ) : null}
@@ -74,7 +74,7 @@ export function LumiHeader() {
           })}
         </nav>
 
-        <div className="hidden min-h-11 min-w-0 flex-1 items-center gap-2 rounded-xl border-[0.5px] border-stone-200/90 bg-white/85 px-4 backdrop-blur-sm lg:flex">
+        <div className="hidden min-h-11 min-w-0 flex-1 items-center gap-2 rounded-xl border-[0.5px] border-stone-200/90 bg-white/90 px-4 backdrop-blur-sm lg:flex">
           <Search size={17} className="shrink-0 text-stone-400" aria-hidden />
           <input
             placeholder="Søg butikker eller styles…"
@@ -88,9 +88,9 @@ export function LumiHeader() {
           whileTap={{ scale: 0.97 }}
           whileHover={reduceMotion ? undefined : { scale: 1.02 }}
           transition={menuSpring}
-          className="hidden min-h-11 shrink-0 items-center gap-2 rounded-xl border-[0.5px] border-stone-200/90 bg-white/85 px-3 text-sm font-medium text-stone-800 backdrop-blur-sm transition hover:bg-white xl:flex"
+          className="hidden min-h-11 shrink-0 items-center gap-2 rounded-xl border-[0.5px] border-stone-200/90 bg-white/90 px-3 text-sm font-medium text-stone-800 backdrop-blur-sm transition hover:bg-white xl:flex"
         >
-          <MapPin size={16} className="text-[#8b6914]" aria-hidden />
+          <MapPin size={16} className="text-[#7c5a10]" aria-hidden />
           <span className="max-w-[8rem] truncate">København K</span>
         </motion.button>
 
@@ -99,7 +99,7 @@ export function LumiHeader() {
           whileTap={{ scale: 0.97 }}
           whileHover={reduceMotion ? undefined : { scale: 1.02 }}
           transition={menuSpring}
-          className="relative ml-auto flex min-h-11 min-w-11 items-center justify-center rounded-xl border-[0.5px] border-stone-200/90 bg-white/95 text-stone-800 shadow-sm md:ml-0"
+          className="relative ml-auto flex min-h-11 min-w-11 items-center justify-center rounded-xl border-[0.5px] border-stone-200/90 bg-white text-stone-800 shadow-sm md:ml-0"
           aria-label="Kurv"
         >
           <ShoppingBag size={20} strokeWidth={1.75} />
@@ -111,7 +111,7 @@ export function LumiHeader() {
             onClick={() => setMenuOpen((prev) => !prev)}
             whileTap={{ scale: 0.98 }}
             transition={menuSpring}
-            className="flex min-h-11 items-center gap-2 rounded-xl border-[0.5px] border-stone-900/10 bg-stone-900 px-3 text-sm font-medium text-[#faf8f5] shadow-md transition hover:bg-stone-800 md:px-4"
+            className="flex min-h-11 items-center gap-2 rounded-xl border-[0.5px] border-stone-900/10 bg-stone-900 px-3 text-sm font-medium text-[#f6f4ef] shadow-md transition hover:bg-stone-800 md:px-4"
             aria-expanded={menuOpen}
             aria-haspopup="true"
           >

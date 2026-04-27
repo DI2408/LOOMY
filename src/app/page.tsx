@@ -18,19 +18,19 @@ import { springSoft } from "@/components/motion-config";
 
 const heroSlides = [
   {
-    title: "Dine yndlingsbutikker — leveret mens dagen stadig føles ung.",
+    title: "Modekurateret på minutter. Leveret i dag.",
     subtitle:
-      "Gennemse udvalgte brands fra København K og få levering med live tracking, når det passer dig.",
+      "LOOMY samler byens mest eftertragtede butikker i ét roligt flow med live lager og hurtig levering.",
   },
   {
-    title: "Én platform. Kunde, butik og bud i samme rolige flow.",
+    title: "Én elegant platform for kunde, butik og bud.",
     subtitle:
-      "Ordren finder selv vej til det rigtige hold, så du kan følge med uden at jagte beskeder.",
+      "Fra køb til dør er hvert trin synligt og afstemt, så oplevelsen føles enkel og premium.",
   },
   {
-    title: "Live lager på størrelse — før du betaler.",
+    title: "Se din størrelse live, før du går til betaling.",
     subtitle:
-      "Se præcis hvad der er tilbage i din størrelse, og sikr dig den rigtige pasform med det samme.",
+      "Undgå usikkerhed: se præcise størrelsesantal og lås dit look med det samme.",
   },
 ];
 
@@ -54,18 +54,18 @@ export default function Home() {
       <LumiHeader />
 
       <main className="mx-auto w-full max-w-7xl flex-1 space-y-10 px-4 py-8 md:space-y-14 md:px-8 md:py-12">
-        <section className="relative overflow-hidden rounded-3xl border-[0.5px] border-stone-700/40 bg-gradient-to-br from-stone-900 via-stone-900 to-stone-950 p-8 shadow-[0_32px_80px_rgba(12,10,9,0.35)] md:p-12 lg:p-14">
+        <section className="relative overflow-hidden rounded-[2rem] border-[0.5px] border-stone-900/30 bg-[linear-gradient(145deg,#191614_0%,#26221f_40%,#151311_100%)] p-8 shadow-[0_36px_90px_rgba(12,10,9,0.42)] md:p-12 lg:p-14">
           <div className="pointer-events-none absolute inset-0">
-            <div className="mesh-float absolute -left-20 -top-24 h-80 w-80 rounded-full bg-[radial-gradient(circle,rgba(212,175,55,0.14)_0%,transparent_68%)] blur-3xl" />
-            <div className="mesh-float absolute bottom-0 right-0 h-96 w-96 rounded-full bg-[radial-gradient(circle,rgba(250,248,245,0.06)_0%,transparent_65%)] blur-3xl [animation-delay:1.8s]" />
-            <div className="mesh-float absolute right-1/4 top-1/3 h-64 w-64 rounded-full bg-[radial-gradient(circle,rgba(139,105,20,0.12)_0%,transparent_70%)] blur-2xl [animation-delay:2.6s]" />
+            <div className="mesh-float absolute -left-20 -top-24 h-80 w-80 rounded-full bg-[radial-gradient(circle,rgba(176,130,29,0.2)_0%,transparent_68%)] blur-3xl" />
+            <div className="mesh-float absolute bottom-0 right-0 h-96 w-96 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.08)_0%,transparent_65%)] blur-3xl [animation-delay:1.8s]" />
+            <div className="mesh-float absolute right-1/4 top-1/3 h-64 w-64 rounded-full bg-[radial-gradient(circle,rgba(124,90,16,0.18)_0%,transparent_70%)] blur-2xl [animation-delay:2.6s]" />
           </div>
-          <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-[#d4af37]/35 to-transparent" />
+          <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-[#d4af37]/45 to-transparent" />
 
-          <div className="relative grid gap-10 lg:grid-cols-[1.08fr_0.92fr] lg:gap-12">
+          <div className="relative grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12">
             <div className="space-y-6">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#d4af37]/90">
-                LOOMY · København K
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#d4af37]">
+                LOOMY · Atelier Delivery
               </p>
               <div className="relative">
                 <p
@@ -82,10 +82,10 @@ export default function Home() {
                 transition={springSoft}
                 className="relative z-10 space-y-4"
               >
-                <h1 className="max-w-2xl font-serif text-3xl font-medium leading-[1.15] tracking-tight text-[#faf8f5] md:text-5xl md:leading-[1.12]">
+                <h1 className="max-w-2xl font-serif text-3xl font-medium leading-[1.12] tracking-tight text-[#faf8f5] md:text-6xl md:leading-[1.08]">
                   {heroSlides[slideIndex].title}
                 </h1>
-                <p className="max-w-xl text-base leading-relaxed text-stone-300/95 md:text-lg">
+                <p className="max-w-xl text-base leading-relaxed text-stone-300 md:text-lg">
                   {heroSlides[slideIndex].subtitle}
                 </p>
               </motion.div>
@@ -111,12 +111,12 @@ export default function Home() {
               </div>
               <div className="flex flex-wrap gap-3 pt-2">
                 <Button
-                  className="bg-[#faf8f5] !text-stone-900 shadow-[0_12px_32px_rgba(0,0,0,0.2)] ring-0 hover:!bg-white"
+                  className="bg-[#faf8f5] !text-stone-900 shadow-[0_12px_32px_rgba(0,0,0,0.24)] ring-0 hover:!bg-white"
                   onClick={() => {
                     window.location.href = "/shopping";
                   }}
                 >
-                  Gå til shop
+                  Udforsk shop
                 </Button>
                 <Button
                   variant="secondary"
@@ -128,7 +128,7 @@ export default function Home() {
                     })
                   }
                 >
-                  Læs mere
+                  Historien bag
                 </Button>
               </div>
             </div>
@@ -143,18 +143,18 @@ export default function Home() {
             <div className="grid gap-3 sm:grid-cols-3 lg:col-span-2 lg:grid-cols-3">
               {[
                 {
-                  label: "Typisk levering",
+                  label: "Leveringsvindue",
                   value: "~36 min",
                   tone: "from-[#faf8f5]/95 to-stone-100/95",
                 },
                 {
-                  label: "Butikker i centrum",
+                  label: "Aktive boutiques",
                   value: `${stores.length}+`,
                   tone: "from-stone-100/95 to-stone-50/95",
                 },
                 {
-                  label: "Lager",
-                  value: "Live",
+                  label: "Styling match",
+                  value: "AI + Live",
                   tone: "from-amber-50/95 to-[#faf8f5]/95",
                 },
               ].map((item) => (
@@ -179,18 +179,18 @@ export default function Home() {
           {[
             {
               icon: <Sparkles size={20} strokeWidth={1.5} className="text-[#8b6914]" />,
-              title: "Kurateret mode",
-              text: "Udvalgte styles fra butikker, der forstår kvalitet og sæson.",
+              title: "Kuraterede drops",
+              text: "Redigerede kollektioner frem for støjende kataloger.",
             },
             {
               icon: <Truck size={20} strokeWidth={1.5} className="text-[#8b6914]" />,
-              title: "Tryg levering",
-              text: "Klare statusser fra butik til bud — uden gætteri.",
+              title: "Diskret levering",
+              text: "Følg ordren roligt fra butik til dør i realtid.",
             },
             {
               icon: <Building2 size={20} strokeWidth={1.5} className="text-[#8b6914]" />,
-              title: "Lokalt først",
-              text: "Bygget omkring Indre By, så afstanden fra rail til dør er kort.",
+              title: "Lokal luksus",
+              text: "Skabt omkring København K med hurtig radius.",
             },
           ].map((item) => (
             <TiltCard key={item.title}>
@@ -213,43 +213,44 @@ export default function Home() {
 
         <section id="about" className="space-y-5">
           <h2 className="font-serif text-2xl font-medium tracking-tight text-stone-900 md:text-3xl">
-            Om LOOMY
+            En ny shopping-rytme
           </h2>
           <Card className="border-[0.5px] border-stone-200/90 bg-white/90 p-8 text-stone-900 shadow-sm backdrop-blur-sm md:p-10">
             <p className="text-sm leading-relaxed text-stone-600 md:text-base">
-              LOOMY er lavet til hurtig modelevering i København K. Vi samler lokale
-              butikker, realtime lager og bud i én rolig platform — så du kan handle med
-              ro i maven.
+              LOOMY er designet som et moderne fashion-atelier i app-form. Vi forener
+              lokale butikker, live lager og hurtig levering i et minimalistisk flow, så du
+              kan beslutte dig hurtigt uden at miste overblik.
             </p>
             <div className="mt-6">
               <Link
                 href="/about"
                 className="inline-flex min-h-11 items-center rounded-xl border-[0.5px] border-stone-300 bg-white px-5 text-sm font-medium text-stone-800 shadow-sm transition hover:border-stone-400 hover:bg-stone-50 active:scale-[0.98]"
               >
-                Læs mere om os
+                Læs LOOMY universet
               </Link>
             </div>
             <p className="mt-6 text-sm leading-relaxed text-stone-600 md:text-base">
-              Vi bygger en ny standard for bekvem shopping, hvor kvalitet og hurtig levering
-              går hånd i hånd.
+              Målet er enkelt: færre klik, bedre kvalitet og en oplevelse der føles
+              gennemtænkt fra første swipe til levering.
             </p>
           </Card>
         </section>
 
         <section id="feedback" className="space-y-5">
           <h2 className="font-serif text-2xl font-medium tracking-tight text-stone-900 md:text-3xl">
-            Din stemme
+            Form LOOMY med os
           </h2>
           <Card className="border-[0.5px] border-stone-200/90 bg-white/90 p-8 shadow-sm backdrop-blur-sm md:p-10">
             <p className="text-sm leading-relaxed text-stone-600 md:text-base">
-              Har du idéer til en bedre oplevelse? Del meget gerne feedback — vi læser med.
+              Har du idéer til en bedre oplevelse? Del dem — vi justerer løbende design,
+              flow og sortiment efter rigtig brugeradfærd.
             </p>
             <div className="mt-6">
               <Link
                 href="/feedback"
                 className="inline-flex min-h-11 items-center rounded-xl border-[0.5px] border-stone-900/15 bg-stone-900 px-5 text-sm font-medium text-[#faf8f5] shadow-md transition hover:bg-stone-800 active:scale-[0.98]"
               >
-                Gå til feedback
+                Del feedback
               </Link>
             </div>
           </Card>

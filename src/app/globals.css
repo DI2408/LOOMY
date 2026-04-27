@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 :root {
-  --background: #faf8f5;
-  --foreground: #1c1917;
-  --loomy-accent: #8b6914;
-  --loomy-accent-soft: rgba(139, 105, 20, 0.12);
-  --loomy-ink: #0c0a09;
-  --loomy-mist: rgba(255, 255, 255, 0.72);
+  --background: #f6f4ef;
+  --foreground: #171412;
+  --loomy-accent: #7c5a10;
+  --loomy-accent-soft: rgba(124, 90, 16, 0.14);
+  --loomy-ink: #0b0908;
+  --loomy-mist: rgba(255, 255, 255, 0.76);
 }
 
 @theme inline {
@@ -33,15 +33,15 @@ html {
 body {
   background-color: var(--background);
   background-image:
-    radial-gradient(ellipse 120% 80% at 50% -20%, rgba(139, 105, 20, 0.08), transparent 55%),
-    radial-gradient(circle at 100% 0%, rgba(120, 113, 108, 0.06), transparent 40%),
-    radial-gradient(circle at 0% 100%, rgba(214, 211, 209, 0.35), transparent 45%);
+    radial-gradient(ellipse 130% 75% at 50% -15%, rgba(124, 90, 16, 0.11), transparent 52%),
+    radial-gradient(circle at 92% 2%, rgba(58, 53, 49, 0.08), transparent 38%),
+    radial-gradient(circle at 8% 96%, rgba(214, 205, 189, 0.42), transparent 46%);
   color: var(--foreground);
   font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
 ::selection {
-  background-color: rgba(139, 105, 20, 0.18);
+  background-color: rgba(124, 90, 16, 0.2);
   color: var(--loomy-ink);
 }
 

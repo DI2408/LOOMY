@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * LOOMY shopping: warm neutrals, hairline cards, spring product tiles, skeleton-friendly structure.
+ * LOOMY shopping v2: editorial marketplace with boutique-first curation.
  */
 import { CheckCircle2, Clock3, Package, ShieldCheck, Sparkles, X } from "lucide-react";
 import Image from "next/image";
@@ -69,20 +69,23 @@ export default function ShoppingPage() {
           initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={springSoft}
-          className="relative overflow-hidden rounded-3xl border-[0.5px] border-stone-200/90 bg-gradient-to-br from-white via-[#faf8f5] to-stone-100/80 p-8 shadow-[0_20px_60px_rgba(28,25,23,0.08)] md:p-12"
+          className="relative overflow-hidden rounded-[2rem] border-[0.5px] border-stone-900/20 bg-[linear-gradient(140deg,#fdfcf9_0%,#f7f3ea_42%,#f4efe6_100%)] p-8 shadow-[0_24px_70px_rgba(28,25,23,0.09)] md:p-12"
         >
-          <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[#8b6914]/[0.06] blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-16 left-1/4 h-48 w-48 rounded-full bg-stone-300/20 blur-3xl" />
+          <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[#7c5a10]/[0.09] blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-16 left-1/4 h-48 w-48 rounded-full bg-stone-300/30 blur-3xl" />
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#8b6914]">
-            Shop · LOOMY
+            Market Edit · LOOMY
           </p>
           <h1 className="mt-3 max-w-3xl font-serif text-3xl font-medium leading-tight tracking-tight md:text-5xl">
-            Find dit næste outfit fra byens bedste butikker.
+            Shop som i et digitalt atelier.
           </h1>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-stone-600 md:text-base">
-            Alt samlet ét sted — live lager, klare priser og levering der følger ordren hele
-            vejen.
+            Udvalgte boutiques, live størrelser og hurtig levering — designet til hurtige,
+            sikre valg uden støj.
           </p>
+          <div className="mt-5 inline-flex items-center rounded-full border-[0.5px] border-[#7c5a10]/30 bg-white/75 px-3 py-1 text-[11px] font-medium text-[#6b4f0a] backdrop-blur-sm">
+            New: Curated capsule drops opdateres løbende
+          </div>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button
               onClick={() =>
@@ -189,7 +192,7 @@ export default function ShoppingPage() {
                               totalStock === 0
                                 ? "border-rose-200/80 bg-rose-50 text-rose-800"
                                 : totalStock < 6
-                                  ? "border-amber-200/80 bg-amber-50 text-amber-900"
+                                  ? "border-[#7c5a10]/30 bg-[#7c5a10]/10 text-[#5f4308]"
                                   : "border-emerald-200/80 bg-emerald-50 text-emerald-900";
                             const stockLabel =
                               totalStock === 0
@@ -209,7 +212,7 @@ export default function ShoppingPage() {
                                 whileHover={reduceMotion ? undefined : { scale: 1.015 }}
                                 whileTap={{ scale: 0.985 }}
                                 transition={{ type: "spring", stiffness: 380, damping: 26 }}
-                                className="w-full overflow-hidden rounded-2xl border-[0.5px] border-stone-200/90 bg-stone-50/50 p-3 text-left shadow-sm transition hover:border-stone-300/90 hover:bg-white hover:shadow-md"
+                                className="w-full overflow-hidden rounded-2xl border-[0.5px] border-stone-200/90 bg-stone-50/50 p-3 text-left shadow-sm transition hover:border-[#7c5a10]/35 hover:bg-white hover:shadow-md"
                               >
                                 <div className="relative mb-3 aspect-[4/3] overflow-hidden rounded-xl border-[0.5px] border-stone-200/80 bg-white">
                                   <Image
@@ -252,7 +255,7 @@ export default function ShoppingPage() {
           </div>
 
           <div className="space-y-6 lg:sticky lg:top-24 lg:self-start">
-            <Card className="p-6">
+            <Card className="border-[0.5px] border-stone-200/90 bg-gradient-to-b from-white to-stone-50/80 p-6 shadow-sm">
               <p className="mb-4 font-serif text-lg font-medium text-stone-900">Log ind som kunde</p>
               <div className="space-y-3">
                 <Button
@@ -292,7 +295,7 @@ export default function ShoppingPage() {
               </div>
             </Card>
 
-            <Card className="p-6">
+            <Card className="border-[0.5px] border-stone-200/90 bg-white/95 p-6 shadow-sm">
               <h2 className="mb-4 font-serif text-lg font-medium text-stone-900">Live ordreflow</h2>
               <div className="space-y-4">
                 {orders.length === 0 ? (
@@ -345,7 +348,7 @@ export default function ShoppingPage() {
               </div>
             </Card>
 
-            <Card className="p-6">
+            <Card className="border-[0.5px] border-stone-200/90 bg-white/95 p-6 shadow-sm">
               <h2 className="mb-3 font-serif text-lg font-medium text-stone-900">Tryg overdragelse</h2>
               <div className="flex items-start gap-3">
                 <ShieldCheck size={18} className="mt-0.5 shrink-0 text-[#8b6914]" strokeWidth={1.75} />
@@ -356,7 +359,7 @@ export default function ShoppingPage() {
               </div>
             </Card>
 
-            <Card id="feedback" className="p-6">
+            <Card id="feedback" className="border-[0.5px] border-stone-200/90 bg-white/95 p-6 shadow-sm">
               <h2 className="mb-3 font-serif text-lg font-medium text-stone-900">Feedback</h2>
               <textarea
                 value={feedback}
