@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import Image from "next/image";
-import { ChevronDown, MapPin, Menu, Search, ShoppingBag } from "lucide-react";
+import { ChevronDown, MapPin, Menu, Search } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useLumi } from "@/components/providers/lumi-provider";
@@ -94,16 +94,15 @@ export function LumiHeader() {
           <span className="max-w-[8rem] truncate">København K</span>
         </motion.button>
 
-        <motion.button
-          type="button"
+        <motion.div
           whileTap={{ scale: 0.97 }}
           whileHover={reduceMotion ? undefined : { scale: 1.02 }}
           transition={menuSpring}
-          className="relative ml-auto flex min-h-11 min-w-11 items-center justify-center rounded-xl border-[0.5px] border-stone-200/90 bg-white text-stone-800 shadow-sm md:ml-0"
-          aria-label="Kurv"
+          className="relative ml-auto flex min-h-11 items-center justify-center rounded-xl border-[0.5px] border-stone-200/90 bg-white px-4 text-stone-900 shadow-sm md:ml-0"
+          aria-label="LOOMY"
         >
-          <ShoppingBag size={20} strokeWidth={1.75} />
-        </motion.button>
+          <span className="font-serif text-sm font-semibold tracking-[0.18em]">LOOMY</span>
+        </motion.div>
 
         <div className="relative">
           <motion.button
