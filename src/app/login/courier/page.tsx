@@ -2,13 +2,18 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Bike, KeyRound } from "lucide-react";
+import { Bike, KeyRound, Loader2 } from "lucide-react";
 import { LumiHeader } from "@/components/lumi-header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useLumi } from "@/components/providers/lumi-provider";
+import { useLumi, type PartnerProfile } from "@/components/providers/lumi-provider";
 import { getSupabaseClient } from "@/lib/supabase/client";
-import { fetchCourierProfileByCourierId } from "@/lib/partner-profiles";
+import { fetchPartnerProfileByEmail } from "@/lib/partner-profiles";
+
+const DEMO: { courierId: string; email: string } = {
+  courierId: "mikkel",
+  email: "courier.mikkel@loomy.dk",
+};
 
 export default function CourierLoginPage() {
   const router = useRouter();
@@ -16,6 +21,7 @@ export default function CourierLoginPage() {
   const [courierId, setCourierId] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
 
   return (
     <div className="min-h-screen text-stone-900">
@@ -24,70 +30,161 @@ export default function CourierLoginPage() {
         <Card className="border border-stone-200 bg-white text-stone-900 shadow-sm">
           <div className="mb-4 flex items-center gap-2">
             <Bike size={18} className="text-[#8b6914]" />
-            <h1 className="text-xl font-bold">Courier Login</h1>
+            <h1 className="text-xl font-bold">Budlogin (demo)</h1>
           </div>
           <p className="mb-4 text-sm text-stone-600">
-            Sign in as courier to see nearby tasks, customer address, and slide each order to next step.
+            Log ind som bud for at se ture, adresser og slide-handlinger. Når Supabase kører,
+            læser serveren <span className="font-medium">courier_id → e-mail</span> (RLS
+            blokerer ikke-loggerede) og logger dig derefter ind.
           </p>
           <div className="space-y-3">
             <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-3 text-xs text-amber-800">
-              <p className="font-semibold">Demo credentials</p>
-              <p className="mt-1">Courier ID: <span className="font-mono">mikkel</span></p>
-              <p>Password: <span className="font-mono">Demo1234!</span></p>
+              <p className="font-semibold">Demokombination (anbefalet)</p>
+              <p className="mt-1">
+                Bud-ID: <span className="font-mono">mikkel</span> · adgangskode:{" "}
+                <span className="font-mono">Demo1234!</span>
+              </p>
+              <p className="mt-1 text-amber-900/90">
+                I Supabase skal brugeren <span className="font-mono">courier.mikkel@loomy.dk</span>{" "}
+                findes i <strong>Auth</strong> (samme kode) og være linket i tabellen
+                <span className="font-mono"> partner_profiles</span> — se{" "}
+                <code className="rounded bg-white/60 px-1">supabase/partner_profiles.sql</code> og
+                <code className="rounded bg-white/60 px-1">supabase/README.md</code>.
+              </p>
             </div>
             <input
               value={courierId}
               onChange={(event) => setCourierId(event.target.value)}
-              placeholder="Courier ID"
+              placeholder="Bud-ID (fx mikkel)"
               className="h-12 w-full rounded-xl border border-stone-300 px-3 text-sm"
             />
             <input
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              placeholder="Password"
+              placeholder="Adgangskode"
               type="password"
               className="h-12 w-full rounded-xl border border-stone-300 px-3 text-sm"
             />
             <Button
               fullWidth
+              disabled={busy}
               onClick={async () => {
                 setError("");
+                setBusy(true);
                 const normalizedCourierId = courierId.trim().toLowerCase();
                 if (!normalizedCourierId || !password.trim()) {
-                  setError("Please fill courier ID and password.");
+                  setError("Udfyld bud-ID og adgangskode.");
+                  setBusy(false);
+                  return;
+                }
+
+                const isDemoMikkel =
+                  normalizedCourierId === DEMO.courierId && password === "Demo1234!";
+
+                const goDemoOffline = (profile: PartnerProfile) => {
+                  loginAsPartner(profile);
+                  router.push("/courier");
+                };
+
+                const resolveEmail = async (): Promise<string | null> => {
+                  const res = await fetch("/api/partner/courier-email", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ courierId: normalizedCourierId }),
+                  });
+                  const data = (await res.json()) as { email?: string; error?: string };
+                  if (res.ok && data.email) return data.email;
+                  if (isDemoMikkel) return DEMO.email;
+                  return null;
+                };
+
+                let emailForAuth: string | null = null;
+                try {
+                  emailForAuth = await resolveEmail();
+                } catch {
+                  emailForAuth = isDemoMikkel ? DEMO.email : null;
+                }
+
+                if (!emailForAuth) {
+                  if (isDemoMikkel) {
+                    goDemoOffline({
+                      role: "courier",
+                      courierId: DEMO.courierId,
+                      email: DEMO.email,
+                    });
+                    setBusy(false);
+                    return;
+                  }
+                  setError(
+                    "Bud findes ikke i databasen. Tjek at partner_profiles er kørt og bud-ID stemmer, eller sæt SUPABASE_SERVICE_ROLE_KEY så e-mail-opslag virker.",
+                  );
+                  setBusy(false);
                   return;
                 }
 
                 try {
-                  const profile = await fetchCourierProfileByCourierId(normalizedCourierId);
-                  if (!profile || profile.role !== "courier" || !profile.email) {
-                    setError("Courier ID is not linked to a valid courier account.");
-                    return;
-                  }
-
                   const supabase = getSupabaseClient();
                   const { error: authError } = await supabase.auth.signInWithPassword({
-                    email: profile.email,
+                    email: emailForAuth,
                     password,
                   });
                   if (authError) {
-                    setError(authError.message);
+                    if (isDemoMikkel) {
+                      goDemoOffline({
+                        role: "courier",
+                        courierId: normalizedCourierId,
+                        email: emailForAuth!,
+                      });
+                    } else {
+                      setError(authError.message);
+                    }
+                    setBusy(false);
+                    return;
+                  }
+                  const profile = await fetchPartnerProfileByEmail(emailForAuth);
+                  if (!profile || profile.role !== "courier") {
+                    if (isDemoMikkel) {
+                      goDemoOffline({
+                        role: "courier",
+                        courierId: normalizedCourierId,
+                        email: emailForAuth,
+                      });
+                    } else {
+                      setError("Kontoen er ikke sat op som bud i LOOMY.");
+                    }
+                    setBusy(false);
                     return;
                   }
                   if (profile.courierId?.toLowerCase() !== normalizedCourierId) {
-                    setError("Courier ID does not match this account mapping.");
+                    setError("Bud-ID matcher ikke denne konto.");
+                    setBusy(false);
                     return;
                   }
                   loginAsPartner(profile);
                   router.push("/courier");
-                } catch {
-                  setError("Supabase is not configured. Add .env.local values first.");
+                } catch (e) {
+                  if (isDemoMikkel) {
+                    goDemoOffline({
+                      role: "courier",
+                      courierId: normalizedCourierId,
+                      email: emailForAuth!,
+                    });
+                  } else {
+                    setError(
+                      e instanceof Error
+                        ? e.message
+                        : "Supabase er ikke konfigureret (mangler env i Vercel).",
+                    );
+                  }
+                } finally {
+                  setBusy(false);
                 }
               }}
             >
-              <span className="inline-flex items-center gap-2">
-                Continue to Courier Hub
-                <KeyRound size={14} />
+              <span className="inline-flex items-center justify-center gap-2">
+                {busy ? <Loader2 size={16} className="animate-spin" /> : null}
+                Fortsæt til bud
+                {!busy ? <KeyRound size={14} /> : null}
               </span>
             </Button>
             {error ? <p className="text-xs text-rose-600">{error}</p> : null}

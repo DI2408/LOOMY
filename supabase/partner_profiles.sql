@@ -1,5 +1,9 @@
 -- Run this in Supabase SQL Editor
 -- Purpose: role-based partner mapping for Store and Courier logins
+--
+-- Also create Auth users for these emails in Supabase Authentication (e.g. Demo1234! for dev).
+-- Courier login: app looks up email by courier_id server-side; set SUPABASE_SERVICE_ROLE_KEY
+-- in your deployment (see supabase/README.md).
 
 create extension if not exists pgcrypto;
 
