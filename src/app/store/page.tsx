@@ -320,92 +320,128 @@ export default function StorePage() {
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
-                  <h2 className="text-lg font-semibold">{store.name}</h2>
+                  <h2 className="font-serif text-xl font-medium tracking-tight">{store.name}</h2>
                   <p className="text-xs text-stone-500">{store.address}</p>
                 </div>
                 <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-                  Inventory live
+                  Lager live
                 </span>
               </div>
-              <div className="mt-4 space-y-3">
+
+              <div className="mt-4 rounded-2xl border border-stone-200 bg-stone-50/70 p-3">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-500">
+                  Hurtig handling
+                </p>
+                <p className="mt-1 text-xs text-stone-600">
+                  Tryk <span className="font-medium">- / +</span> for små justeringer, eller skriv et præcist
+                  tal i feltet. Lagerstatus opdateres med det samme.
+                </p>
+              </div>
+
+              <div className="mt-4 space-y-4">
                 {store.products.map((product) => (
                   <div
                     key={product.id}
-                    className="rounded-xl border border-stone-200 bg-gradient-to-br from-stone-50 to-white p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]"
+                    className="rounded-2xl border border-stone-200 bg-gradient-to-br from-stone-50 to-white p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]"
                   >
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="font-semibold">{product.name}</p>
-                      <span className="rounded-full bg-stone-100 px-2 py-1 text-[11px] font-semibold text-stone-600">
-                        {sizes.reduce((sum, size) => sum + product.sizes[size], 0)} units
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="font-semibold text-stone-900">{product.name}</p>
+                      <span className="rounded-full bg-stone-100 px-2.5 py-1 text-[11px] font-semibold text-stone-600">
+                        {sizes.reduce((sum, size) => sum + product.sizes[size], 0)} stk
                       </span>
                     </div>
-                    <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                      {sizes.map((size) => (
-                        <label
-                          key={`${product.id}-${size}`}
-                          className="rounded-lg border border-stone-200 bg-white p-2 text-xs shadow-sm"
-                        >
-                          <div className="mb-1 flex items-center justify-between">
-                            <span className="font-semibold">{size}</span>
-                            <span
-                              className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
-                                product.sizes[size] === 0
-                                  ? "bg-rose-100 text-rose-700"
-                                  : product.sizes[size] <= 2
-                                    ? "bg-amber-100 text-amber-700"
-                                    : "bg-emerald-100 text-emerald-700"
-                              }`}
-                            >
-                              {product.sizes[size] === 0
-                                ? "Out"
-                                : product.sizes[size] <= 2
-                                  ? "Low"
-                                  : "Good"}
-                            </span>
-                          </div>
-                          <input
-                            type="number"
-                            min={0}
-                            value={product.sizes[size]}
-                            onChange={(event) =>
-                              updateStock({
-                                storeId: store.id,
-                                productId: product.id,
-                                size,
-                                quantity: Number(event.target.value),
-                              })
-                            }
-                            className="w-full rounded border border-stone-200 px-2 py-1 text-stone-800 focus:border-[#8b6914]/40 focus:outline-none"
-                          />
-                          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-stone-100">
-                            <div
-                              className={`h-full rounded-full ${
-                                product.sizes[size] === 0
-                                  ? "bg-rose-400"
-                                  : product.sizes[size] <= 2
-                                    ? "bg-amber-400"
-                                    : "bg-emerald-400"
-                              }`}
-                              style={{ width: `${Math.min(100, product.sizes[size] * 16)}%` }}
-                            />
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              updateStock({
-                                storeId: store.id,
-                                productId: product.id,
-                                size,
-                                quantity: product.sizes[size] + 5,
-                              })
-                            }
-                            className="mt-2 inline-flex w-full items-center justify-center gap-1 rounded-md border border-stone-200 bg-stone-50 px-2 py-1 text-[10px] font-semibold text-stone-700 transition hover:bg-stone-100"
+
+                    <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                      {sizes.map((size) => {
+                        const qty = product.sizes[size];
+                        const tone =
+                          qty === 0
+                            ? "bg-rose-100 text-rose-700"
+                            : qty <= 2
+                              ? "bg-amber-100 text-amber-700"
+                              : "bg-emerald-100 text-emerald-700";
+                        const label = qty === 0 ? "Udsolgt" : qty <= 2 ? "Få tilbage" : "På lager";
+
+                        return (
+                          <div
+                            key={`${product.id}-${size}`}
+                            className="rounded-xl border border-stone-200 bg-white p-3 text-xs shadow-sm"
                           >
-                            <RotateCw size={10} />
-                            Quick restock +5
-                          </button>
-                        </label>
-                      ))}
+                            <div className="mb-2 flex items-center justify-between">
+                              <span className="text-sm font-semibold text-stone-800">{size}</span>
+                              <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${tone}`}>
+                                {label}
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  updateStock({
+                                    storeId: store.id,
+                                    productId: product.id,
+                                    size,
+                                    quantity: Math.max(0, qty - 1),
+                                  })
+                                }
+                                className="inline-flex min-h-9 min-w-9 items-center justify-center rounded-lg border border-stone-200 bg-stone-50 text-sm font-semibold text-stone-700 transition hover:bg-stone-100 active:scale-95"
+                                aria-label={`Sænk lager for ${product.name} ${size}`}
+                              >
+                                -
+                              </button>
+
+                              <input
+                                type="number"
+                                min={0}
+                                value={qty}
+                                onChange={(event) =>
+                                  updateStock({
+                                    storeId: store.id,
+                                    productId: product.id,
+                                    size,
+                                    quantity: Number(event.target.value),
+                                  })
+                                }
+                                className="min-h-9 w-full rounded-lg border border-stone-200 px-2 text-center text-sm font-semibold text-stone-800 focus:border-[#8b6914]/40 focus:outline-none"
+                                aria-label={`Lagerantal for ${product.name} ${size}`}
+                              />
+
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  updateStock({
+                                    storeId: store.id,
+                                    productId: product.id,
+                                    size,
+                                    quantity: qty + 1,
+                                  })
+                                }
+                                className="inline-flex min-h-9 min-w-9 items-center justify-center rounded-lg border border-stone-200 bg-stone-50 text-sm font-semibold text-stone-700 transition hover:bg-stone-100 active:scale-95"
+                                aria-label={`Øg lager for ${product.name} ${size}`}
+                              >
+                                +
+                              </button>
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                updateStock({
+                                  storeId: store.id,
+                                  productId: product.id,
+                                  size,
+                                  quantity: qty + 5,
+                                })
+                              }
+                              className="mt-2 inline-flex w-full items-center justify-center gap-1 rounded-lg border border-stone-200 bg-stone-50 px-2 py-1.5 text-[10px] font-semibold text-stone-700 transition hover:bg-stone-100"
+                            >
+                              <RotateCw size={10} />
+                              Hurtig opfyldning +5
+                            </button>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 ))}
