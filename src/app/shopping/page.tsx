@@ -3,7 +3,7 @@
 /**
  * LOOMY shopping v2: editorial marketplace with boutique-first curation.
  */
-import { CheckCircle2, Clock3, Package, ShieldCheck, Sparkles, X } from "lucide-react";
+import { CheckCircle2, Clock3, Loader2, Package, ShieldCheck, Sparkles, X } from "lucide-react";
 import Image from "next/image";
 import { useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
@@ -38,6 +38,10 @@ export default function ShoppingPage() {
   const [loginMessage, setLoginMessage] = useState<string>("");
   const [feedback, setFeedback] = useState("");
   const [feedbackSent, setFeedbackSent] = useState(false);
+  const [feedbackError, setFeedbackError] = useState("");
+  const [sendingFeedback, setSendingFeedback] = useState(false);
+  const [loginBusy, setLoginBusy] = useState<"google" | "apple" | "magic" | null>(null);
+  const [placingOrder, setPlacingOrder] = useState(false);
   const [selected, setSelected] = useState<{ store: StoreData; product: Product } | null>(null);
   const [selectedSize, setSelectedSize] = useState<SizeKey | null>(null);
   const storeSectionRef = useRef<HTMLElement | null>(null);
@@ -260,31 +264,49 @@ export default function ShoppingPage() {
               <div className="space-y-3">
                 <Button
                   fullWidth
+                  disabled={loginBusy !== null}
                   onClick={() => {
+                    setLoginBusy("google");
                     loginAs("customer");
                     setLoginMessage("Velkommen — demo med Google.");
+                    window.setTimeout(() => setLoginBusy(null), 420);
                   }}
                 >
+                  {loginBusy === "google" ? (
+                    <Loader2 size={15} className="mr-2 animate-spin" />
+                  ) : null}
                   Fortsæt med Google
                 </Button>
                 <Button
                   variant="secondary"
                   fullWidth
+                  disabled={loginBusy !== null}
                   onClick={() => {
+                    setLoginBusy("apple");
                     loginAs("customer");
                     setLoginMessage("Velkommen — demo med Apple.");
+                    window.setTimeout(() => setLoginBusy(null), 420);
                   }}
                 >
+                  {loginBusy === "apple" ? (
+                    <Loader2 size={15} className="mr-2 animate-spin" />
+                  ) : null}
                   Fortsæt med Apple
                 </Button>
                 <Button
                   variant="secondary"
                   fullWidth
+                  disabled={loginBusy !== null}
                   onClick={() => {
+                    setLoginBusy("magic");
                     loginAs("customer");
                     setLoginMessage("Magic link sendt (demo).");
+                    window.setTimeout(() => setLoginBusy(null), 420);
                   }}
                 >
+                  {loginBusy === "magic" ? (
+                    <Loader2 size={15} className="mr-2 animate-spin" />
+                  ) : null}
                   Send magic link
                 </Button>
                 {loginMessage ? (
@@ -366,6 +388,7 @@ export default function ShoppingPage() {
                 onChange={(event) => {
                   setFeedback(event.target.value);
                   setFeedbackSent(false);
+                  setFeedbackError("");
                 }}
                 className="min-h-28 w-full rounded-xl border-[0.5px] border-stone-200/90 bg-white px-3 py-2.5 text-sm text-stone-800 placeholder:text-stone-400 focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-[#8b6914]/15"
                 placeholder="Hvad kan vi gøre bedre?"
@@ -373,14 +396,28 @@ export default function ShoppingPage() {
               <Button
                 className="mt-4"
                 fullWidth
-                onClick={() => {
-                  if (!feedback.trim()) return;
+                disabled={sendingFeedback}
+                onClick={async () => {
+                  if (!feedback.trim()) {
+                    setFeedbackError("Skriv gerne en kort besked, før du sender.");
+                    return;
+                  }
+                  setFeedbackError("");
+                  setSendingFeedback(true);
+                  await new Promise((resolve) => window.setTimeout(resolve, 420));
                   setFeedbackSent(true);
                   setFeedback("");
+                  setSendingFeedback(false);
                 }}
               >
+                {sendingFeedback ? <Loader2 size={15} className="mr-2 animate-spin" /> : null}
                 Send feedback
               </Button>
+              {feedbackError ? (
+                <p className="mt-2 rounded-xl border-[0.5px] border-rose-200/80 bg-rose-50 px-3 py-2 text-xs text-rose-700">
+                  {feedbackError}
+                </p>
+              ) : null}
               {feedbackSent ? (
                 <p className="mt-3 rounded-xl border-[0.5px] border-emerald-200/80 bg-emerald-50 px-3 py-2 text-xs text-emerald-900">
                   Tak — vi bruger det til at gøre LOOMY bedre.
@@ -477,18 +514,29 @@ export default function ShoppingPage() {
                   </div>
                   <Button
                     fullWidth
+                    disabled={!selectedSize || placingOrder}
                     onClick={() => {
                       if (!selectedSize) return;
+                      setPlacingOrder(true);
                       placeOrder({
                         storeId: selected.store.id,
                         productId: selected.product.id,
                         size: selectedSize,
                       });
+                      setPlacingOrder(false);
                       setSelected(null);
                     }}
-                    disabled={!selectedSize}
                   >
-                    {selectedSize ? `Bestil str. ${selectedSize}` : "Vælg størrelse"}
+                    {placingOrder ? (
+                      <>
+                        <Loader2 size={15} className="mr-2 animate-spin" />
+                        Opretter ordre...
+                      </>
+                    ) : selectedSize ? (
+                      `Bestil str. ${selectedSize}`
+                    ) : (
+                      "Vælg størrelse"
+                    )}
                   </Button>
                 </div>
               </div>
