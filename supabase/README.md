@@ -2,14 +2,20 @@
 
 ## 1. Opret tabeller + RLS
 
-I **Supabase SQL Editor** kør:
+I **Supabase SQL Editor** kør **i denne rækkefølge** (se også `MIGRATION_ORDER.md`):
 
 1. `partner_profiles.sql`
 2. `customer_profiles.sql`
+3. `loomy_platform.sql`
 
 `partner_profiles.sql` opretter `public.partner_profiles` (butik + bud).
+
 `customer_profiles.sql` opretter `public.customer_profiles` (kundeprofiler).
-Begge bruger RLS, så en bruger kun kan læse sin egen række når vedkommende er logget ind.
+
+`loomy_platform.sql` tilføjer det fulde LOOMY-skema: **butikker, produkter, lager, bud,
+ordrer, ordrelinjer, betaling-metadata (Stripe Connect), feedback** samt **RLS for alle roller**
+(kunde / butik / bud). Filen udvider også `customer_profiles` med `user_id` og en **trigger**
+der opretter profil automatisk ved ny bruger i `auth.users`.
 
 ## 2. Opret brugere i Auth
 
@@ -25,9 +31,9 @@ Butikker (se samme fil): `store.strom@loomy.dk` m.fl.
 
 Kunder (matcher seed i `customer_profiles.sql`):
 
-- `customer.emma@loomy.dk`
-- `customer.noah@loomy.dk`
-- `customer.sofie@loomy.dk`
+- `emma@loomy.dk`
+- `noah@loomy.dk`
+- `sofie@loomy.dk`
 
 ## 3. Vercel / lokal: server-opslag til budlogin
 

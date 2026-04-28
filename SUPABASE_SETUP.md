@@ -33,14 +33,15 @@ Use these emails (mapped in SQL):
 
 ### Customer demo accounts
 
-- `customer.emma@loomy.dk`
-- `customer.noah@loomy.dk`
-- `customer.sofie@loomy.dk`
+- `emma@loomy.dk`
+- `noah@loomy.dk`
+- `sofie@loomy.dk`
 
 ## 3) Login pages
 
 - Store login: `/login/store`
 - Courier login: `/login/courier`
+- Customer login: `/login/customer`
 
 Each dashboard is role-specific:
 
@@ -59,12 +60,17 @@ Each dashboard is role-specific:
 1. Open Supabase SQL Editor.
 2. Paste and run `supabase/partner_profiles.sql`.
 3. Paste and run `supabase/customer_profiles.sql`.
-4. Confirm rows exist:
+4. Paste and run `supabase/loomy_platform.sql` (catalog, orders, payments RLS, feedback).
+5. Confirm rows exist:
 
 ```sql
 select email, role, store_id, courier_id from public.partner_profiles order by email;
 select email, full_name, style_tags from public.customer_profiles order by email;
+select count(*) from public.stores;
+select count(*) from public.products;
 ```
 
-Both tables use RLS and only allow authenticated users to select rows where `email`
-matches the logged-in JWT email.
+Se fuld kørselsrækkefølge i `supabase/MIGRATION_ORDER.md`.
+
+RLS er aktiveret på alle tabeller med brugerdata; partner- og kundeprofiler matcher JWT-e-mail
+eller `auth.uid()` hvor det er relevant.
