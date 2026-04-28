@@ -118,6 +118,7 @@ export function LumiHeader() {
                 </p>
                 {[
                   { href: "/shopping", label: "Shop" },
+                  { href: "/customer", label: "Mit LOOMY" },
                   { href: "/about", label: "Om os" },
                   { href: "/feedback", label: "Feedback" },
                   { href: "/#contact", label: "Kontakt" },
@@ -186,10 +187,11 @@ export function LumiHeader() {
                   onClick={() => {
                     loginAs("customer");
                     setOpen(false);
+                    window.location.href = "/customer";
                   }}
                   className="flex min-h-11 w-full rounded-xl px-3 text-left text-sm text-stone-700 transition hover:bg-stone-50"
                 >
-                  Kundevisning
+                  Mit LOOMY
                 </button>
                 {role !== "customer" ? (
                   <button

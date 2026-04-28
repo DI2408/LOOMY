@@ -5,7 +5,7 @@
  */
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Info, MessageCircle, Store } from "lucide-react";
+import { Home, Info, MessageCircle, Store, UserRound } from "lucide-react";
 import { motion } from "framer-motion";
 
 const dockSpring = { type: "spring" as const, stiffness: 420, damping: 34 };
@@ -13,6 +13,7 @@ const dockSpring = { type: "spring" as const, stiffness: 420, damping: 34 };
 const dockItems = [
   { href: "/", label: "Hjem", icon: Home },
   { href: "/shopping", label: "Shop", icon: Store },
+  { href: "/customer", label: "Konto", icon: UserRound },
   { href: "/about", label: "Om", icon: Info },
   { href: "/feedback", label: "Feedback", icon: MessageCircle },
 ] as const;

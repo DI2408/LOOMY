@@ -5,6 +5,7 @@
  */
 import { CheckCircle2, Clock3, Loader2, Package, ShieldCheck, Sparkles, X } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Card } from "@/components/ui/card";
@@ -32,7 +33,8 @@ const statusSteps: { id: OrderStatus; label: string; owner: string }[] = [
 const modalSpring = { type: "spring" as const, stiffness: 400, damping: 34 };
 
 export default function ShoppingPage() {
-  const { stores, orders, placeOrder, loginAs } = useLumi();
+  const router = useRouter();
+  const { stores, orders, placeOrder, loginAsCustomer } = useLumi();
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [query, setQuery] = useState("");
   const [loginMessage, setLoginMessage] = useState<string>("");
@@ -267,9 +269,12 @@ export default function ShoppingPage() {
                   disabled={loginBusy !== null}
                   onClick={() => {
                     setLoginBusy("google");
-                    loginAs("customer");
+                    loginAsCustomer("google");
                     setLoginMessage("Velkommen — demo med Google.");
-                    window.setTimeout(() => setLoginBusy(null), 420);
+                    window.setTimeout(() => {
+                      setLoginBusy(null);
+                      router.push("/customer");
+                    }, 420);
                   }}
                 >
                   {loginBusy === "google" ? (
@@ -283,9 +288,12 @@ export default function ShoppingPage() {
                   disabled={loginBusy !== null}
                   onClick={() => {
                     setLoginBusy("apple");
-                    loginAs("customer");
+                    loginAsCustomer("apple");
                     setLoginMessage("Velkommen — demo med Apple.");
-                    window.setTimeout(() => setLoginBusy(null), 420);
+                    window.setTimeout(() => {
+                      setLoginBusy(null);
+                      router.push("/customer");
+                    }, 420);
                   }}
                 >
                   {loginBusy === "apple" ? (
@@ -299,9 +307,12 @@ export default function ShoppingPage() {
                   disabled={loginBusy !== null}
                   onClick={() => {
                     setLoginBusy("magic");
-                    loginAs("customer");
+                    loginAsCustomer("magic");
                     setLoginMessage("Magic link sendt (demo).");
-                    window.setTimeout(() => setLoginBusy(null), 420);
+                    window.setTimeout(() => {
+                      setLoginBusy(null);
+                      router.push("/customer");
+                    }, 420);
                   }}
                 >
                   {loginBusy === "magic" ? (

@@ -74,12 +74,26 @@ export type PartnerProfile = {
   email: string;
 };
 
+export type CustomerProfile = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  styleTags: string[];
+};
+
 type LumiContextValue = {
   stores: StoreData[];
   couriers: CourierData[];
   orders: OrderData[];
   role: "customer" | "store" | "courier";
+  customerProfile: CustomerProfile;
   loginAs: (role: "customer" | "store" | "courier") => void;
+  loginAsCustomer: (provider: "google" | "apple" | "magic", email?: string) => void;
+  updateCustomerProfile: (input: Partial<Omit<CustomerProfile, "id">>) => void;
+  getCustomerOrders: () => OrderData[];
+  getRecommendedProducts: () => Product[];
   loginAsPartner: (profile: PartnerProfile) => void;
   logout: () => void;
   partnerProfile: PartnerProfile | null;
@@ -352,6 +366,33 @@ const customerProfiles = [
   },
 ];
 
+const customerSeedProfiles: CustomerProfile[] = [
+  {
+    id: "customer-emma",
+    name: "Emma Larsen",
+    email: "emma@loomy.dk",
+    phone: "+45 31 25 80 90",
+    address: "Store Kongensgade 45, 2. tv, 1264 København K",
+    styleTags: ["minimal", "tailored", "neutral"],
+  },
+  {
+    id: "customer-noah",
+    name: "Noah Petersen",
+    email: "noah@loomy.dk",
+    phone: "+45 42 14 77 01",
+    address: "Larsbjørnsstræde 9, 1. th, 1454 København K",
+    styleTags: ["street", "monochrome", "utility"],
+  },
+  {
+    id: "customer-sofie",
+    name: "Sofie Madsen",
+    email: "sofie@loomy.dk",
+    phone: "+45 29 11 50 04",
+    address: "Nørre Voldgade 12, 3. sal, 1358 København K",
+    styleTags: ["occasion", "soft", "elegant"],
+  },
+];
+
 const initialOrders: OrderData[] = [
   {
     id: "LMI-1201",
@@ -442,6 +483,7 @@ export function LumiProvider({ children }: { children: ReactNode }) {
   const [couriers, setCouriers] = useState<CourierData[]>(initialCouriers);
   const [orders, setOrders] = useState<OrderData[]>(initialOrders);
   const [role, setRole] = useState<"customer" | "store" | "courier">("customer");
+  const [customerProfile, setCustomerProfile] = useState<CustomerProfile>(customerSeedProfiles[0]);
   const [partnerProfile, setPartnerProfile] = useState<PartnerProfile | null>(null);
 
   useEffect(() => {
@@ -483,6 +525,36 @@ export function LumiProvider({ children }: { children: ReactNode }) {
       setPartnerProfile(null);
     }
   }, []);
+
+  const loginAsCustomer = useCallback(
+    (provider: "google" | "apple" | "magic", email?: string) => {
+      setRole("customer");
+      setPartnerProfile(null);
+      const normalizedEmail = email?.trim().toLowerCase() ?? "";
+      const knownByEmail = customerSeedProfiles.find((p) => p.email === normalizedEmail);
+      if (knownByEmail) {
+        setCustomerProfile(knownByEmail);
+        return;
+      }
+      if (provider === "apple") {
+        setCustomerProfile(customerSeedProfiles[1]);
+        return;
+      }
+      if (provider === "magic") {
+        setCustomerProfile(customerSeedProfiles[2]);
+        return;
+      }
+      setCustomerProfile(customerSeedProfiles[0]);
+    },
+    [],
+  );
+
+  const updateCustomerProfile = useCallback(
+    (input: Partial<Omit<CustomerProfile, "id">>) => {
+      setCustomerProfile((prev) => ({ ...prev, ...input }));
+    },
+    [],
+  );
 
   const loginAsPartner = useCallback((profile: PartnerProfile) => {
     setPartnerProfile(profile);
@@ -634,13 +706,56 @@ export function LumiProvider({ children }: { children: ReactNode }) {
     );
   }, []);
 
+  const getCustomerOrders = useCallback(() => {
+    const normalizedName = customerProfile.name.trim().toLowerCase();
+    return orders
+      .filter((order) => order.customerName.trim().toLowerCase() === normalizedName)
+      .sort((a, b) => b.createdAt - a.createdAt);
+  }, [customerProfile.name, orders]);
+
+  const getRecommendedProducts = useCallback(() => {
+    const pastOrders = getCustomerOrders();
+    const orderedCategories = new Set<string>();
+    const orderedProductIds = new Set<string>();
+    for (const order of pastOrders) {
+      orderedProductIds.add(order.productId);
+      const store = stores.find((s) => s.id === order.storeId);
+      const product = store?.products.find((p) => p.id === order.productId);
+      if (product?.category) orderedCategories.add(product.category);
+    }
+    const weighted = stores
+      .flatMap((store) => store.products)
+      .filter((product) => !orderedProductIds.has(product.id))
+      .map((product) => ({
+        product,
+        score:
+          (orderedCategories.has(product.category) ? 2 : 0) +
+          (customerProfile.styleTags.some((tag) =>
+            product.description.toLowerCase().includes(tag) ||
+            product.name.toLowerCase().includes(tag),
+          )
+            ? 1
+            : 0),
+      }))
+      .sort((a, b) => b.score - a.score || a.product.price - b.product.price)
+      .slice(0, 6)
+      .map((entry) => entry.product);
+    if (weighted.length > 0) return weighted;
+    return stores.flatMap((store) => store.products).slice(0, 6);
+  }, [customerProfile.styleTags, getCustomerOrders, stores]);
+
   const value = useMemo(
     () => ({
       stores,
       couriers,
       orders,
       role,
+      customerProfile,
       loginAs,
+      loginAsCustomer,
+      updateCustomerProfile,
+      getCustomerOrders,
+      getRecommendedProducts,
       loginAsPartner,
       logout,
       partnerProfile,
@@ -654,7 +769,12 @@ export function LumiProvider({ children }: { children: ReactNode }) {
       couriers,
       orders,
       role,
+      customerProfile,
       loginAs,
+      loginAsCustomer,
+      updateCustomerProfile,
+      getCustomerOrders,
+      getRecommendedProducts,
       loginAsPartner,
       logout,
       partnerProfile,
