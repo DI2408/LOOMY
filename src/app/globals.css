@@ -96,3 +96,7 @@ body {
   background: transparent;
   cursor: grab;
 }
+
+.slide-action-range:focus-visible {
+  outline: none;
+}

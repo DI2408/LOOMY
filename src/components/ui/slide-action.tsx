@@ -5,7 +5,7 @@
  * prefers-reduced-motion: falls back to a primary button tap.
  */
 import { useState } from "react";
-import { ArrowRight, Check, Loader2 } from "lucide-react";
+import { ArrowRight, Check, Loader2, MousePointerClick, MoveRight } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 
@@ -21,17 +21,31 @@ export function SlideAction({ label, hint = "Træk til højre for at bekræfte",
   const reduceMotion = useReducedMotion();
   const [value, setValue] = useState(0);
   const [done, setDone] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  const runComplete = () => {
+    if (submitting) return;
+    setSubmitting(true);
+    onComplete();
+    window.setTimeout(() => {
+      setSubmitting(false);
+      setDone(false);
+      setValue(0);
+    }, 650);
+  };
 
   if (reduceMotion) {
     return (
       <Button
         fullWidth
         className="min-h-12"
-        onClick={() => {
-          onComplete();
-        }}
+        disabled={submitting}
+        onClick={runComplete}
       >
-        {label}
+        <span className="inline-flex items-center gap-2">
+          {submitting ? <Loader2 size={16} className="animate-spin" /> : <MousePointerClick size={16} />}
+          {label}
+        </span>
       </Button>
     );
   }
@@ -46,15 +60,15 @@ export function SlideAction({ label, hint = "Træk til højre for at bekræfte",
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#7c5a10]">Bekræft</p>
           <p className="mt-0.5 text-xs text-stone-500">{hint}</p>
         </div>
-        {filled ? (
+        {filled || submitting ? (
           <motion.span
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={spring}
             className="inline-flex items-center gap-1 rounded-full border border-emerald-200/90 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-800"
           >
-            <Check size={12} strokeWidth={2.5} aria-hidden />
-            Klar
+            {submitting ? <Loader2 size={12} className="animate-spin" aria-hidden /> : <Check size={12} strokeWidth={2.5} aria-hidden />}
+            {submitting ? "Sender" : "Klar"}
           </motion.span>
         ) : (
           <span className="rounded-full border-[0.5px] border-stone-200 bg-white/90 px-2.5 py-1 text-[11px] font-medium text-stone-500 tabular-nums">
@@ -87,17 +101,13 @@ export function SlideAction({ label, hint = "Træk til højre for at bekræfte",
           max={100}
           step={1}
           value={value}
-          disabled={done}
+          disabled={done || submitting}
           onChange={(event) => {
             const next = Number(event.target.value);
             setValue(next);
-            if (next >= 100 && !done) {
+            if (next >= 100 && !done && !submitting) {
               setDone(true);
-              onComplete();
-              window.setTimeout(() => {
-                setValue(0);
-                setDone(false);
-              }, 650);
+              runComplete();
             }
           }}
           className="slide-action-range absolute inset-0 z-10 h-full w-full cursor-grab touch-none active:cursor-grabbing disabled:cursor-default"
@@ -107,12 +117,22 @@ export function SlideAction({ label, hint = "Træk til højre for at bekræfte",
 
       <div className="mt-3 flex items-center justify-between gap-3">
         <p className="text-sm font-medium leading-snug text-stone-800">{label}</p>
-        {done ? (
+        {done || submitting ? (
           <Loader2 size={16} className="animate-spin text-[#7c5a10]" aria-hidden />
         ) : (
           <span className="hidden text-[11px] text-stone-400 sm:inline">Slip ved 100%</span>
         )}
       </div>
+
+      <button
+        type="button"
+        disabled={submitting}
+        onClick={runComplete}
+        className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border-[0.5px] border-stone-200/90 bg-white/90 text-sm font-medium text-stone-800 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-70"
+      >
+        {submitting ? <Loader2 size={16} className="animate-spin" aria-hidden /> : <MoveRight size={16} aria-hidden />}
+        Tryk i stedet for slide
+      </button>
     </div>
   );
 }
