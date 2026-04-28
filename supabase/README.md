@@ -1,8 +1,15 @@
 # LOOMY — Supabase database
 
-## 1. Opret tabel + RLS
+## 1. Opret tabeller + RLS
 
-I **Supabase SQL Editor** kør filen `partner_profiles.sql` (hele indholdet). Den opretter `public.partner_profiles` med RLS, så brugere kun selv kan læse egen række når de er logget ind.
+I **Supabase SQL Editor** kør:
+
+1. `partner_profiles.sql`
+2. `customer_profiles.sql`
+
+`partner_profiles.sql` opretter `public.partner_profiles` (butik + bud).
+`customer_profiles.sql` opretter `public.customer_profiles` (kundeprofiler).
+Begge bruger RLS, så en bruger kun kan læse sin egen række når vedkommende er logget ind.
 
 ## 2. Opret brugere i Auth
 
@@ -15,6 +22,12 @@ Bud (matcher seed i `partner_profiles.sql`):
 - `courier.jonas@loomy.dk` + `jonas`
 
 Butikker (se samme fil): `store.strom@loomy.dk` m.fl.
+
+Kunder (matcher seed i `customer_profiles.sql`):
+
+- `customer.emma@loomy.dk`
+- `customer.noah@loomy.dk`
+- `customer.sofie@loomy.dk`
 
 ## 3. Vercel / lokal: server-opslag til budlogin
 

@@ -1,4 +1,4 @@
-# Supabase Auth Setup (Store + Courier)
+# Supabase Auth Setup (Store + Courier + Customer)
 
 This project now uses Supabase email/password login for partner access.
 
@@ -15,7 +15,7 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_publishable_key
 
 Go to **Authentication -> Users** and create email/password users.
 
-Use these partner emails (mapped in code):
+Use these emails (mapped in SQL):
 
 ### Store partner accounts
 
@@ -31,6 +31,12 @@ Use these partner emails (mapped in code):
 - `courier.sara@loomy.dk` -> `sara`
 - `courier.jonas@loomy.dk` -> `jonas`
 
+### Customer demo accounts
+
+- `customer.emma@loomy.dk`
+- `customer.noah@loomy.dk`
+- `customer.sofie@loomy.dk`
+
 ## 3) Login pages
 
 - Store login: `/login/store`
@@ -43,17 +49,22 @@ Each dashboard is role-specific:
 
 ## 4) Notes
 
-- Mapping is now database-driven in `public.partner_profiles`.
-- Run `supabase/partner_profiles.sql` in Supabase SQL Editor first.
+- Mapping is now database-driven in:
+  - `public.partner_profiles` (store + courier)
+  - `public.customer_profiles` (customer demo)
+- Run both SQL files in Supabase SQL Editor.
 
 ## 5) Database setup (required)
 
 1. Open Supabase SQL Editor.
 2. Paste and run `supabase/partner_profiles.sql`.
-3. Confirm rows exist:
+3. Paste and run `supabase/customer_profiles.sql`.
+4. Confirm rows exist:
 
 ```sql
 select email, role, store_id, courier_id from public.partner_profiles order by email;
+select email, full_name, style_tags from public.customer_profiles order by email;
 ```
 
-This table uses RLS and only allows authenticated users to select rows where `email` matches the logged-in JWT email.
+Both tables use RLS and only allow authenticated users to select rows where `email`
+matches the logged-in JWT email.
