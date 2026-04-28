@@ -69,3 +69,30 @@ body {
 .mesh-float {
   animation: meshFloat 10s ease-in-out infinite;
 }
+
+/* Slide-to-confirm: larger touch target on mobile */
+.slide-action-range {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+}
+
+.slide-action-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 56px;
+  height: 52px;
+  border-radius: 1rem;
+  border: none;
+  background: transparent;
+  cursor: grab;
+}
+
+.slide-action-range::-moz-range-thumb {
+  width: 56px;
+  height: 52px;
+  border-radius: 1rem;
+  border: none;
+  background: transparent;
+  cursor: grab;
+}

@@ -440,8 +440,13 @@ export default function StorePage() {
                       <SlideAction
                         label={
                           order.status === "order_placed"
-                            ? "Slide to accept and start packing"
-                            : "Slide when order is ready for pickup"
+                            ? "Acceptér og start pakning"
+                            : "Pakken er klar til bud"
+                        }
+                        hint={
+                          order.status === "order_placed"
+                            ? "Træk til højre for at gå i gang med ordren"
+                            : "Træk til højre når pakken kan afhentes"
                         }
                         onComplete={() => progressOrderByStore(order.id)}
                       />
