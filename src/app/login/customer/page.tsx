@@ -47,13 +47,6 @@ export default function CustomerLoginPage() {
             Vælg en demo-kunde for at åbne et personligt LOOMY-område med ordrehistorik,
             profil og anbefalinger.
           </p>
-          <div className="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-3 py-3 text-xs text-amber-800">
-            <p className="font-semibold">Demo profiler</p>
-            <p className="mt-1">
-              Matcher Supabase seed i <span className="font-mono">customer_profiles.sql</span>.
-            </p>
-          </div>
-
           <div className="space-y-3">
             {customerDemos.map((demo) => (
               <button
