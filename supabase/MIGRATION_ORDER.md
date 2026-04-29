@@ -6,6 +6,7 @@ Run these SQL files **in order** in the Supabase SQL Editor on a **fresh** proje
 2. `customer_profiles.sql` — kundeprofiler (`customer_profiles`)
 3. `loomy_platform.sql` — fuldt platformskema (katalog, ordre, betalinger, feedback, trigger på `auth.users`)
 4. `loomy_orders_rpc.sql` — **RPC til unikke ordrenumre** og sikker ordre-oprettelse / status (påkrævet for app-integration)
+5. `stripe_events.sql` — Stripe webhook idempotency + event log tabel (påkrævet for sikker webhook-drift)
 
 I **Supabase → Database → Replication** skal du typisk aktivere realtime for `public.orders` og `public.product_inventory`, hvis klienten skal opdatere live.
 

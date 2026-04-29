@@ -8,6 +8,7 @@ I **Supabase SQL Editor** kør **i denne rækkefølge** (se også `MIGRATION_ORD
 2. `customer_profiles.sql`
 3. `loomy_platform.sql`
 4. `loomy_orders_rpc.sql` (unikke ordrenumre + `place_loomy_order` / status-RPCs — **kræves** for shopping mod Supabase)
+5. `stripe_events.sql` (webhook idempotency-log + RLS deny-all for klientroller)
 
 `partner_profiles.sql` opretter `public.partner_profiles` (butik + bud).
 
