@@ -11,6 +11,10 @@ import {
 } from "react";
 import { getSupabaseClient } from "@/lib/supabase/client";
 import { fetchPartnerProfileByEmail } from "@/lib/partner-profiles";
+import { fetchCatalogFromSupabase } from "@/lib/loomy/catalog";
+import { demoFallbackCouriers, demoFallbackStores } from "@/lib/loomy/demo-fallback-catalog";
+import { demoFallbackOrders } from "@/lib/loomy/demo-fallback-orders";
+import { fetchOrdersForContext } from "@/lib/loomy/orders";
 
 export type SizeKey = "XS" | "S" | "M" | "L";
 export type OrderStatus =
@@ -83,10 +87,16 @@ export type CustomerProfile = {
   styleTags: string[];
 };
 
+export type PlaceOrderResult =
+  | { ok: true; order: OrderData }
+  | { ok: false; error: string };
+
 type LumiContextValue = {
   stores: StoreData[];
   couriers: CourierData[];
   orders: OrderData[];
+  /** True when catalog/orders sync from Supabase (requires env + DB). */
+  supabaseDataMode: boolean;
   role: "customer" | "store" | "courier";
   customerProfile: CustomerProfile;
   loginAs: (role: "customer" | "store" | "courier") => void;
@@ -97,274 +107,16 @@ type LumiContextValue = {
   loginAsPartner: (profile: PartnerProfile) => void;
   logout: () => void;
   partnerProfile: PartnerProfile | null;
-  placeOrder: (params: { storeId: string; productId: string; size: SizeKey }) => void;
+  placeOrder: (params: { storeId: string; productId: string; size: SizeKey }) => Promise<PlaceOrderResult>;
   updateStock: (params: {
     storeId: string;
     productId: string;
     size: SizeKey;
     quantity: number;
-  }) => void;
-  progressOrderByStore: (orderId: string) => void;
-  progressOrderByCourier: (orderId: string) => void;
+  }) => Promise<void>;
+  progressOrderByStore: (orderId: string) => Promise<{ ok: boolean; error?: string }>;
+  progressOrderByCourier: (orderId: string) => Promise<{ ok: boolean; error?: string }>;
 };
-
-const initialStores: StoreData[] = [
-  {
-    id: "strom-boutique",
-    name: "Strøm Boutique",
-    neighborhood: "Indre By",
-    address: "Kronprinsensgade 22, 1114 København K",
-    etaMinutes: 28,
-    rating: 4.9,
-    products: [
-      {
-        id: "strom-silk-shirt",
-        name: "Silk Shirt",
-        category: "New In",
-        description: "Premium silk shirt for office and dinner.",
-        imageUrl: "/products/new-in.svg",
-        price: 899,
-        sizes: { XS: 2, S: 4, M: 3, L: 2 },
-      },
-      {
-        id: "strom-midnight-blazer",
-        name: "Midnight Blazer",
-        category: "Emergency Outfits",
-        description: "Tailored blazer for last-minute events.",
-        imageUrl: "/products/emergency.svg",
-        price: 1499,
-        sizes: { XS: 1, S: 2, M: 3, L: 2 },
-      },
-      {
-        id: "strom-oxford-loafer",
-        name: "Oxford Loafer",
-        category: "Shoes",
-        description: "Classic loafers with all-day comfort.",
-        imageUrl: "/products/shoes.svg",
-        price: 1299,
-        sizes: { XS: 1, S: 2, M: 2, L: 1 },
-      },
-      {
-        id: "strom-gold-chain",
-        name: "Gold Chain",
-        category: "Accessories",
-        description: "Minimal gold-plated statement chain.",
-        imageUrl: "/products/accessories.svg",
-        price: 699,
-        sizes: { XS: 3, S: 3, M: 3, L: 3 },
-      },
-    ],
-  },
-  {
-    id: "naked-copenhagen-edit",
-    name: "Naked Copenhagen Edit",
-    neighborhood: "Indre By",
-    address: "Pilestræde 46, 1112 København K",
-    etaMinutes: 32,
-    rating: 4.8,
-    products: [
-      {
-        id: "naked-bomber-jacket",
-        name: "Oversized Bomber",
-        category: "New In",
-        description: "Streetwear bomber with premium finish.",
-        imageUrl: "/products/new-in.svg",
-        price: 1199,
-        sizes: { XS: 1, S: 2, M: 2, L: 1 },
-      },
-      {
-        id: "naked-utility-set",
-        name: "Utility Set",
-        category: "Emergency Outfits",
-        description: "Complete matching set ready to wear.",
-        imageUrl: "/products/emergency.svg",
-        price: 999,
-        sizes: { XS: 2, S: 3, M: 2, L: 1 },
-      },
-      {
-        id: "naked-runner",
-        name: "City Runner Sneaker",
-        category: "Shoes",
-        description: "Urban running sneaker in neutral tones.",
-        imageUrl: "/products/shoes.svg",
-        price: 1099,
-        sizes: { XS: 1, S: 2, M: 2, L: 2 },
-      },
-      {
-        id: "naked-cap",
-        name: "Signature Cap",
-        category: "Accessories",
-        description: "Low-profile cap with subtle branding.",
-        imageUrl: "/products/accessories.svg",
-        price: 399,
-        sizes: { XS: 4, S: 4, M: 4, L: 4 },
-      },
-    ],
-  },
-  {
-    id: "birger-et-mikkelsen-house",
-    name: "Birger et Mikkelsen House",
-    neighborhood: "Indre By",
-    address: "Amagertorv 33, 1160 København K",
-    etaMinutes: 35,
-    rating: 4.7,
-    products: [
-      {
-        id: "bemk-wrap-dress",
-        name: "Wrap Dress",
-        category: "New In",
-        description: "Elegant wrap dress in soft satin.",
-        imageUrl: "/products/new-in.svg",
-        price: 1599,
-        sizes: { XS: 1, S: 2, M: 2, L: 1 },
-      },
-      {
-        id: "bemk-event-trouser",
-        name: "Event Trouser",
-        category: "Emergency Outfits",
-        description: "Tailored trouser for evening and business.",
-        imageUrl: "/products/emergency.svg",
-        price: 1099,
-        sizes: { XS: 2, S: 2, M: 3, L: 2 },
-      },
-      {
-        id: "bemk-heel",
-        name: "Leather Heel",
-        category: "Shoes",
-        description: "Soft leather heel with stable fit.",
-        imageUrl: "/products/shoes.svg",
-        price: 1399,
-        sizes: { XS: 1, S: 1, M: 2, L: 1 },
-      },
-      {
-        id: "bemk-clutch",
-        name: "Evening Clutch",
-        category: "Accessories",
-        description: "Compact clutch for occasion wear.",
-        imageUrl: "/products/accessories.svg",
-        price: 799,
-        sizes: { XS: 2, S: 2, M: 2, L: 2 },
-      },
-    ],
-  },
-  {
-    id: "wood-wood-city",
-    name: "WOOD WOOD City",
-    neighborhood: "Indre By",
-    address: "Grønnegade 1, 1107 København K",
-    etaMinutes: 30,
-    rating: 4.8,
-    products: [
-      {
-        id: "ww-city-hoodie",
-        name: "City Hoodie",
-        category: "New In",
-        description: "Relaxed premium hoodie for city wear.",
-        imageUrl: "/products/new-in.svg",
-        price: 899,
-        sizes: { XS: 3, S: 4, M: 4, L: 3 },
-      },
-      {
-        id: "ww-date-night-fit",
-        name: "Date Night Fit",
-        category: "Emergency Outfits",
-        description: "Complete outfit ready for tonight.",
-        imageUrl: "/products/emergency.svg",
-        price: 1399,
-        sizes: { XS: 1, S: 2, M: 2, L: 2 },
-      },
-      {
-        id: "ww-street-runner",
-        name: "Street Runner",
-        category: "Shoes",
-        description: "Hybrid sneaker with lightweight sole.",
-        imageUrl: "/products/shoes.svg",
-        price: 1199,
-        sizes: { XS: 2, S: 2, M: 3, L: 2 },
-      },
-      {
-        id: "ww-crossbody",
-        name: "Crossbody Bag",
-        category: "Accessories",
-        description: "Compact crossbody for essentials.",
-        imageUrl: "/products/accessories.svg",
-        price: 649,
-        sizes: { XS: 3, S: 3, M: 3, L: 3 },
-      },
-    ],
-  },
-  {
-    id: "storm-cph",
-    name: "STORM Copenhagen",
-    neighborhood: "Indre By",
-    address: "Store Regnegade 1, 1110 København K",
-    etaMinutes: 26,
-    rating: 4.9,
-    products: [
-      {
-        id: "storm-merino-knit",
-        name: "Merino Knit",
-        category: "New In",
-        description: "Fine merino knit in modern silhouette.",
-        imageUrl: "/products/new-in.svg",
-        price: 999,
-        sizes: { XS: 2, S: 3, M: 3, L: 2 },
-      },
-      {
-        id: "storm-black-set",
-        name: "Black Tailored Set",
-        category: "Emergency Outfits",
-        description: "Polished set for same-day events.",
-        imageUrl: "/products/emergency.svg",
-        price: 1699,
-        sizes: { XS: 1, S: 2, M: 2, L: 1 },
-      },
-      {
-        id: "storm-derby",
-        name: "Leather Derby",
-        category: "Shoes",
-        description: "Hand-finished derby with sleek profile.",
-        imageUrl: "/products/shoes.svg",
-        price: 1499,
-        sizes: { XS: 1, S: 2, M: 2, L: 1 },
-      },
-      {
-        id: "storm-scarf",
-        name: "Cashmere Scarf",
-        category: "Accessories",
-        description: "Soft cashmere scarf in neutral tones.",
-        imageUrl: "/products/accessories.svg",
-        price: 549,
-        sizes: { XS: 5, S: 5, M: 5, L: 5 },
-      },
-    ],
-  },
-];
-
-const initialCouriers: CourierData[] = [
-  { id: "mikkel", name: "Mikkel (Bike)", zone: "Inner City", etaMinutes: 12, status: "available" },
-  { id: "sara", name: "Sara (Car)", zone: "Norrebro", etaMinutes: 18, status: "on_delivery" },
-  { id: "jonas", name: "Jonas (Bike)", zone: "Vesterbro", etaMinutes: 15, status: "available" },
-];
-
-const customerProfiles = [
-  {
-    name: "Emma Larsen",
-    address: "Store Kongensgade 45, 2. tv, 1264 København K",
-  },
-  {
-    name: "Noah Petersen",
-    address: "Larsbjornsstraede 9, 1. th, 1454 København K",
-  },
-  {
-    name: "Sofie Madsen",
-    address: "Nørre Voldgade 12, 3. sal, 1358 København K",
-  },
-  {
-    name: "Maja Andersen",
-    address: "Kronprinsessegade 30, 2. tv, 1306 København K",
-  },
-];
 
 const customerSeedProfiles: CustomerProfile[] = [
   {
@@ -393,131 +145,248 @@ const customerSeedProfiles: CustomerProfile[] = [
   },
 ];
 
-const initialOrders: OrderData[] = [
-  {
-    id: "LMI-1201",
-    storeId: "strom-boutique",
-    storeName: "Strøm Boutique",
-    storeAddress: "Kronprinsensgade 22, 1114 København K",
-    productId: "strom-silk-shirt",
-    productName: "Silk Shirt",
-    size: "M",
-    qty: 1,
-    customerName: "Emma Larsen",
-    customerAddress: "Store Kongensgade 45, 2. tv, 1264 København K",
-    nearbyEtaMinutes: 24,
-    courierId: "mikkel",
-    status: "order_placed",
-    createdAt: 1714064400000,
-  },
-  {
-    id: "LMI-1202",
-    storeId: "storm-cph",
-    storeName: "STORM Copenhagen",
-    storeAddress: "Store Regnegade 1, 1110 København K",
-    productId: "storm-merino-knit",
-    productName: "Merino Knit",
-    size: "S",
-    qty: 1,
-    customerName: "Noah Petersen",
-    customerAddress: "Larsbjornsstraede 9, 1. th, 1454 København K",
-    nearbyEtaMinutes: 18,
-    courierId: "mikkel",
-    status: "store_packing",
-    createdAt: 1714060800000,
-  },
-  {
-    id: "LMI-1203",
-    storeId: "naked-copenhagen-edit",
-    storeName: "Naked Copenhagen Edit",
-    storeAddress: "Pilestræde 46, 1112 København K",
-    productId: "naked-runner",
-    productName: "City Runner Sneaker",
-    size: "M",
-    qty: 1,
-    customerName: "Sofie Madsen",
-    customerAddress: "Nørre Voldgade 12, 3. sal, 1358 København K",
-    nearbyEtaMinutes: 16,
-    courierId: "mikkel",
-    status: "courier_pickup",
-    createdAt: 1714059000000,
-  },
-  {
-    id: "LMI-1204",
-    storeId: "wood-wood-city",
-    storeName: "WOOD WOOD City",
-    storeAddress: "Grønnegade 1, 1107 København K",
-    productId: "ww-crossbody",
-    productName: "Crossbody Bag",
-    size: "L",
-    qty: 1,
-    customerName: "Maja Andersen",
-    customerAddress: "Kronprinsessegade 30, 2. tv, 1306 København K",
-    nearbyEtaMinutes: 14,
-    courierId: "sara",
-    status: "on_the_way",
-    createdAt: 1714057200000,
-  },
-  {
-    id: "LMI-1205",
-    storeId: "birger-et-mikkelsen-house",
-    storeName: "Birger et Mikkelsen House",
-    storeAddress: "Amagertorv 33, 1160 København K",
-    productId: "bemk-wrap-dress",
-    productName: "Wrap Dress",
-    size: "S",
-    qty: 1,
-    customerName: "Freja Nielsen",
-    customerAddress: "Borgergade 18, 2. tv, 1300 København K",
-    nearbyEtaMinutes: 22,
-    courierId: "jonas",
-    status: "delivered",
-    createdAt: 1714051800000,
-  },
-];
-
 const LumiContext = createContext<LumiContextValue | undefined>(undefined);
 
+function getSupabaseOrNull() {
+  try {
+    return getSupabaseClient();
+  } catch {
+    return null;
+  }
+}
+
+function demoPlaceOrderLocal(params: {
+  storeId: string;
+  productId: string;
+  size: SizeKey;
+  stores: StoreData[];
+  couriers: CourierData[];
+  customerProfile: CustomerProfile;
+}): { nextStores: StoreData[]; nextCouriers: CourierData[]; order: OrderData } | null {
+  const { storeId, productId, size, stores, couriers, customerProfile } = params;
+  let canPlace = false;
+  let selectedStoreName = "";
+  let selectedStoreAddress = "";
+  let selectedProductName = "";
+  const nextStores = stores.map((store) => {
+    if (store.id !== storeId) return store;
+    selectedStoreName = store.name;
+    selectedStoreAddress = store.address;
+    return {
+      ...store,
+      products: store.products.map((product) => {
+        if (product.id !== productId) return product;
+        if (product.sizes[size] <= 0) return product;
+        canPlace = true;
+        selectedProductName = product.name;
+        return { ...product, sizes: { ...product.sizes, [size]: product.sizes[size] - 1 } };
+      }),
+    };
+  });
+  if (!canPlace) return null;
+  const availableCourier = couriers.find((c) => c.status === "available");
+  const orderId = `LMI-${Math.floor(Math.random() * 9000) + 1000}`;
+  const eta = 18 + Math.floor(Math.random() * 20);
+  const nextCouriers = couriers.map((c) =>
+    c.id === availableCourier?.id ? { ...c, status: "on_delivery" as const } : c,
+  );
+  const order: OrderData = {
+    id: orderId,
+    storeId,
+    storeName: selectedStoreName,
+    storeAddress: selectedStoreAddress,
+    productId,
+    productName: selectedProductName,
+    size,
+    qty: 1,
+    customerName: customerProfile.name,
+    customerAddress: customerProfile.address,
+    nearbyEtaMinutes: eta,
+    courierId: availableCourier?.id,
+    status: "order_placed",
+    createdAt: Date.now(),
+  };
+  return { nextStores, nextCouriers, order };
+}
+
 export function LumiProvider({ children }: { children: ReactNode }) {
-  const [stores, setStores] = useState<StoreData[]>(initialStores);
-  const [couriers, setCouriers] = useState<CourierData[]>(initialCouriers);
-  const [orders, setOrders] = useState<OrderData[]>(initialOrders);
+  const [stores, setStores] = useState<StoreData[]>(() => demoFallbackStores);
+  const [couriers, setCouriers] = useState<CourierData[]>(() => demoFallbackCouriers);
+  const [orders, setOrders] = useState<OrderData[]>(
+    () => [...demoFallbackOrders] as OrderData[],
+  );
+  const [supabaseDataMode, setSupabaseDataMode] = useState(false);
   const [role, setRole] = useState<"customer" | "store" | "courier">("customer");
   const [customerProfile, setCustomerProfile] = useState<CustomerProfile>(customerSeedProfiles[0]);
   const [partnerProfile, setPartnerProfile] = useState<PartnerProfile | null>(null);
+  const [authUserId, setAuthUserId] = useState<string | null>(null);
+
+  const refreshCatalog = useCallback(async () => {
+    const supabase = getSupabaseOrNull();
+    if (!supabase) {
+      setSupabaseDataMode(false);
+      setStores(demoFallbackStores);
+      setCouriers(demoFallbackCouriers);
+      setOrders([...demoFallbackOrders] as OrderData[]);
+      return;
+    }
+    try {
+      const { stores: next, couriers: c } = await fetchCatalogFromSupabase(supabase);
+      setStores(next);
+      setCouriers(c);
+      setSupabaseDataMode(true);
+    } catch {
+      setSupabaseDataMode(false);
+      setStores(demoFallbackStores);
+      setCouriers(demoFallbackCouriers);
+      setOrders([...demoFallbackOrders] as OrderData[]);
+    }
+  }, []);
+
+  const refreshOrdersFromSupabase = useCallback(async () => {
+    const supabase = getSupabaseOrNull();
+    if (!supabase || !authUserId) {
+      setOrders([]);
+      return;
+    }
+    if (role === "customer") {
+      const list = await fetchOrdersForContext(supabase, {
+        role: "customer",
+        userId: authUserId,
+      });
+      setOrders(list);
+      return;
+    }
+    if (role === "store" && partnerProfile?.storeId) {
+      const list = await fetchOrdersForContext(supabase, {
+        role: "store",
+        userId: authUserId,
+        storeId: partnerProfile.storeId,
+      });
+      setOrders(list);
+      return;
+    }
+    if (role === "courier" && partnerProfile?.courierId) {
+      const list = await fetchOrdersForContext(supabase, {
+        role: "courier",
+        userId: authUserId,
+        courierId: partnerProfile.courierId,
+      });
+      setOrders(list);
+      return;
+    }
+    setOrders([]);
+  }, [authUserId, role, partnerProfile]);
+
+  const loadCustomerProfileFromDb = useCallback(async (userId: string) => {
+    const supabase = getSupabaseOrNull();
+    if (!supabase) return;
+    const { data, error } = await supabase
+      .from("customer_profiles")
+      .select("id, email, full_name, phone, address, style_tags")
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (error || !data) return;
+    const row = data as {
+      id: string;
+      email: string;
+      full_name: string;
+      phone: string | null;
+      address: string;
+      style_tags: string[] | null;
+    };
+    setCustomerProfile({
+      id: row.id,
+      name: row.full_name,
+      email: row.email,
+      phone: row.phone ?? "",
+      address: row.address,
+      styleTags: row.style_tags ?? [],
+    });
+  }, []);
 
   useEffect(() => {
-    let mounted = true;
-    try {
-      const supabase = getSupabaseClient();
-      supabase.auth.getUser().then(({ data }) => {
-        if (!mounted) return;
-        const email = data.user?.email;
-        if (!email) return;
-        fetchPartnerProfileByEmail(email)
-          .then((profile) => {
-            if (!mounted) return;
-            if (profile) {
-              setPartnerProfile(profile);
-              setRole(profile.role);
-            } else {
-              setRole("customer");
-              setPartnerProfile(null);
-            }
-          })
-          .catch(() => {
-            if (!mounted) return;
-            setRole("customer");
-            setPartnerProfile(null);
-          });
-      });
-    } catch {
-      // Supabase env vars are optional in local dev until configured.
-    }
+    const supabase = getSupabaseOrNull();
+    if (!supabase) return;
+
+    queueMicrotask(() => {
+      void refreshCatalog();
+    });
+
+    const { data: sub } = supabase.auth.onAuthStateChange(async (event, session) => {
+      const user = session?.user ?? null;
+      setAuthUserId(user?.id ?? null);
+
+      if (!user?.email) {
+        setPartnerProfile(null);
+        setRole("customer");
+        setOrders([]);
+        return;
+      }
+
+      try {
+        const profile = await fetchPartnerProfileByEmail(user.email);
+        if (profile) {
+          setPartnerProfile(profile);
+          setRole(profile.role);
+        } else {
+          setPartnerProfile(null);
+          setRole("customer");
+          await loadCustomerProfileFromDb(user.id);
+        }
+      } catch {
+        setPartnerProfile(null);
+        setRole("customer");
+      }
+
+      if (event === "SIGNED_OUT") {
+        setCustomerProfile(customerSeedProfiles[0]);
+        void refreshCatalog();
+      }
+    });
+
+    void supabase.auth.getUser().then(({ data }) => {
+      setAuthUserId(data.user?.id ?? null);
+    });
+
     return () => {
-      mounted = false;
+      sub.subscription.unsubscribe();
     };
-  }, []);
+  }, [loadCustomerProfileFromDb, refreshCatalog]);
+
+  useEffect(() => {
+    const supabase = getSupabaseOrNull();
+    if (!supabase || !supabaseDataMode) return;
+
+    const channel = supabase
+      .channel("loomy-orders")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "orders" },
+        () => {
+          void refreshOrdersFromSupabase();
+        },
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "product_inventory" },
+        () => {
+          void refreshCatalog();
+        },
+      )
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [supabaseDataMode, refreshOrdersFromSupabase, refreshCatalog]);
+
+  useEffect(() => {
+    if (!supabaseDataMode) return;
+    queueMicrotask(() => {
+      void refreshOrdersFromSupabase();
+    });
+  }, [supabaseDataMode, refreshOrdersFromSupabase, role, partnerProfile]);
 
   const loginAs = useCallback((nextRole: "customer" | "store" | "courier") => {
     setRole(nextRole);
@@ -550,10 +419,26 @@ export function LumiProvider({ children }: { children: ReactNode }) {
   );
 
   const updateCustomerProfile = useCallback(
-    (input: Partial<Omit<CustomerProfile, "id">>) => {
-      setCustomerProfile((prev) => ({ ...prev, ...input }));
+    async (input: Partial<Omit<CustomerProfile, "id">>) => {
+      const supabase = getSupabaseOrNull();
+      setCustomerProfile((prev) => {
+        const next = { ...prev, ...input };
+        if (supabase && authUserId) {
+          void supabase
+            .from("customer_profiles")
+            .update({
+              full_name: next.name,
+              email: next.email.trim().toLowerCase(),
+              phone: next.phone || null,
+              address: next.address,
+              style_tags: next.styleTags,
+            })
+            .eq("user_id", authUserId);
+        }
+        return next;
+      });
     },
-    [],
+    [authUserId],
   );
 
   const loginAsPartner = useCallback((profile: PartnerProfile) => {
@@ -565,72 +450,84 @@ export function LumiProvider({ children }: { children: ReactNode }) {
     setRole("customer");
     setPartnerProfile(null);
     try {
-      const supabase = getSupabaseClient();
-      void supabase.auth.signOut();
+      const supabase = getSupabaseOrNull();
+      void supabase?.auth.signOut();
     } catch {
       // Ignore when Supabase is not configured.
     }
   }, []);
 
   const placeOrder = useCallback(
-    ({ storeId, productId, size }: { storeId: string; productId: string; size: SizeKey }) => {
-      let canPlace = false;
-      let selectedStoreName = "";
-      let selectedStoreAddress = "";
-      let selectedProductName = "";
-      setStores((prev) =>
-        prev.map((store) => {
-          if (store.id !== storeId) return store;
-          selectedStoreName = store.name;
-          selectedStoreAddress = store.address;
-          return {
-            ...store,
-            products: store.products.map((product) => {
-              if (product.id !== productId) return product;
-              if (product.sizes[size] <= 0) return product;
-              canPlace = true;
-              selectedProductName = product.name;
-              return {
-                ...product,
-                sizes: { ...product.sizes, [size]: product.sizes[size] - 1 },
-              };
-            }),
-          };
-        }),
-      );
+    async ({
+      storeId,
+      productId,
+      size,
+    }: {
+      storeId: string;
+      productId: string;
+      size: SizeKey;
+    }): Promise<PlaceOrderResult> => {
+      const supabase = getSupabaseOrNull();
+      if (supabase && authUserId) {
+        const { data, error } = await supabase.rpc("place_loomy_order", {
+          p_store_id: storeId,
+          p_product_id: productId,
+          p_size: size,
+          p_delivery_address: customerProfile.address,
+        });
+        if (error) {
+          const msg =
+            error.message.includes("out_of_stock") || error.message.includes("22000")
+              ? "Størrelsen er netop blevet udsolgt. Opdater og prøv igen."
+              : error.message.includes("not_authenticated") || error.message.includes("28000")
+                ? "Log ind som kunde for at bestille."
+                : error.message;
+          return { ok: false, error: msg };
+        }
+        const row = data as Record<string, unknown> | null;
+        if (!row || typeof row.id !== "string") {
+          return { ok: false, error: "Uventet svar fra serveren." };
+        }
+        const order: OrderData = {
+          id: String(row.id),
+          storeId: String(row.storeId),
+          storeName: String(row.storeName),
+          storeAddress: String(row.storeAddress),
+          productId: String(row.productId),
+          productName: String(row.productName),
+          size: row.size as SizeKey,
+          qty: Number(row.qty),
+          customerName: String(row.customerName),
+          customerAddress: String(row.customerAddress),
+          nearbyEtaMinutes: Number(row.nearbyEtaMinutes),
+          courierId: row.courierId ? String(row.courierId) : undefined,
+          status: row.status as OrderStatus,
+          createdAt: Number(row.createdAt),
+        };
+        void refreshCatalog();
+        void refreshOrdersFromSupabase();
+        return { ok: true, order };
+      }
 
-      if (!canPlace) return;
-
-      const availableCourier = couriers.find((courier) => courier.status === "available");
-      const orderId = `LMI-${Math.floor(Math.random() * 9000) + 1000}`;
-      const customer =
-        customerProfiles[Math.floor(Math.random() * customerProfiles.length)];
-      const eta = 18 + Math.floor(Math.random() * 20);
-      setOrders((prev) => [
-        {
-          id: orderId,
-          storeId,
-          storeName: selectedStoreName,
-          storeAddress: selectedStoreAddress,
-          productId,
-          productName: selectedProductName,
-          size,
-          qty: 1,
-          customerName: customer.name,
-          customerAddress: customer.address,
-          nearbyEtaMinutes: eta,
-          courierId: availableCourier?.id,
-          status: "order_placed",
-          createdAt: Date.now(),
-        },
-        ...prev,
-      ]);
+      const demo = demoPlaceOrderLocal({
+        storeId,
+        productId,
+        size,
+        stores,
+        couriers,
+        customerProfile,
+      });
+      if (!demo) return { ok: false, error: "Udsolgt i den valgte størrelse." };
+      setStores(demo.nextStores);
+      setCouriers(demo.nextCouriers);
+      setOrders((prev) => [demo.order, ...prev]);
+      return { ok: true, order: demo.order };
     },
-    [couriers],
+    [authUserId, customerProfile, couriers, refreshCatalog, refreshOrdersFromSupabase, stores],
   );
 
   const updateStock = useCallback(
-    ({
+    async ({
       storeId,
       productId,
       size,
@@ -641,6 +538,17 @@ export function LumiProvider({ children }: { children: ReactNode }) {
       size: SizeKey;
       quantity: number;
     }) => {
+      const supabase = getSupabaseOrNull();
+      if (supabase && authUserId && partnerProfile?.role === "store") {
+        const { error } = await supabase
+          .from("product_inventory")
+          .update({ qty: Math.max(0, quantity) })
+          .eq("product_id", productId)
+          .eq("size", size);
+        if (error) throw new Error(error.message);
+        void refreshCatalog();
+        return;
+      }
       setStores((prev) =>
         prev.map((store) =>
           store.id === storeId
@@ -648,10 +556,7 @@ export function LumiProvider({ children }: { children: ReactNode }) {
                 ...store,
                 products: store.products.map((product) =>
                   product.id === productId
-                    ? {
-                        ...product,
-                        sizes: { ...product.sizes, [size]: Math.max(0, quantity) },
-                      }
+                    ? { ...product, sizes: { ...product.sizes, [size]: Math.max(0, quantity) } }
                     : product,
                 ),
               }
@@ -659,59 +564,86 @@ export function LumiProvider({ children }: { children: ReactNode }) {
         ),
       );
     },
-    [],
+    [authUserId, partnerProfile?.role, refreshCatalog],
   );
 
-  const progressOrderByStore = useCallback((orderId: string) => {
-    setOrders((prev) =>
-      prev.map((order) => {
-        if (order.id !== orderId) return order;
-        if (order.status === "order_placed") return { ...order, status: "store_packing" };
-        if (order.status === "store_packing") {
-          if (order.courierId) {
-            setCouriers((courierPrev) =>
-              courierPrev.map((courier) =>
-                courier.id === order.courierId
-                  ? { ...courier, status: "on_delivery" }
-                  : courier,
-              ),
-            );
+  const progressOrderByStore = useCallback(
+    async (orderId: string): Promise<{ ok: boolean; error?: string }> => {
+      const supabase = getSupabaseOrNull();
+      if (supabase && authUserId) {
+        const { error } = await supabase.rpc("progress_order_store", { p_order_id: orderId });
+        if (error) return { ok: false, error: error.message };
+        void refreshOrdersFromSupabase();
+        void refreshCatalog();
+        return { ok: true };
+      }
+      setOrders((prev) =>
+        prev.map((order) => {
+          if (order.id !== orderId) return order;
+          if (order.status === "order_placed") return { ...order, status: "store_packing" };
+          if (order.status === "store_packing") {
+            if (order.courierId) {
+              setCouriers((courierPrev) =>
+                courierPrev.map((courier) =>
+                  courier.id === order.courierId
+                    ? { ...courier, status: "on_delivery" }
+                    : courier,
+                ),
+              );
+            }
+            return { ...order, status: "courier_pickup" };
           }
-          return { ...order, status: "courier_pickup" };
-        }
-        return order;
-      }),
-    );
-  }, []);
+          return order;
+        }),
+      );
+      return { ok: true };
+    },
+    [authUserId, refreshOrdersFromSupabase, refreshCatalog],
+  );
 
-  const progressOrderByCourier = useCallback((orderId: string) => {
-    setOrders((prev) =>
-      prev.map((order) => {
-        if (order.id !== orderId) return order;
-        if (order.status === "courier_pickup") return { ...order, status: "on_the_way" };
-        if (order.status === "on_the_way") {
-          if (order.courierId) {
-            setCouriers((courierPrev) =>
-              courierPrev.map((courier) =>
-                courier.id === order.courierId
-                  ? { ...courier, status: "available" }
-                  : courier,
-              ),
-            );
+  const progressOrderByCourier = useCallback(
+    async (orderId: string): Promise<{ ok: boolean; error?: string }> => {
+      const supabase = getSupabaseOrNull();
+      if (supabase && authUserId) {
+        const { error } = await supabase.rpc("progress_order_courier", { p_order_id: orderId });
+        if (error) return { ok: false, error: error.message };
+        void refreshOrdersFromSupabase();
+        void refreshCatalog();
+        return { ok: true };
+      }
+      setOrders((prev) =>
+        prev.map((order) => {
+          if (order.id !== orderId) return order;
+          if (order.status === "courier_pickup") return { ...order, status: "on_the_way" };
+          if (order.status === "on_the_way") {
+            if (order.courierId) {
+              setCouriers((courierPrev) =>
+                courierPrev.map((courier) =>
+                  courier.id === order.courierId
+                    ? { ...courier, status: "available" }
+                    : courier,
+                ),
+              );
+            }
+            return { ...order, status: "delivered" };
           }
-          return { ...order, status: "delivered" };
-        }
-        return order;
-      }),
-    );
-  }, []);
+          return order;
+        }),
+      );
+      return { ok: true };
+    },
+    [authUserId, refreshOrdersFromSupabase, refreshCatalog],
+  );
 
   const getCustomerOrders = useCallback(() => {
+    if (supabaseDataMode && role === "customer" && authUserId) {
+      return [...orders].sort((a, b) => b.createdAt - a.createdAt);
+    }
     const normalizedName = customerProfile.name.trim().toLowerCase();
     return orders
       .filter((order) => order.customerName.trim().toLowerCase() === normalizedName)
       .sort((a, b) => b.createdAt - a.createdAt);
-  }, [customerProfile.name, orders]);
+  }, [authUserId, customerProfile.name, orders, role, supabaseDataMode]);
 
   const getRecommendedProducts = useCallback(() => {
     const pastOrders = getCustomerOrders();
@@ -730,9 +662,10 @@ export function LumiProvider({ children }: { children: ReactNode }) {
         product,
         score:
           (orderedCategories.has(product.category) ? 2 : 0) +
-          (customerProfile.styleTags.some((tag) =>
-            product.description.toLowerCase().includes(tag) ||
-            product.name.toLowerCase().includes(tag),
+          (customerProfile.styleTags.some(
+            (tag) =>
+              product.description.toLowerCase().includes(tag) ||
+              product.name.toLowerCase().includes(tag),
           )
             ? 1
             : 0),
@@ -749,6 +682,7 @@ export function LumiProvider({ children }: { children: ReactNode }) {
       stores,
       couriers,
       orders,
+      supabaseDataMode,
       role,
       customerProfile,
       loginAs,
@@ -768,6 +702,7 @@ export function LumiProvider({ children }: { children: ReactNode }) {
       stores,
       couriers,
       orders,
+      supabaseDataMode,
       role,
       customerProfile,
       loginAs,

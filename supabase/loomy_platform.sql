@@ -313,6 +313,7 @@ create table if not exists public.orders (
   courier_id text references public.couriers (id),
   status public.loomy_order_status not null default 'order_placed',
   delivery_address text not null,
+  customer_display_name text,
   eta_minutes int not null default 25 check (eta_minutes >= 0),
   currency text not null default 'DKK',
   total_minor int check (total_minor is null or total_minor >= 0),

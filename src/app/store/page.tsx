@@ -378,7 +378,7 @@ export default function StorePage() {
                               <button
                                 type="button"
                                 onClick={() =>
-                                  updateStock({
+                                  void updateStock({
                                     storeId: store.id,
                                     productId: product.id,
                                     size,
@@ -396,7 +396,7 @@ export default function StorePage() {
                                 min={0}
                                 value={qty}
                                 onChange={(event) =>
-                                  updateStock({
+                                  void updateStock({
                                     storeId: store.id,
                                     productId: product.id,
                                     size,
@@ -410,7 +410,7 @@ export default function StorePage() {
                               <button
                                 type="button"
                                 onClick={() =>
-                                  updateStock({
+                                  void updateStock({
                                     storeId: store.id,
                                     productId: product.id,
                                     size,
@@ -427,7 +427,7 @@ export default function StorePage() {
                             <button
                               type="button"
                               onClick={() =>
-                                updateStock({
+                                void updateStock({
                                   storeId: store.id,
                                   productId: product.id,
                                   size,
@@ -484,7 +484,7 @@ export default function StorePage() {
                             ? "Træk til højre for at gå i gang med ordren"
                             : "Træk til højre når pakken kan afhentes"
                         }
-                        onComplete={() => progressOrderByStore(order.id)}
+                        onComplete={() => void progressOrderByStore(order.id)}
                       />
                     </div>
                   ))

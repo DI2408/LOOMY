@@ -56,13 +56,13 @@ export default function UnifiedPage() {
                           <button
                             key={`${product.id}-${size}`}
                             disabled={stock <= 0}
-                            onClick={() =>
-                              placeOrder({
+                            onClick={() => {
+                              void placeOrder({
                                 storeId: store.id,
                                 productId: product.id,
                                 size: size as SizeKey,
-                              })
-                            }
+                              });
+                            }}
                             className={`rounded px-2 py-1 text-xs ${
                               stock > 0
                                 ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
@@ -96,14 +96,14 @@ export default function UnifiedPage() {
                             type="number"
                             min={0}
                             value={product.sizes[size]}
-                            onChange={(event) =>
-                              updateStock({
+                            onChange={(event) => {
+                              void updateStock({
                                 storeId: store.id,
                                 productId: product.id,
                                 size,
                                 quantity: Number(event.target.value),
-                              })
-                            }
+                              });
+                            }}
                             className="rounded border border-stone-200 px-1 py-1 text-xs"
                             title={`${size} stock`}
                           />
@@ -121,7 +121,7 @@ export default function UnifiedPage() {
                   .map((order) => (
                     <div key={order.id} className="mb-2 flex items-center justify-between rounded-lg bg-white p-2">
                       <span className="text-xs">{order.id}</span>
-                      <Button variant="secondary" onClick={() => progressOrderByStore(order.id)}>
+                      <Button variant="secondary" onClick={() => void progressOrderByStore(order.id)}>
                         {order.status === "order_placed" ? "Pack" : "Ready"}
                       </Button>
                     </div>
@@ -149,7 +149,7 @@ export default function UnifiedPage() {
                   .map((order) => (
                     <div key={order.id} className="mb-2 flex items-center justify-between rounded-lg bg-white p-2">
                       <span className="text-xs">{order.id}</span>
-                      <Button variant="secondary" onClick={() => progressOrderByCourier(order.id)}>
+                      <Button variant="secondary" onClick={() => void progressOrderByCourier(order.id)}>
                         {order.status === "courier_pickup" ? "Picked Up" : "Delivered"}
                       </Button>
                     </div>

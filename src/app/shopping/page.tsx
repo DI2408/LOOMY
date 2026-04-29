@@ -34,7 +34,7 @@ const modalSpring = { type: "spring" as const, stiffness: 400, damping: 34 };
 
 export default function ShoppingPage() {
   const router = useRouter();
-  const { stores, orders, placeOrder, loginAsCustomer } = useLumi();
+  const { stores, orders, placeOrder, loginAsCustomer, customerProfile } = useLumi();
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [query, setQuery] = useState("");
   const [loginMessage, setLoginMessage] = useState<string>("");
@@ -44,6 +44,7 @@ export default function ShoppingPage() {
   const [sendingFeedback, setSendingFeedback] = useState(false);
   const [loginBusy, setLoginBusy] = useState<"google" | "apple" | "magic" | null>(null);
   const [placingOrder, setPlacingOrder] = useState(false);
+  const [orderError, setOrderError] = useState("");
   const [selected, setSelected] = useState<{ store: StoreData; product: Product } | null>(null);
   const [selectedSize, setSelectedSize] = useState<SizeKey | null>(null);
   const storeSectionRef = useRef<HTMLElement | null>(null);
@@ -339,7 +340,14 @@ export default function ShoppingPage() {
                     </p>
                   </div>
                 ) : (
-                  orders.slice(0, 3).map((order) => (
+                  orders
+                    .filter(
+                      (order) =>
+                        order.customerName.trim().toLowerCase() ===
+                        customerProfile.name.trim().toLowerCase(),
+                    )
+                    .slice(0, 3)
+                    .map((order) => (
                     <div
                       key={order.id}
                       className="rounded-2xl border-[0.5px] border-stone-200/90 bg-stone-50/50 p-4"
@@ -526,16 +534,22 @@ export default function ShoppingPage() {
                   <Button
                     fullWidth
                     disabled={!selectedSize || placingOrder}
-                    onClick={() => {
+                    onClick={async () => {
                       if (!selectedSize) return;
+                      setOrderError("");
                       setPlacingOrder(true);
-                      placeOrder({
+                      const result = await placeOrder({
                         storeId: selected.store.id,
                         productId: selected.product.id,
                         size: selectedSize,
                       });
                       setPlacingOrder(false);
-                      setSelected(null);
+                      if (result.ok) {
+                        setSelected(null);
+                        setSelectedSize(null);
+                      } else {
+                        setOrderError(result.error);
+                      }
                     }}
                   >
                     {placingOrder ? (
@@ -549,6 +563,11 @@ export default function ShoppingPage() {
                       "Vælg størrelse"
                     )}
                   </Button>
+                  {orderError ? (
+                    <p className="text-xs text-red-600" role="alert">
+                      {orderError}
+                    </p>
+                  ) : null}
                 </div>
               </div>
             </motion.div>

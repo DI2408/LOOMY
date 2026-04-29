@@ -210,7 +210,7 @@ export default function CourierPage() {
                                 ? "Træk hele vejen til højre når du har pakken"
                                 : "Træk til højre når pakken er afleveret"
                             }
-                            onComplete={() => progressOrderByCourier(order.id)}
+                            onComplete={() => void progressOrderByCourier(order.id)}
                           />
                           {isDeliveryStep ? (
                             <p className="mt-3 text-center text-[11px] font-medium text-[#7c5a10]">

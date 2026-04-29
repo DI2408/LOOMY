@@ -61,13 +61,16 @@ Each dashboard is role-specific:
 2. Paste and run `supabase/partner_profiles.sql`.
 3. Paste and run `supabase/customer_profiles.sql`.
 4. Paste and run `supabase/loomy_platform.sql` (catalog, orders, payments RLS, feedback).
-5. Confirm rows exist:
+5. Paste and run `supabase/loomy_orders_rpc.sql` (unique order numbers `LOO-…`, `place_loomy_order`, store/courier progress RPCs).
+6. In **Database → Replication**, enable realtime for `public.orders` and `public.product_inventory` if you want live UI updates without refresh.
+7. Confirm rows exist:
 
 ```sql
 select email, role, store_id, courier_id from public.partner_profiles order by email;
 select email, full_name, style_tags from public.customer_profiles order by email;
 select count(*) from public.stores;
 select count(*) from public.products;
+select proname from pg_proc where proname in ('place_loomy_order', 'progress_order_store', 'progress_order_courier');
 ```
 
 Se fuld kørselsrækkefølge i `supabase/MIGRATION_ORDER.md`.

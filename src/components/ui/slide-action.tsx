@@ -14,7 +14,7 @@ const spring = { type: "spring" as const, stiffness: 420, damping: 32 };
 type SlideActionProps = {
   label: string;
   hint?: string;
-  onComplete: () => void;
+  onComplete: () => void | Promise<void>;
 };
 
 export function SlideAction({ label, hint = "Træk til højre for at bekræfte", onComplete }: SlideActionProps) {
@@ -26,12 +26,13 @@ export function SlideAction({ label, hint = "Træk til højre for at bekræfte",
   const runComplete = () => {
     if (submitting) return;
     setSubmitting(true);
-    onComplete();
-    window.setTimeout(() => {
-      setSubmitting(false);
-      setDone(false);
-      setValue(0);
-    }, 650);
+    void Promise.resolve(onComplete()).finally(() => {
+      window.setTimeout(() => {
+        setSubmitting(false);
+        setDone(false);
+        setValue(0);
+      }, 400);
+    });
   };
 
   if (reduceMotion) {
