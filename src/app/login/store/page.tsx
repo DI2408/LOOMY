@@ -30,12 +30,6 @@ export default function StoreLoginPage() {
           <p className="mb-4 text-sm text-stone-600">
             Sign in as store partner to accept orders, prepare pickup, and update catalog stock.
           </p>
-          <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-3 py-3 text-xs text-amber-800">
-            <p className="font-semibold">Demo credentials</p>
-            <p className="mt-1">Store ID: <span className="font-mono">strom-boutique</span></p>
-            <p>Email: <span className="font-mono">store.demo@loomy.dk</span></p>
-            <p>Password: <span className="font-mono">Demo1234!</span></p>
-          </div>
           <div className="space-y-3">
             <input
               value={storeId}

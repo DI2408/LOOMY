@@ -38,20 +38,6 @@ export default function CourierLoginPage() {
             blokerer ikke-loggerede) og logger dig derefter ind.
           </p>
           <div className="space-y-3">
-            <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-3 text-xs text-amber-800">
-              <p className="font-semibold">Demokombination (anbefalet)</p>
-              <p className="mt-1">
-                Bud-ID: <span className="font-mono">mikkel</span> · adgangskode:{" "}
-                <span className="font-mono">Demo1234!</span>
-              </p>
-              <p className="mt-1 text-amber-900/90">
-                I Supabase skal brugeren <span className="font-mono">courier.mikkel@loomy.dk</span>{" "}
-                findes i <strong>Auth</strong> (samme kode) og være linket i tabellen
-                <span className="font-mono"> partner_profiles</span> — se{" "}
-                <code className="rounded bg-white/60 px-1">supabase/partner_profiles.sql</code> og
-                <code className="rounded bg-white/60 px-1">supabase/README.md</code>.
-              </p>
-            </div>
             <input
               value={courierId}
               onChange={(event) => setCourierId(event.target.value)}
