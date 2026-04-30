@@ -6,7 +6,7 @@
 import { CheckCircle2, Clock3, Loader2, Package, ShieldCheck, Sparkles, X } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,7 @@ import {
   type StoreData,
 } from "@/components/providers/lumi-provider";
 import { springSoft } from "@/components/motion-config";
+import { getSupabaseClient } from "@/lib/supabase/client";
 
 const categories = ["New In", "Emergency Outfits", "Shoes", "Accessories"];
 
@@ -34,7 +35,7 @@ const modalSpring = { type: "spring" as const, stiffness: 400, damping: 34 };
 
 export default function ShoppingPage() {
   const router = useRouter();
-  const { stores, orders, placeOrder, loginAsCustomer, customerProfile } = useLumi();
+  const { stores, orders, placeOrder, loginAsCustomer, customerProfile, supabaseDataMode } = useLumi();
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [query, setQuery] = useState("");
   const [loginMessage, setLoginMessage] = useState<string>("");
@@ -45,10 +46,63 @@ export default function ShoppingPage() {
   const [loginBusy, setLoginBusy] = useState<"google" | "apple" | "magic" | null>(null);
   const [placingOrder, setPlacingOrder] = useState(false);
   const [orderError, setOrderError] = useState("");
+  const [pendingCheckoutOrderId, setPendingCheckoutOrderId] = useState<string | null>(null);
+  const [checkoutBusy, setCheckoutBusy] = useState(false);
   const [selected, setSelected] = useState<{ store: StoreData; product: Product } | null>(null);
   const [selectedSize, setSelectedSize] = useState<SizeKey | null>(null);
   const storeSectionRef = useRef<HTMLElement | null>(null);
   const reduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const orderId = params.get("order_id") ?? "";
+    const checkout = params.get("checkout") ?? "";
+    if (!orderId || !checkout) return;
+
+    const clearParams = () => {
+      const u = new URL(window.location.href);
+      u.searchParams.delete("checkout");
+      u.searchParams.delete("order_id");
+      window.history.replaceState({}, "", `${u.pathname}${u.search}`);
+    };
+
+    if (checkout === "cancel") {
+      void (async () => {
+        try {
+          let supabase;
+          try {
+            supabase = getSupabaseClient();
+          } catch {
+            supabase = null;
+          }
+          if (supabase) {
+            const { data: sess } = await supabase.auth.getSession();
+            const token = sess.session?.access_token;
+            if (token) {
+              await fetch("/api/checkout/cancel-order", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ orderId }),
+              });
+            }
+          }
+        } catch {
+          // ignore (network)
+        } finally {
+          clearParams();
+        }
+      })();
+      return;
+    }
+
+    if (checkout === "success") {
+      clearParams();
+    }
+  }, []);
 
   const filteredStores = useMemo(() => {
     return stores
@@ -458,7 +512,10 @@ export default function ShoppingPage() {
             exit={{ opacity: 0 }}
             transition={{ duration: reduceMotion ? 0.15 : 0.22 }}
             className="fixed inset-0 z-[60] flex items-end justify-center bg-stone-900/50 p-3 backdrop-blur-[2px] md:items-center"
-            onClick={() => setSelected(null)}
+            onClick={() => {
+              setPendingCheckoutOrderId(null);
+              setSelected(null);
+            }}
           >
             <motion.div
               initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 28, scale: 0.98 }}
@@ -480,7 +537,10 @@ export default function ShoppingPage() {
                 <motion.button
                   type="button"
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => setSelected(null)}
+                  onClick={() => {
+                    setPendingCheckoutOrderId(null);
+                    setSelected(null);
+                  }}
                   className="flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-xl border-[0.5px] border-stone-200 bg-white text-stone-600 transition hover:bg-stone-50"
                   aria-label="Luk"
                 >
@@ -531,38 +591,97 @@ export default function ShoppingPage() {
                       )}
                     </div>
                   </div>
-                  <Button
-                    fullWidth
-                    disabled={!selectedSize || placingOrder}
-                    onClick={async () => {
-                      if (!selectedSize) return;
-                      setOrderError("");
-                      setPlacingOrder(true);
-                      const result = await placeOrder({
-                        storeId: selected.store.id,
-                        productId: selected.product.id,
-                        size: selectedSize,
-                      });
-                      setPlacingOrder(false);
-                      if (result.ok) {
-                        setSelected(null);
-                        setSelectedSize(null);
-                      } else {
-                        setOrderError(result.error);
-                      }
-                    }}
-                  >
-                    {placingOrder ? (
-                      <>
-                        <Loader2 size={15} className="mr-2 animate-spin" />
-                        Opretter ordre...
-                      </>
-                    ) : selectedSize ? (
-                      `Bestil str. ${selectedSize}`
-                    ) : (
-                      "Vælg størrelse"
-                    )}
-                  </Button>
+                  {supabaseDataMode && pendingCheckoutOrderId ? (
+                    <div className="space-y-3 rounded-2xl border-[0.5px] border-stone-200/90 bg-white/90 p-4">
+                      <p className="text-sm font-medium text-stone-900">Ordre oprettet</p>
+                      <p className="text-xs text-stone-600">
+                        Ordrenr. <span className="font-mono">{pendingCheckoutOrderId}</span> — fuldfør
+                        betalingen på Stripe for at låse butikken op.
+                      </p>
+                      <Button
+                        fullWidth
+                        disabled={checkoutBusy}
+                        onClick={async () => {
+                          setOrderError("");
+                          setCheckoutBusy(true);
+                          try {
+                            const supabase = getSupabaseClient();
+                            const { data: sess } = await supabase.auth.getSession();
+                            const token = sess.session?.access_token;
+                            if (!token) {
+                              setOrderError("Log ind for at betale.");
+                              setCheckoutBusy(false);
+                              return;
+                            }
+                            const res = await fetch("/api/checkout/create-session", {
+                              method: "POST",
+                              headers: {
+                                "Content-Type": "application/json",
+                                Authorization: `Bearer ${token}`,
+                              },
+                              body: JSON.stringify({ orderId: pendingCheckoutOrderId }),
+                            });
+                            const data = (await res.json()) as { url?: string; error?: string };
+                            if (!res.ok || !data.url) {
+                              setOrderError(data.error ?? "Kunne ikke starte betaling.");
+                              setCheckoutBusy(false);
+                              return;
+                            }
+                            window.location.href = data.url;
+                          } catch {
+                            setOrderError("Netværksfejl — prøv igen.");
+                            setCheckoutBusy(false);
+                          }
+                        }}
+                      >
+                        {checkoutBusy ? (
+                          <>
+                            <Loader2 size={15} className="mr-2 animate-spin" />
+                            Åbner betaling…
+                          </>
+                        ) : (
+                          "Fortsæt til sikker betaling"
+                        )}
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      fullWidth
+                      disabled={!selectedSize || placingOrder}
+                      onClick={async () => {
+                        if (!selectedSize) return;
+                        setOrderError("");
+                        setPlacingOrder(true);
+                        const result = await placeOrder({
+                          storeId: selected.store.id,
+                          productId: selected.product.id,
+                          size: selectedSize,
+                        });
+                        setPlacingOrder(false);
+                        if (result.ok) {
+                          if (supabaseDataMode) {
+                            setPendingCheckoutOrderId(result.order.id);
+                          } else {
+                            setSelected(null);
+                            setSelectedSize(null);
+                          }
+                        } else {
+                          setOrderError(result.error);
+                        }
+                      }}
+                    >
+                      {placingOrder ? (
+                        <>
+                          <Loader2 size={15} className="mr-2 animate-spin" />
+                          Opretter ordre...
+                        </>
+                      ) : selectedSize ? (
+                        `Bestil str. ${selectedSize}`
+                      ) : (
+                        "Vælg størrelse"
+                      )}
+                    </Button>
+                  )}
                   {orderError ? (
                     <p className="text-xs text-red-600" role="alert">
                       {orderError}

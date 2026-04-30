@@ -7,7 +7,7 @@ For a **module-by-module go/no-go** verdict and a prioritized lift plan, see `do
 ## A. Critical blockers (must pass)
 
 - [ ] Stripe webhooks verified with signature in production.
-- [ ] Idempotency enabled for Stripe events (`stripe_webhook_events` table active).
+- [ ] Idempotency enabled for Stripe events (`public.stripe_events` from `supabase/stripe_events.sql`).
 - [ ] Payment status transitions update `payments` and `orders` safely.
 - [ ] RLS enabled on all tenant tables; role matrix tested (customer/store/courier).
 - [ ] `loomy_orders_rpc.sql` deployed; unique order ids (`LOO-XXXXXXXXX`) verified.
@@ -40,6 +40,7 @@ For a **module-by-module go/no-go** verdict and a prioritized lift plan, see `do
 
 - [x] Unique order numbering and secure order RPCs in Supabase.
 - [x] Supabase-backed catalog/orders in app with graceful demo fallback.
-- [x] Stripe webhook route skeleton + idempotency table SQL (`supabase/stripe_events.sql` → `public.stripe_webhook_events`).
-- [ ] Payment intent creation endpoint (server) with full Connect transfer logic.
+- [x] Stripe webhook route + idempotency table SQL (`supabase/stripe_events.sql` → `public.stripe_events`).
+- [x] Stripe Checkout session creation (server) with Connect `transfer_data.destination` + `application_fee_amount` (`/api/checkout/create-session`).
+- [ ] Full Connect onboarding in-app (replace `LOOMY_STORE_STRIPE_ACCOUNTS` JSON mapping).
 - [ ] Full webhook event handling coverage (refund/dispute/chargeback flows).

@@ -572,7 +572,13 @@ export function LumiProvider({ children }: { children: ReactNode }) {
       const supabase = getSupabaseOrNull();
       if (supabase && authUserId) {
         const { error } = await supabase.rpc("progress_order_store", { p_order_id: orderId });
-        if (error) return { ok: false, error: error.message };
+        if (error) {
+          const msg =
+            error.message.includes("payment_required") || error.message.includes("28000")
+              ? "Ordren skal betales før butikken kan starte pakning."
+              : error.message;
+          return { ok: false, error: msg };
+        }
         void refreshOrdersFromSupabase();
         void refreshCatalog();
         return { ok: true };

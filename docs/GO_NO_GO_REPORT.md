@@ -9,7 +9,7 @@
 | Auth & roller | **CONDITIONAL GO** | Supabase Auth + partner mapping findes; mangler hård server-side rollevalidering på alle sensitive paths og fuld onboarding. |
 | Katalog & lager | **CONDITIONAL GO** | DB + RLS + realtime muligt; mangler reservations-/timeout-flow og belastnings-/konkurrencetest. |
 | Ordrer & status | **CONDITIONAL GO** | RPC + unikke ordrenumre er stærkt; mangler fuld state-machine audit, cancel/timeout, og bevis for RLS på tværs af edge cases. |
-| Betalinger (Stripe) | **NO-GO** | Webhook + idempotency skeleton findes; mangler PaymentIntent-oprettelse, Connect splits, fuld webhook-matrix, og økonomisk reconciliation. |
+| Betalinger (Stripe) | **CONDITIONAL GO** | Checkout + Connect destination charge + webhook idempotency + payment gating er implementeret; mangler fuld onboarding, dispute depth, reconciliation, og Connect model hardening for scale. |
 | Sikkerhed (RLS + API) | **NO-GO** | RLS er på plads i SQL, men **mangler dokumenteret og automatiseret policy-matrix** + rate limits + penetrationstest-light. |
 | Frontend / UX | **CONDITIONAL GO** | Stærk visuel profil; blandet sprog, for meget kritisk logik i client provider, mangler ensartet error/toast-lag på alle flows. |
 | Drift & observability | **NO-GO** | Mangler Sentry/alarmer, e2e i CI, staging-paritet, og runbooks der er testet i øvelse. |
@@ -57,11 +57,11 @@
 
 ## 4. Betalinger (Stripe Connect)
 
-**GO hvis:** PaymentIntent oprettes server-side; webhooks opdaterer betaling og ordrestatus konsistent; refunds/disputes håndteres; ingen hemmeligheder i browser; idempotency bevist under replay.
+**GO hvis:** Checkout/PaymentIntent oprettes server-side; Connect routing er korrekt; webhooks opdaterer `payments` konsistent; refunds/disputes håndteres; ingen hemmeligheder i browser; idempotency bevist under replay; reconciliation kører.
 
-**I dag:** Webhook route + `stripe_webhook_events` + delvis `payments` opdatering — **ikke nok**.
+**I dag:** Stripe Checkout session med **destination charge** + **application fee** + webhook idempotency + `payments` opdatering + betaling påkrævet før butik starter pakning — **stærkt fundament**, men ikke “færdig bank” uden onboarding + reconciliation + dispute-dybde.
 
-**Dette alene giver NO-GO for launch.**
+**Kommerciel launch forbliver NO-GO** indtil onboarding, reconciliation og dispute/chargeback-dybde er på plads — men pilot med manuelle Connect-konti er nu realistisk.
 
 ---
 
@@ -100,7 +100,7 @@
 
 ## P0 — Stopper for launch (gør først)
 
-1. **Stripe:** Server route til PaymentIntent + binding til `orders`/`payments` + Connect destination charges eller transfers (beslut model og dokumentér).
+1. **Stripe:** Connect onboarding i produkt (erstat `LOOMY_STORE_STRIPE_ACCOUNTS`) + reconciliation + dispute/chargeback playbooks.
 2. **Stripe:** Udvid webhooks (refund, dispute, payment_intent amounts) + reconciliation felt / event log.
 3. **E2E:** Playwright (eller lign.) mod staging: login → bestil → butik → bud → leveret.
 4. **Observability:** Sentry + strukturerede logs på `/api/*` + webhook fejl.
@@ -132,7 +132,7 @@
 | Produkt (demo/pilot) | **7.0** |
 | Produkt (kommerciel) | **6.0** |
 | Production readiness | **4.5** |
-| Betalinger | **3.5** |
+| Betalinger | **6.5** |
 | Sikkerhed (bevist) | **5.0** |
 | UX / brand | **8.0** |
 
