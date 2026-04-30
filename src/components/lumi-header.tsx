@@ -6,6 +6,7 @@ import { useState } from "react";
 import { ChevronDown, MapPin, Menu, Search } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { CartDrawer } from "@/components/cart-drawer";
 import { useLumi } from "@/components/providers/lumi-provider";
 
 const menuSpring = { type: "spring" as const, stiffness: 420, damping: 32 };
@@ -143,7 +144,8 @@ export function LumiHeader() {
           </AnimatePresence>
         </div>
 
-        <div className="relative shrink-0">
+        <div className="relative flex shrink-0 items-center gap-2">
+          <CartDrawer />
           <Button
             variant="secondary"
             className="min-h-11 border-[0.5px] border-stone-200 bg-white px-3 font-medium !text-stone-900 shadow-sm md:px-4"

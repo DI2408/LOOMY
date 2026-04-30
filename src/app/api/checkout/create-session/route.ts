@@ -134,8 +134,8 @@ export async function POST(request: Request) {
           },
         },
       ],
-      success_url: `${appUrl}/shopping?checkout=success&order_id=${encodeURIComponent(orderId)}`,
-      cancel_url: `${appUrl}/shopping?checkout=cancel&order_id=${encodeURIComponent(orderId)}`,
+      success_url: `${appUrl}/checkout?order_id=${encodeURIComponent(orderId)}&checkout=success`,
+      cancel_url: `${appUrl}/checkout?order_id=${encodeURIComponent(orderId)}&checkout=cancel`,
     });
 
     await admin

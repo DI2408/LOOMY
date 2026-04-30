@@ -31,6 +31,8 @@ Include `supabase/loomy_checkout_payments.sql` **after** `loomy_orders_rpc.sql` 
 - `payments.stripe_checkout_session_id` exists
 - store cannot start packing until payment is `succeeded`
 
+Then run `supabase/loomy_cart_order.sql` so the **shopping cart** can create **one order** with **multiple `order_items`** and a single `payments` row (`place_loomy_cart_order`).
+
 ## 3) Stripe Dashboard
 
 1. Create **Connect** accounts for each merchant (or use Connect Onboarding later).
@@ -47,9 +49,10 @@ Include `supabase/loomy_checkout_payments.sql` **after** `loomy_orders_rpc.sql` 
 ## 4) Customer flow (shopping)
 
 1. Customer must be **logged in** (Supabase session).
-2. Place order → **“Fortsæt til sikker betaling”** → Stripe Checkout.
-3. Success → return to `/shopping?checkout=success&order_id=…`
-4. Cancel → `/shopping?checkout=cancel&order_id=…` (order cancelled + inventory restored server-side).
+2. Add items to **kurv** (header) → **Gå til betaling** → creates order server-side → redirects to **`/checkout?order_id=…`**
+3. On checkout page → **Betal med Stripe** → Stripe Checkout.
+4. Success → return to `/checkout?order_id=…&checkout=success`
+5. Cancel → `/checkout?order_id=…&checkout=cancel` (order cancelled + inventory restored server-side).
 
 ## 5) Store flow
 

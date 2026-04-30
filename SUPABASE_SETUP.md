@@ -64,15 +64,16 @@ Each dashboard is role-specific:
 5. Paste and run `supabase/loomy_orders_rpc.sql` (unique order numbers `LOO-…`, `place_loomy_order`, store/courier progress RPCs).
 6. Paste and run `supabase/stripe_events.sql` (webhook idempotency log table for Stripe events).
 7. Paste and run `supabase/loomy_checkout_payments.sql` (payments row on order + payment required before store packs).
-8. In **Database → Replication**, enable realtime for `public.orders` and `public.product_inventory` if you want live UI updates without refresh.
-9. Confirm rows exist:
+8. Paste and run `supabase/loomy_cart_order.sql` (multi-line cart checkout RPC).
+9. In **Database → Replication**, enable realtime for `public.orders` and `public.product_inventory` if you want live UI updates without refresh.
+10. Confirm rows exist:
 
 ```sql
 select email, role, store_id, courier_id from public.partner_profiles order by email;
 select email, full_name, style_tags from public.customer_profiles order by email;
 select count(*) from public.stores;
 select count(*) from public.products;
-select proname from pg_proc where proname in ('place_loomy_order', 'progress_order_store', 'progress_order_courier');
+select proname from pg_proc where proname in ('place_loomy_order', 'place_loomy_cart_order', 'progress_order_store', 'progress_order_courier');
 select table_name from information_schema.tables where table_schema = 'public' and table_name = 'stripe_events';
 ```
 

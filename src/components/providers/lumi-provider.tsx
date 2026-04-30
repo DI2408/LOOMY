@@ -15,6 +15,7 @@ import { fetchCatalogFromSupabase } from "@/lib/loomy/catalog";
 import { demoFallbackCouriers, demoFallbackStores } from "@/lib/loomy/demo-fallback-catalog";
 import { demoFallbackOrders } from "@/lib/loomy/demo-fallback-orders";
 import { fetchOrdersForContext } from "@/lib/loomy/orders";
+import { loadCartFromStorage, saveCartToStorage } from "@/lib/loomy/cart-storage";
 
 export type SizeKey = "XS" | "S" | "M" | "L";
 export type OrderStatus =
@@ -91,12 +92,30 @@ export type PlaceOrderResult =
   | { ok: true; order: OrderData }
   | { ok: false; error: string };
 
+export type CartLine = {
+  id: string;
+  storeId: string;
+  storeName: string;
+  productId: string;
+  productName: string;
+  size: SizeKey;
+  qty: number;
+  unitPriceKr: number;
+  imageUrl: string;
+};
+
+export type PlaceCartOrderResult =
+  | { ok: true; order: OrderData }
+  | { ok: false; error: string };
+
 type LumiContextValue = {
   stores: StoreData[];
   couriers: CourierData[];
   orders: OrderData[];
   /** True when catalog/orders sync from Supabase (requires env + DB). */
   supabaseDataMode: boolean;
+  /** Current Supabase user id when logged in (null otherwise). */
+  authUserId: string | null;
   role: "customer" | "store" | "courier";
   customerProfile: CustomerProfile;
   loginAs: (role: "customer" | "store" | "courier") => void;
@@ -107,6 +126,17 @@ type LumiContextValue = {
   loginAsPartner: (profile: PartnerProfile) => void;
   logout: () => void;
   partnerProfile: PartnerProfile | null;
+  /** Shopping bag (client-side; persisted in localStorage). */
+  cartLines: CartLine[];
+  cartOpen: boolean;
+  setCartOpen: (open: boolean) => void;
+  addToCart: (line: Omit<CartLine, "id"> & { id?: string }) => void;
+  updateCartQty: (lineId: string, qty: number) => void;
+  removeCartLine: (lineId: string) => void;
+  clearCart: () => void;
+  cartItemCount: number;
+  cartSubtotalKr: number;
+  placeCartOrder: () => Promise<PlaceCartOrderResult>;
   placeOrder: (params: { storeId: string; productId: string; size: SizeKey }) => Promise<PlaceOrderResult>;
   updateStock: (params: {
     storeId: string;
@@ -215,6 +245,8 @@ export function LumiProvider({ children }: { children: ReactNode }) {
   const [orders, setOrders] = useState<OrderData[]>(
     () => [...demoFallbackOrders] as OrderData[],
   );
+  const [cartLines, setCartLines] = useState<CartLine[]>(() => loadCartFromStorage());
+  const [cartOpen, setCartOpen] = useState(false);
   const [supabaseDataMode, setSupabaseDataMode] = useState(false);
   const [role, setRole] = useState<"customer" | "store" | "courier">("customer");
   const [customerProfile, setCustomerProfile] = useState<CustomerProfile>(customerSeedProfiles[0]);
@@ -387,6 +419,175 @@ export function LumiProvider({ children }: { children: ReactNode }) {
       void refreshOrdersFromSupabase();
     });
   }, [supabaseDataMode, refreshOrdersFromSupabase, role, partnerProfile]);
+
+  useEffect(() => {
+    saveCartToStorage(
+      cartLines.map((l) => ({
+        id: l.id,
+        storeId: l.storeId,
+        storeName: l.storeName,
+        productId: l.productId,
+        productName: l.productName,
+        size: l.size,
+        qty: l.qty,
+        unitPriceKr: l.unitPriceKr,
+        imageUrl: l.imageUrl,
+      })),
+    );
+  }, [cartLines]);
+
+  const cartItemCount = useMemo(
+    () => cartLines.reduce((sum, line) => sum + line.qty, 0),
+    [cartLines],
+  );
+
+  const cartSubtotalKr = useMemo(
+    () => cartLines.reduce((sum, line) => sum + line.unitPriceKr * line.qty, 0),
+    [cartLines],
+  );
+
+  const addToCart = useCallback((line: Omit<CartLine, "id"> & { id?: string }) => {
+    const id = line.id ?? `cart-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+    setCartLines((prev) => [...prev, { ...line, id }]);
+    setCartOpen(true);
+  }, []);
+
+  const updateCartQty = useCallback((lineId: string, qty: number) => {
+    setCartLines((prev) =>
+      prev
+        .map((l) => (l.id === lineId ? { ...l, qty: Math.max(1, qty) } : l))
+        .filter((l) => l.qty > 0),
+    );
+  }, []);
+
+  const removeCartLine = useCallback((lineId: string) => {
+    setCartLines((prev) => prev.filter((l) => l.id !== lineId));
+  }, []);
+
+  const clearCart = useCallback(() => {
+    setCartLines([]);
+  }, []);
+
+  const placeCartOrder = useCallback(async (): Promise<PlaceCartOrderResult> => {
+    if (cartLines.length === 0) {
+      return { ok: false, error: "Kurven er tom." };
+    }
+    const storeIds = new Set(cartLines.map((l) => l.storeId));
+    if (storeIds.size > 1) {
+      return { ok: false, error: "Du kan kun have varer fra én butik ad gangen." };
+    }
+
+    const supabase = getSupabaseOrNull();
+    if (supabase && authUserId) {
+      const items = cartLines.map((l) => ({
+        store_id: l.storeId,
+        product_id: l.productId,
+        size: l.size,
+        qty: l.qty,
+      }));
+      const { data, error } = await supabase.rpc("place_loomy_cart_order", {
+        p_items: items,
+        p_delivery_address: customerProfile.address,
+      });
+      if (error) {
+        const msg =
+          error.message.includes("out_of_stock") || error.message.includes("22000")
+            ? "En vare blev netop udsolgt. Opdater kurven og prøv igen."
+            : error.message.includes("multi_store_cart")
+              ? "Kun én butik pr. ordre."
+              : error.message.includes("not_authenticated") || error.message.includes("28000")
+                ? "Log ind for at gennemføre."
+                : error.message;
+        return { ok: false, error: msg };
+      }
+      const row = data as Record<string, unknown> | null;
+      if (!row || typeof row.id !== "string") {
+        return { ok: false, error: "Uventet svar fra serveren." };
+      }
+      const firstLine = cartLines[0];
+      const order: OrderData = {
+        id: String(row.id),
+        storeId: String(row.storeId),
+        storeName: String(row.storeName),
+        storeAddress: String(row.storeAddress),
+        productId: firstLine.productId,
+        productName:
+          cartLines.length > 1
+            ? `${firstLine.productName} + ${cartLines.length - 1} mere`
+            : firstLine.productName,
+        size: firstLine.size,
+        qty: cartLines.reduce((s, l) => s + l.qty, 0),
+        customerName: String(row.customerName),
+        customerAddress: String(row.customerAddress),
+        nearbyEtaMinutes: Number(row.nearbyEtaMinutes),
+        courierId: row.courierId ? String(row.courierId) : undefined,
+        status: row.status as OrderStatus,
+        createdAt: Number(row.createdAt),
+      };
+      clearCart();
+      setCartOpen(false);
+      void refreshCatalog();
+      void refreshOrdersFromSupabase();
+      return { ok: true, order };
+    }
+
+    const nextStores = stores.map((store) => ({
+      ...store,
+      products: store.products.map((p) => ({ ...p, sizes: { ...p.sizes } })),
+    }));
+    for (const line of cartLines) {
+      const store = nextStores.find((s) => s.id === line.storeId);
+      if (!store) return { ok: false, error: "Butik findes ikke." };
+      const product = store.products.find((p) => p.id === line.productId);
+      if (!product) return { ok: false, error: "Produkt findes ikke." };
+      const stock = product.sizes[line.size];
+      if (stock < line.qty) {
+        return { ok: false, error: "Ikke nok på lager til en vare i kurven." };
+      }
+      product.sizes[line.size] = stock - line.qty;
+    }
+    const availableCourier = couriers.find((c) => c.status === "available");
+    const nextCouriers = couriers.map((c) =>
+      c.id === availableCourier?.id ? { ...c, status: "on_delivery" as const } : c,
+    );
+    const first = cartLines[0];
+    const totalQty = cartLines.reduce((s, l) => s + l.qty, 0);
+    const orderId = `LMI-${Math.floor(Math.random() * 9000) + 1000}`;
+    const lastOrder: OrderData = {
+      id: orderId,
+      storeId: first.storeId,
+      storeName: first.storeName,
+      storeAddress: nextStores.find((s) => s.id === first.storeId)?.address ?? "",
+      productId: first.productId,
+      productName:
+        cartLines.length > 1
+          ? `${first.productName} + ${cartLines.length - 1} mere`
+          : first.productName,
+      size: first.size,
+      qty: totalQty,
+      customerName: customerProfile.name,
+      customerAddress: customerProfile.address,
+      nearbyEtaMinutes: 18 + Math.floor(Math.random() * 20),
+      courierId: availableCourier?.id,
+      status: "order_placed",
+      createdAt: Date.now(),
+    };
+    setStores(nextStores);
+    setCouriers(nextCouriers);
+    setOrders((prev) => [lastOrder, ...prev]);
+    clearCart();
+    setCartOpen(false);
+    return { ok: true, order: lastOrder };
+  }, [
+    authUserId,
+    cartLines,
+    clearCart,
+    customerProfile,
+    couriers,
+    refreshCatalog,
+    refreshOrdersFromSupabase,
+    stores,
+  ]);
 
   const loginAs = useCallback((nextRole: "customer" | "store" | "courier") => {
     setRole(nextRole);
@@ -689,6 +890,7 @@ export function LumiProvider({ children }: { children: ReactNode }) {
       couriers,
       orders,
       supabaseDataMode,
+      authUserId,
       role,
       customerProfile,
       loginAs,
@@ -699,6 +901,16 @@ export function LumiProvider({ children }: { children: ReactNode }) {
       loginAsPartner,
       logout,
       partnerProfile,
+      cartLines,
+      cartOpen,
+      setCartOpen,
+      addToCart,
+      updateCartQty,
+      removeCartLine,
+      clearCart,
+      cartItemCount,
+      cartSubtotalKr,
+      placeCartOrder,
       placeOrder,
       updateStock,
       progressOrderByStore,
@@ -709,6 +921,7 @@ export function LumiProvider({ children }: { children: ReactNode }) {
       couriers,
       orders,
       supabaseDataMode,
+      authUserId,
       role,
       customerProfile,
       loginAs,
@@ -719,6 +932,15 @@ export function LumiProvider({ children }: { children: ReactNode }) {
       loginAsPartner,
       logout,
       partnerProfile,
+      cartLines,
+      cartOpen,
+      addToCart,
+      updateCartQty,
+      removeCartLine,
+      clearCart,
+      cartItemCount,
+      cartSubtotalKr,
+      placeCartOrder,
       placeOrder,
       updateStock,
       progressOrderByStore,
