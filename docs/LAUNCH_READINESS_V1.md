@@ -2,6 +2,8 @@
 
 Use this as a pass/fail gate before production rollout.
 
+For a **module-by-module go/no-go** verdict and a prioritized lift plan, see `docs/GO_NO_GO_REPORT.md`.
+
 ## A. Critical blockers (must pass)
 
 - [ ] Stripe webhooks verified with signature in production.
@@ -38,6 +40,6 @@ Use this as a pass/fail gate before production rollout.
 
 - [x] Unique order numbering and secure order RPCs in Supabase.
 - [x] Supabase-backed catalog/orders in app with graceful demo fallback.
-- [x] Stripe webhook route skeleton + idempotency table SQL (`stripe_events.sql`).
+- [x] Stripe webhook route skeleton + idempotency table SQL (`supabase/stripe_events.sql` → `public.stripe_webhook_events`).
 - [ ] Payment intent creation endpoint (server) with full Connect transfer logic.
 - [ ] Full webhook event handling coverage (refund/dispute/chargeback flows).
