@@ -30,9 +30,14 @@ export default function RootLayout({
   return (
     <html
       lang="da"
+      suppressHydrationWarning
       className={`${inter.variable} ${playfair.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-sans text-stone-900">
+      {/* suppressHydrationWarning: extensions (e.g. Grammarly) mutate body/html attrs before hydration */}
+      <body
+        suppressHydrationWarning
+        className="min-h-full flex flex-col font-sans text-stone-900"
+      >
         <noscript>
           <div className="mx-auto max-w-lg p-6 text-center text-stone-800">
             <p className="font-serif text-lg font-medium">LOOMY kræver JavaScript</p>
