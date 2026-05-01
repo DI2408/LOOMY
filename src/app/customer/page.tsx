@@ -5,14 +5,15 @@
  */
 import { useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { Loader2, Package, Sparkles, UserRound } from "lucide-react";
+import { Check, Loader2, Package, Sparkles, Truck, UserRound } from "lucide-react";
 import { z } from "zod";
 import { LumiHeader } from "@/components/lumi-header";
-import { useLumi } from "@/components/providers/lumi-provider";
+import { useLumi, type OrderData } from "@/components/providers/lumi-provider";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { springSoft } from "@/components/motion-config";
+import { orderTrackingSteps, paymentStatusLabelDa } from "@/lib/loomy/customer-order-ui";
 
 const profileSchema = z.object({
   name: z.string().trim().min(2, "Indtast dit fulde navn."),
@@ -25,6 +26,120 @@ const profileSchema = z.object({
 });
 
 type FieldErrors = Partial<Record<keyof z.infer<typeof profileSchema>, string>>;
+
+function CustomerOrderCard({
+  order,
+  emphasizePayment,
+}: {
+  order: OrderData;
+  emphasizePayment?: boolean;
+}) {
+  const reduceMotion = useReducedMotion();
+  const { steps, activeIndex, paidAwaitingFulfillment } = orderTrackingSteps(order);
+  const payLabel = paymentStatusLabelDa(order.paymentStatus);
+  const lines = order.itemLines ?? [
+    { productId: order.productId, productName: order.productName, size: order.size, qty: order.qty },
+  ];
+  const totalKr = order.totalMinor != null ? Math.round(order.totalMinor / 100) : null;
+
+  return (
+    <Card className="border-[0.5px] border-stone-200/90 bg-white/95 p-4 shadow-sm">
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div>
+          <p className="font-mono text-[11px] font-medium text-stone-500">{order.id}</p>
+          <p className="mt-1 text-sm font-medium text-stone-900">{order.storeName}</p>
+        </div>
+        <div className="flex flex-wrap justify-end gap-1.5">
+          {payLabel ? (
+            <span
+              className={`rounded-full border-[0.5px] px-2.5 py-1 text-[11px] font-medium ${
+                order.paymentStatus === "succeeded"
+                  ? "border-emerald-300/80 bg-emerald-50 text-emerald-900"
+                  : order.paymentStatus === "requires_payment"
+                    ? "border-amber-300/70 bg-amber-50 text-amber-950"
+                    : "border-stone-200 bg-stone-50 text-stone-700"
+              }`}
+            >
+              {payLabel}
+            </span>
+          ) : null}
+          <span className="rounded-full border-[0.5px] border-stone-200 bg-stone-50 px-2.5 py-1 text-[11px] text-stone-700">
+            {order.status.replaceAll("_", " ")}
+          </span>
+        </div>
+      </div>
+
+      {emphasizePayment && paidAwaitingFulfillment ? (
+        <p className="mt-3 rounded-xl border-[0.5px] border-[#7c5a10]/25 bg-[#7c5a10]/8 px-3 py-2 text-xs text-[#5c4308]">
+          Betaling er gennemført — butikken kan nu pakke din ordre.
+        </p>
+      ) : null}
+
+      <div className="mt-4 overflow-x-auto pb-1">
+        <ol className="flex min-w-[min(100%,520px)] gap-1">
+          {steps.map((step, i) => {
+            const done = i < activeIndex;
+            const current = i === activeIndex;
+            return (
+              <motion.li
+                key={step.status}
+                initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ ...springSoft, delay: i * 0.03 }}
+                className="flex min-w-0 flex-1 flex-col items-center gap-1 text-center"
+              >
+                <span
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-[0.5px] text-[11px] font-semibold ${
+                    done
+                      ? "border-emerald-400/80 bg-emerald-50 text-emerald-800"
+                      : current
+                        ? "border-[#7c5a10]/50 bg-[#faf8f5] text-[#6b4f0a]"
+                        : "border-stone-200 bg-white text-stone-400"
+                  }`}
+                >
+                  {done ? <Check size={14} strokeWidth={2.5} /> : i + 1}
+                </span>
+                <span className="text-[9px] font-medium uppercase leading-tight tracking-wide text-stone-500">
+                  {step.label}
+                </span>
+              </motion.li>
+            );
+          })}
+        </ol>
+      </div>
+
+      <div className="mt-4 space-y-2 border-t-[0.5px] border-stone-100 pt-3">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-stone-400">Varer</p>
+        <ul className="space-y-2">
+          {lines.map((line) => (
+            <li
+              key={`${line.productId}-${line.size}`}
+              className="flex items-start justify-between gap-2 text-sm text-stone-800"
+            >
+              <span className="min-w-0">
+                <span className="font-medium">{line.productName}</span>
+                <span className="text-stone-500"> · Str. {line.size}</span>
+              </span>
+              <span className="shrink-0 tabular-nums text-stone-600">×{line.qty}</span>
+            </li>
+          ))}
+        </ul>
+        {totalKr != null ? (
+          <p className="pt-2 text-right text-sm font-semibold tabular-nums text-stone-900">{totalKr} kr</p>
+        ) : null}
+      </div>
+
+      <div className="mt-3 flex flex-wrap items-center gap-3 text-[11px] text-stone-500">
+        <span className="inline-flex items-center gap-1">
+          <Truck size={13} className="text-[#8b6914]" aria-hidden /> ETA ca. {order.nearbyEtaMinutes} min
+        </span>
+        <Button variant="ghost" className="min-h-9 px-2 text-[11px]" href={`/checkout?order_id=${encodeURIComponent(order.id)}`}>
+          Åbn checkout
+        </Button>
+      </div>
+    </Card>
+  );
+}
 
 export default function CustomerPage() {
   const reduceMotion = useReducedMotion();
@@ -146,18 +261,7 @@ export default function CustomerPage() {
           <Card className="space-y-4 border-[0.5px] border-stone-200/90 bg-gradient-to-b from-white to-stone-50/70 p-6">
             <h2 className="font-serif text-xl font-medium">Seneste ordre</h2>
             {latestOrder ? (
-              <div className="space-y-3 rounded-2xl border-[0.5px] border-stone-200 bg-white/90 p-4">
-                <p className="text-sm font-medium text-stone-900">{latestOrder.productName}</p>
-                <p className="text-xs text-stone-600">{latestOrder.storeName}</p>
-                <div className="flex flex-wrap gap-2">
-                  <span className="rounded-full border-[0.5px] border-stone-200 px-2.5 py-1 text-[11px] text-stone-700">
-                    Str. {latestOrder.size}
-                  </span>
-                  <span className="rounded-full border-[0.5px] border-stone-200 px-2.5 py-1 text-[11px] text-stone-700">
-                    Status: {latestOrder.status.replaceAll("_", " ")}
-                  </span>
-                </div>
-              </div>
+              <CustomerOrderCard order={latestOrder} emphasizePayment />
             ) : (
               <div className="rounded-2xl border-[0.5px] border-dashed border-stone-200 bg-stone-50/70 p-5 text-center">
                 <Package className="mx-auto mb-2 text-stone-400" size={26} strokeWidth={1.5} />
@@ -228,17 +332,7 @@ export default function CustomerPage() {
           ) : (
             <div className="space-y-3">
               {customerOrders.map((order) => (
-                <Card key={order.id} className="border-[0.5px] border-stone-200/90 bg-white/95 p-4">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="text-sm font-medium text-stone-900">{order.productName}</p>
-                    <span className="rounded-full border-[0.5px] border-stone-200 px-2.5 py-1 text-[11px] text-stone-700">
-                      {order.id}
-                    </span>
-                  </div>
-                  <p className="mt-1 text-xs text-stone-600">
-                    {order.storeName} · Str. {order.size} · Antal {order.qty}
-                  </p>
-                </Card>
+                <CustomerOrderCard key={order.id} order={order} />
               ))}
             </div>
           )}

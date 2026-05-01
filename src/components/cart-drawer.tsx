@@ -14,7 +14,12 @@ import { springSoft } from "@/components/motion-config";
 
 const drawerSpring = { type: "spring" as const, stiffness: 420, damping: 36 };
 
-export function CartDrawer() {
+type CartDrawerProps = {
+  /** Close overlapping menus (e.g. header "Mere") when opening cart */
+  onOpen?: () => void;
+};
+
+export function CartDrawer({ onOpen }: CartDrawerProps) {
   const reduceMotion = useReducedMotion();
   const {
     cartOpen,
@@ -37,7 +42,10 @@ export function CartDrawer() {
         type="button"
         whileTap={{ scale: 0.96 }}
         transition={drawerSpring}
-        onClick={() => setCartOpen(true)}
+        onClick={() => {
+          onOpen?.();
+          setCartOpen(true);
+        }}
         className="relative flex min-h-11 min-w-11 items-center justify-center rounded-xl border-[0.5px] border-stone-200/90 bg-white/90 text-stone-800 shadow-sm backdrop-blur-sm transition hover:bg-white"
         aria-label={`Kurv, ${cartItemCount} varer`}
       >

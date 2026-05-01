@@ -73,15 +73,7 @@ export async function POST(request: Request) {
   }
 
   const destination = getStripeConnectAccountIdForStore(o.store_id);
-  if (!destination) {
-    return NextResponse.json(
-      {
-        error:
-          "Butikken har ikke et Stripe Connect-konto-id. Sæt LOOMY_STORE_STRIPE_ACCOUNTS i miljøvariabler.",
-      },
-      { status: 503 },
-    );
-  }
+  const useConnect = Boolean(destination);
 
   const amountMinor = o.total_minor ?? 0;
   if (amountMinor <= 0) {
@@ -103,9 +95,9 @@ export async function POST(request: Request) {
   }
 
   const bps = getApplicationFeeBps();
-  const fee = applicationFeeAmountMinor(amountMinor, bps);
+  const fee = useConnect ? applicationFeeAmountMinor(amountMinor, bps) : 0;
 
-  if (fee >= amountMinor) {
+  if (useConnect && fee >= amountMinor) {
     return NextResponse.json({ error: "Platform fee er for høj i forhold til ordrebeløbet." }, { status: 400 });
   }
 
@@ -118,12 +110,21 @@ export async function POST(request: Request) {
         order_id: orderId,
         user_id: user.id,
         store_id: o.store_id,
+        stripe_mode: useConnect ? "connect" : "platform",
       },
-      payment_intent_data: {
-        application_fee_amount: fee,
-        transfer_data: { destination },
-        metadata: { order_id: orderId, user_id: user.id },
-      },
+      ...(useConnect && destination
+        ? {
+            payment_intent_data: {
+              application_fee_amount: fee,
+              transfer_data: { destination },
+              metadata: { order_id: orderId, user_id: user.id },
+            },
+          }
+        : {
+            payment_intent_data: {
+              metadata: { order_id: orderId, user_id: user.id, stripe_mode: "platform" },
+            },
+          }),
       line_items: [
         {
           quantity: 1,
@@ -142,13 +143,14 @@ export async function POST(request: Request) {
       .from("payments")
       .update({
         stripe_checkout_session_id: session.id,
-        stripe_connect_account_id: destination,
+        stripe_connect_account_id: useConnect ? destination : null,
         status: "processing",
         updated_at: new Date().toISOString(),
         metadata: {
           checkout_session_id: session.id,
-          application_fee_minor: fee,
-          platform_fee_bps: bps,
+          ...(useConnect
+            ? { application_fee_minor: fee, platform_fee_bps: bps }
+            : { stripe_checkout_mode: "platform" }),
         },
       })
       .eq("order_id", orderId);

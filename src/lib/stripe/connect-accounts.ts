@@ -3,6 +3,9 @@
  * Set in env as JSON: LOOMY_STORE_STRIPE_ACCOUNTS={"strom-boutique":"acct_xxx",...}
  */
 export function getStripeConnectAccountIdForStore(storeId: string): string | null {
+  if (process.env.LOOMY_STRIPE_PLATFORM_ONLY === "true") {
+    return null;
+  }
   const raw = process.env.LOOMY_STORE_STRIPE_ACCOUNTS?.trim();
   if (!raw) return null;
   try {
@@ -12,6 +15,11 @@ export function getStripeConnectAccountIdForStore(storeId: string): string | nul
   } catch {
     return null;
   }
+}
+
+/** True when Connect destination charges are configured for this store. */
+export function hasStripeConnectForStore(storeId: string): boolean {
+  return getStripeConnectAccountIdForStore(storeId) !== null;
 }
 
 /** Platform fee in basis points (1 bp = 0.01%). Default 100 = 1%. */

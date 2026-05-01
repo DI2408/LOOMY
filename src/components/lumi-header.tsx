@@ -145,7 +145,7 @@ export function LumiHeader() {
         </div>
 
         <div className="relative flex shrink-0 items-center gap-2">
-          <CartDrawer />
+          <CartDrawer onOpen={() => setMenuOpen(false)} />
           <Button
             variant="secondary"
             className="min-h-11 border-[0.5px] border-stone-200 bg-white px-3 font-medium !text-stone-900 shadow-sm md:px-4"

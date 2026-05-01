@@ -58,6 +58,13 @@ export type CourierData = {
   status: "available" | "on_delivery";
 };
 
+export type OrderLineSummary = {
+  productId: string;
+  productName: string;
+  size: string;
+  qty: number;
+};
+
 export type OrderData = {
   id: string;
   storeId: string;
@@ -73,6 +80,11 @@ export type OrderData = {
   status: OrderStatus;
   courierId?: string;
   createdAt: number;
+  /** Multiple lines when order came from cart / RPC */
+  itemLines?: OrderLineSummary[];
+  /** Payment row status when loaded from Supabase */
+  paymentStatus?: string | null;
+  totalMinor?: number | null;
 };
 
 export type PartnerRole = "store" | "courier";
@@ -455,7 +467,17 @@ export function LumiProvider({ children }: { children: ReactNode }) {
 
   const addToCart = useCallback((line: Omit<CartLine, "id"> & { id?: string }) => {
     const id = line.id ?? `cart-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-    setCartLines((prev) => [...prev, { ...line, id }]);
+    setCartLines((prev) => {
+      const sameKey = (a: CartLine) =>
+        a.storeId === line.storeId && a.productId === line.productId && a.size === line.size;
+      const idx = prev.findIndex(sameKey);
+      if (idx >= 0) {
+        const next = [...prev];
+        next[idx] = { ...next[idx], qty: next[idx].qty + line.qty };
+        return next;
+      }
+      return [...prev, { ...line, id }];
+    });
     setCartOpen(true);
   }, []);
 
