@@ -16,6 +16,11 @@ import { demoFallbackCouriers, demoFallbackStores } from "@/lib/loomy/demo-fallb
 import { demoFallbackOrders } from "@/lib/loomy/demo-fallback-orders";
 import { fetchOrdersForContext } from "@/lib/loomy/orders";
 import { loadCartFromStorage, saveCartToStorage } from "@/lib/loomy/cart-storage";
+import {
+  clearDemoCheckoutSnapshot,
+  loadDemoCheckoutSnapshot,
+  saveDemoCheckoutSnapshot,
+} from "@/lib/loomy/demo-checkout-storage";
 
 export type SizeKey = "XS" | "S" | "M" | "L";
 export type OrderStatus =
@@ -137,6 +142,8 @@ type LumiContextValue = {
   cartItemCount: number;
   cartSubtotalKr: number;
   placeCartOrder: () => Promise<PlaceCartOrderResult>;
+  /** Demo/local orders only: advance order after simulated payment. */
+  markDemoOrderPaid: (orderId: string) => void;
   placeOrder: (params: { storeId: string; productId: string; size: SizeKey }) => Promise<PlaceOrderResult>;
   updateStock: (params: {
     storeId: string;
@@ -468,6 +475,17 @@ export function LumiProvider({ children }: { children: ReactNode }) {
     setCartLines([]);
   }, []);
 
+  const markDemoOrderPaid = useCallback((orderId: string) => {
+    const snap = loadDemoCheckoutSnapshot();
+    if (!snap || snap.orderId !== orderId || snap.status !== "order_placed") return;
+    saveDemoCheckoutSnapshot({ ...snap, status: "store_packing" });
+    setOrders((prev) =>
+      prev.map((o) =>
+        o.id === orderId ? { ...o, status: "store_packing" as OrderStatus } : o,
+      ),
+    );
+  }, []);
+
   const placeCartOrder = useCallback(async (): Promise<PlaceCartOrderResult> => {
     if (cartLines.length === 0) {
       return { ok: false, error: "Kurven er tom." };
@@ -485,19 +503,29 @@ export function LumiProvider({ children }: { children: ReactNode }) {
         size: l.size,
         qty: l.qty,
       }));
+      clearDemoCheckoutSnapshot();
       const { data, error } = await supabase.rpc("place_loomy_cart_order", {
         p_items: items,
         p_delivery_address: customerProfile.address,
       });
       if (error) {
+        const raw = error.message ?? "";
+        const code = error.code ?? "";
         const msg =
-          error.message.includes("out_of_stock") || error.message.includes("22000")
+          raw.includes("out_of_stock") || code === "22000" || raw.includes("22000")
             ? "En vare blev netop udsolgt. Opdater kurven og prøv igen."
-            : error.message.includes("multi_store_cart")
+            : raw.includes("multi_store_cart")
               ? "Kun én butik pr. ordre."
-              : error.message.includes("not_authenticated") || error.message.includes("28000")
+              : raw.includes("not_authenticated") || raw.includes("28000") || code === "28000"
                 ? "Log ind for at gennemføre."
-                : error.message;
+                : raw.includes("place_loomy_cart_order") ||
+                    raw.includes("42883") ||
+                    raw.toLowerCase().includes("function") ||
+                    raw.toLowerCase().includes("does not exist")
+                  ? "SQL-funktionen place_loomy_cart_order mangler i databasen. Kør supabase/loomy_cart_order.sql i Supabase."
+                  : raw.includes("invalid_address") || raw.includes("22023")
+                    ? "Udfyld en gyldig leveringsadresse under Mit LOOMY."
+                    : raw;
         return { ok: false, error: msg };
       }
       const row = data as Record<string, unknown> | null;
@@ -575,6 +603,25 @@ export function LumiProvider({ children }: { children: ReactNode }) {
     setStores(nextStores);
     setCouriers(nextCouriers);
     setOrders((prev) => [lastOrder, ...prev]);
+    saveDemoCheckoutSnapshot({
+      orderId: lastOrder.id,
+      storeId: lastOrder.storeId,
+      storeName: lastOrder.storeName,
+      deliveryAddress: customerProfile.address,
+      status: "order_placed",
+      lines: cartLines.map((l) => ({
+        id: l.id,
+        storeId: l.storeId,
+        storeName: l.storeName,
+        productId: l.productId,
+        productName: l.productName,
+        size: l.size,
+        qty: l.qty,
+        unitPriceKr: l.unitPriceKr,
+        imageUrl: l.imageUrl,
+      })),
+      subtotalKr: cartLines.reduce((s, l) => s + l.unitPriceKr * l.qty, 0),
+    });
     clearCart();
     setCartOpen(false);
     return { ok: true, order: lastOrder };
@@ -911,6 +958,7 @@ export function LumiProvider({ children }: { children: ReactNode }) {
       cartItemCount,
       cartSubtotalKr,
       placeCartOrder,
+      markDemoOrderPaid,
       placeOrder,
       updateStock,
       progressOrderByStore,
@@ -941,6 +989,7 @@ export function LumiProvider({ children }: { children: ReactNode }) {
       cartItemCount,
       cartSubtotalKr,
       placeCartOrder,
+      markDemoOrderPaid,
       placeOrder,
       updateStock,
       progressOrderByStore,

@@ -4,6 +4,7 @@
  * LOOMY cart: glass drawer, spring motion, thumb-friendly controls.
  */
 import Image from "next/image";
+import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Loader2, Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
 import { useState } from "react";
@@ -192,9 +193,7 @@ export function CartDrawer() {
                         return;
                       }
                       setCartOpen(false);
-                      if (supabaseDataMode) {
-                        window.location.href = `/checkout?order_id=${encodeURIComponent(res.order.id)}`;
-                      }
+                      window.location.href = `/checkout?order_id=${encodeURIComponent(res.order.id)}`;
                     }}
                   >
                     {busy ? (
@@ -209,12 +208,20 @@ export function CartDrawer() {
                   <p className="mt-2 text-center text-[11px] text-stone-500">
                     {supabaseDataMode ? (
                       authUserId ? (
-                        "Du sendes til en sikker betalingsside efter ordre er oprettet."
+                        "Du sendes til checkout — betal med Stripe eller fuldfør demo."
                       ) : (
-                        "Log ind som kunde for at betale med Stripe."
+                        <span className="block">
+                          Log ind som kunde for at betale med Stripe.{" "}
+                          <Link
+                            href={`/login/customer?next=${encodeURIComponent("/shopping")}`}
+                            className="font-medium text-[#6b4f0a] underline-offset-2 hover:underline"
+                          >
+                            Gå til login
+                          </Link>
+                        </span>
                       )
                     ) : (
-                      "Demo: ordre oprettes lokalt uden Stripe."
+                      "Demo uden Supabase: checkout med simuleret betaling."
                     )}
                   </p>
                 </div>
