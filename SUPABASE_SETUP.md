@@ -57,6 +57,19 @@ Each dashboard is role-specific:
 
 ## 5) Database setup (required)
 
+### Option A — Supabase CLI (same migrations as repo)
+
+From project root after installing [Supabase CLI](https://supabase.com/docs/guides/cli):
+
+```bash
+npx supabase link --project-ref <your-project-ref>
+npm run supabase:migrate:remote
+```
+
+Migrations live in **`supabase/migrations/`** (ordered timestamps); see **`supabase/MIGRATION_ORDER.md`**.
+
+### Option B — SQL Editor (manual)
+
 1. Open Supabase SQL Editor.
 2. Paste and run `supabase/partner_profiles.sql`.
 3. Paste and run `supabase/customer_profiles.sql`.

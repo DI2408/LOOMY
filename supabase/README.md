@@ -2,6 +2,17 @@
 
 ## 1. Opret tabeller + RLS
 
+### Valg A — CLI (`supabase db push`)
+
+Filerne ligger også som **`supabase/migrations/*.sql`** i korrekt rækkefølge. Fra projektroden:
+
+```bash
+npx supabase link    # én gang pr. maskine/projekt
+npm run supabase:migrate:remote
+```
+
+### Valg B — SQL Editor
+
 I **Supabase SQL Editor** kør **i denne rækkefølge** (se også `MIGRATION_ORDER.md`):
 
 1. `partner_profiles.sql`

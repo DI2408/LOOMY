@@ -1,5 +1,19 @@
 # LOOMY Supabase — migration order
 
+## Supabase CLI (recommended)
+
+The same SQL is versioned under **`supabase/migrations/`** with timestamps so you can:
+
+1. Install CLI: [Supabase CLI](https://supabase.com/docs/guides/cli).
+2. Link the repo to your project: `npm run supabase:link` (or `npx supabase link`).
+3. Push migrations to the linked remote database: `npm run supabase:migrate:remote` (`supabase db push`).
+
+Local Docker stack (optional): `npm run supabase:start` then `npm run supabase:db:reset` applies all migrations.
+
+---
+
+## SQL Editor (manual)
+
 Run these SQL files **in order** in the Supabase SQL Editor on a **fresh** project (or read upgrade notes below).
 
 1. `partner_profiles.sql` — butik + bud mapping (`partner_profiles`)
@@ -11,6 +25,8 @@ Run these SQL files **in order** in the Supabase SQL Editor on a **fresh** proje
 7. `loomy_cart_order.sql` — **kurv**: én ordre med flere `order_items` + én `payments`-række (kræves for checkout med flere varer)
 
 I **Supabase → Database → Replication** skal du typisk aktivere realtime for `public.orders` og `public.product_inventory`, hvis klienten skal opdatere live.
+
+Root-folderfiler (`partner_profiles.sql` osv.) og **`supabase/migrations/`** er kopier af hinanden ved release — ved ændringer opdater først **`supabase/migrations/`**-filerne og kopiér derefter til roden (eller kun migrations hvis du udelukkende bruger CLI).
 
 ## Efter kørsel
 

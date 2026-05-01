@@ -9,7 +9,12 @@
     "postbuild": "node scripts/verify-site.mjs",
     "start": "next start -H 0.0.0.0 -p 3000",
     "verify:site": "node scripts/verify-site.mjs",
-    "lint": "eslint"
+    "lint": "eslint",
+    "supabase:start": "npx --yes supabase@latest start",
+    "supabase:stop": "npx --yes supabase@latest stop",
+    "supabase:db:reset": "npx --yes supabase@latest db reset",
+    "supabase:migrate:remote": "npx --yes supabase@latest db push",
+    "supabase:link": "npx --yes supabase@latest link"
   },
   "dependencies": {
     "@splinetool/react-spline": "^4.1.0",
