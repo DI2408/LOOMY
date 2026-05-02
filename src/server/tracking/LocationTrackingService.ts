@@ -1,4 +1,4 @@
-import { getSocketIoServer } from "@/server/socket/ioBridge";
+import { LoomyEvents, emitLoomyEvent } from "@/lib/events";
 import type { OrderManagerRepository } from "@/server/orders/orderManagerRepository";
 import type { StoreOrderDetailsJson } from "@/server/events/orderPaidEvents";
 import { getETACalculator } from "./etaCalculator";
@@ -84,34 +84,27 @@ export class LocationTrackingService {
         lastPushLat: lat,
         lastPushLng: lng,
       });
-      const io = getSocketIoServer();
-      if (io) {
-        const payloadBase = {
+      const ts = new Date().toISOString();
+      const etaCalc = getETACalculator();
+      for (const order of active) {
+        const customer = readCustomerLocationFromOrderDetails(
+          order.orderDetails as StoreOrderDetailsJson
+        );
+        let etaPhrase: string | undefined;
+        if (customer && shouldRefreshEta(order.id, { lat, lng })) {
+          etaPhrase = await etaCalc.getEtaPhrase({ lat, lng }, customer);
+          setCachedEtaPhrase(order.id, etaPhrase);
+        } else {
+          etaPhrase = getCachedEtaPhrase(order.id);
+        }
+        emitLoomyEvent(LoomyEvents.COURIER_LOCATION_UPDATE, {
+          orderId: order.id,
           courierId,
           lat,
           lng,
-          ts: new Date().toISOString(),
-        };
-        const etaCalc = getETACalculator();
-        for (const order of active) {
-          const customer = readCustomerLocationFromOrderDetails(
-            order.orderDetails as StoreOrderDetailsJson
-          );
-          let etaPhrase: string | undefined;
-          if (customer && shouldRefreshEta(order.id, { lat, lng })) {
-            etaPhrase = await etaCalc.getEtaPhrase(
-              { lat, lng },
-              customer
-            );
-            setCachedEtaPhrase(order.id, etaPhrase);
-          } else {
-            etaPhrase = getCachedEtaPhrase(order.id);
-          }
-          io.to(`order:${order.id}`).emit("location_update", {
-            ...payloadBase,
-            ...(etaPhrase ? { etaPhrase } : {}),
-          });
-        }
+          ts,
+          etaPhrase,
+        });
       }
     }
 

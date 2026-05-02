@@ -1,6 +1,6 @@
 /**
- * LOOMY service facade — order lifecycle orchestration (server-only).
- * Delegates to `src/server/orders`; use from Route Handlers, Server Actions, or agents.
+ * LOOMY service facade — order lifecycle (server-only).
+ * Emits on `@/lib/events` bus: ORDER_PAID, ORDER_READY_FOR_PICKUP, ORDER_DELIVERED (via OrderManager hooks).
  */
 
 import { getOrderManager } from "@/server/courier/courierDispatchSingleton";

@@ -3,13 +3,11 @@ export async function register(): Promise<void> {
     return;
   }
   try {
-    const { getCourierDispatchSystem } = await import(
-      "@/server/courier/courierDispatchSingleton"
-    );
-    getCourierDispatchSystem().listen();
+    const { registerAllLoomyAgents } = await import("@/services/orchestrationAgent");
+    registerAllLoomyAgents();
   } catch (err) {
     console.warn(
-      "[loomy] CourierDispatchSystem not started (check Supabase service env).",
+      "[LOOMY] agent orchestration not started (check Supabase / env).",
       err
     );
   }

@@ -1,5 +1,5 @@
 import { createServiceSupabase } from "@/lib/supabase/service";
-import { emitOrderReadyForPickup } from "@/server/events/orderReadyEvents";
+import { LoomyEvents, emitLoomyEvent, orderRowToSnapshot } from "@/lib/events";
 import { OrderManager, createNoopOrderManagerAgents } from "@/server/orders/OrderManager";
 import {
   createSupabaseOrderManagerRepository,
@@ -44,8 +44,17 @@ export function getOrderManager(): OrderManager {
   const noop = createNoopOrderManagerAgents();
   orderManager = new OrderManager(repo, {
     ...noop,
+    onOrderPaid: async (orderId) => {
+      const row = await repo.getById(orderId);
+      if (!row) return;
+      emitLoomyEvent(LoomyEvents.ORDER_PAID, { order: orderRowToSnapshot(row) });
+      console.info(`[LOOMY OrderManager] relay ORDER_PAID order=${orderId}`);
+    },
     notifyCourierSystem: async (orderId) => {
-      emitOrderReadyForPickup({ orderId });
+      emitLoomyEvent(LoomyEvents.ORDER_READY_FOR_PICKUP, { orderId });
+      console.info(
+        `[LOOMY OrderManager] relay ORDER_READY_FOR_PICKUP order=${orderId}`
+      );
     },
     onOutForDelivery: async (orderId) => {
       const ioMod = await import("@/server/socket/ioBridge");
@@ -64,11 +73,13 @@ export function getOrderManager(): OrderManager {
         const { getPayoutOrchestrator } = await import("@/server/payout/payoutSingleton");
         const result = await getPayoutOrchestrator().onOrderDelivered(row);
         console.info(
-          `[loomy] payout ${orderId}: store=${result.breakdown.storeNetMinorUnits} courier=${result.breakdown.courierHonorariumMinorUnits} loomy=${result.breakdown.loomyCommissionMinorUnits} stripe=${result.stripe.storeTransferId ?? "—"}/${result.stripe.courierTransferId ?? "—"}`
+          `[LOOMY payout] ${orderId}: store=${result.breakdown.storeNetMinorUnits} courier=${result.breakdown.courierHonorariumMinorUnits} loomy=${result.breakdown.loomyCommissionMinorUnits} stripe=${result.stripe.storeTransferId ?? "—"}/${result.stripe.courierTransferId ?? "—"}`
         );
       } catch (e) {
-        console.error("[loomy] payout orchestration failed", orderId, e);
+        console.error("[LOOMY payout] orchestration failed", orderId, e);
       }
+      emitLoomyEvent(LoomyEvents.ORDER_DELIVERED, { orderId });
+      console.info(`[LOOMY OrderManager] relay ORDER_DELIVERED order=${orderId}`);
     },
   });
   return orderManager;

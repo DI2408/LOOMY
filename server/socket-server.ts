@@ -29,6 +29,15 @@ async function main(): Promise<void> {
 
   setSocketIoServer(io);
 
+  try {
+    const { registerAllLoomyAgents } = await import(
+      "../src/services/orchestrationAgent"
+    );
+    registerAllLoomyAgents();
+  } catch (e) {
+    console.warn("[LOOMY] registerAllLoomyAgents failed", e);
+  }
+
   io.on("connection", (socket) => {
     socket.on("join_order", (orderId: unknown) => {
       if (typeof orderId === "string" && orderId.length > 0) {

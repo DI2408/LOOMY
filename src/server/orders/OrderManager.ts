@@ -12,6 +12,8 @@ import {
 export type OrderManagerAgentHooks = {
   sendCustomerConfirmation: (orderId: string) => Promise<void>;
   notifyStoreAgent: (orderId: string) => Promise<void>;
+  /** Fired after DB transition to `paid` — use for ORDER_PAID bus. */
+  onOrderPaid?: (orderId: string) => Promise<void>;
   notifyCourierSystem: (orderId: string) => Promise<void>;
   /** After store hands package to courier — enables live tracking. */
   onOutForDelivery: (orderId: string) => Promise<void>;
@@ -67,6 +69,7 @@ export class OrderManager {
 
     await this.agents.sendCustomerConfirmation(orderId);
     await this.agents.notifyStoreAgent(orderId);
+    await this.agents.onOrderPaid?.(orderId);
 
     return updated;
   }
@@ -180,6 +183,7 @@ export function createNoopOrderManagerAgents(): OrderManagerAgentHooks {
   return {
     sendCustomerConfirmation: async () => {},
     notifyStoreAgent: async () => {},
+    onOrderPaid: undefined,
     notifyCourierSystem: async () => {},
     onOutForDelivery: async () => {},
     onOrderDelivered: async () => {},

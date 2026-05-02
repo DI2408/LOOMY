@@ -1,5 +1,5 @@
+import { LoomyEvents, emitLoomyEvent } from "@/lib/events";
 import type { StoreOrderDetailsJson } from "@/server/events/orderPaidEvents";
-import { subscribeOrderReadyForPickup } from "@/server/events/orderReadyEvents";
 import type { OrderManagerRepository } from "@/server/orders/orderManagerRepository";
 import type { OrderManagerRow } from "@/server/orders/orderManagerTypes";
 import { OrderClaimError } from "@/server/orders/orderManagerTypes";
@@ -17,7 +17,6 @@ export class CourierDispatchSystem {
   private readonly orders: OrderManagerRepository;
   private readonly couriers: CourierRepository;
   private readonly maxRadiusKm: number;
-  private unsubscribe: (() => void) | null = null;
 
   constructor(deps: CourierDispatchSystemDeps) {
     this.orders = deps.orders;
@@ -25,17 +24,10 @@ export class CourierDispatchSystem {
     this.maxRadiusKm = deps.maxRadiusKm ?? 15;
   }
 
-  listen(): void {
-    if (this.unsubscribe) return;
-    this.unsubscribe = subscribeOrderReadyForPickup((p) => {
-      void this.broadcastOrderToCouriers(p.orderId);
-    });
-  }
+  /** @deprecated Brug `registerCourierDispatchAgent` + LOOMY bus. */
+  listen(): void {}
 
-  stop(): void {
-    this.unsubscribe?.();
-    this.unsubscribe = null;
-  }
+  stop(): void {}
 
   async broadcastOrderToCouriers(orderId: string): Promise<{
     order: OrderManagerRow;
@@ -57,6 +49,17 @@ export class CourierDispatchSystem {
       order.orderDetails as StoreOrderDetailsJson,
       this.maxRadiusKm
     );
+
+    if (eligible.length === 0) {
+      emitLoomyEvent(LoomyEvents.ORDER_DISPATCH_FAILED, {
+        orderId,
+        reason: "no_eligible_couriers",
+        eligibleCourierCount: 0,
+      });
+      console.warn(
+        `[LOOMY courier] ORDER_DISPATCH_FAILED order=${orderId} (0 eligible couriers)`
+      );
+    }
 
     const payload = {
       orderId: order.id,
@@ -127,6 +130,15 @@ export class CourierDispatchSystem {
       courierId,
       status: claimed.status,
     });
+
+    emitLoomyEvent(LoomyEvents.COURIER_ASSIGNED, {
+      orderId: claimed.id,
+      courierId,
+      status: claimed.status,
+    });
+    console.info(
+      `[LOOMY courier] COURIER_ASSIGNED order=${claimed.id} courier=${courierId}`
+    );
 
     return claimed;
   }

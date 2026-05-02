@@ -1,6 +1,7 @@
 import type { StoreOrderDetailsJson } from "@/server/events/orderPaidEvents";
 import type { OrderManagerRow } from "@/server/orders/orderManagerTypes";
 import { calculatePayoutBreakdown } from "./payoutCalculator";
+import { applyDefaultSplitIfUnset } from "./defaultOrderSplit";
 import type { PayoutBreakdown } from "./payoutTypes";
 import type { StripeConnectPayoutGateway } from "./stripeConnectPayoutGateway";
 
@@ -36,7 +37,13 @@ export class PayoutOrchestrator {
   constructor(private readonly deps: PayoutOrchestratorDeps) {}
 
   async onOrderDelivered(order: OrderManagerRow): Promise<OrderDeliveredPayoutResult> {
-    const details = order.orderDetails as StoreOrderDetailsJson;
+    const detailsBefore = order.orderDetails as StoreOrderDetailsJson;
+    const details = applyDefaultSplitIfUnset(detailsBefore);
+    if (details !== detailsBefore) {
+      console.info(
+        `[LOOMY payout] order ${order.id} applied default 80/15/5 split on total`
+      );
+    }
     const breakdown = calculatePayoutBreakdown(details);
 
     const storeStripeAccountId =
