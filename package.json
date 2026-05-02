@@ -2,6 +2,9 @@
   "name": "loomy",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "scripts": {
     "cursor:sync": "node scripts/sync-loomy-cursor.mjs",
     "dev": "next dev",
@@ -28,6 +31,10 @@
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
     "stripe": "^18.0.0"
+  },
+  "optionalDependencies": {
+    "@tailwindcss/oxide-linux-x64-gnu": "4.2.4",
+    "@tailwindcss/oxide-linux-x64-musl": "4.2.4"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

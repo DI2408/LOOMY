@@ -24,7 +24,7 @@ export function LumiHeader() {
           className="flex h-12 w-12 items-center justify-center rounded-xl border border-slate-200 bg-white shadow-sm"
         >
           <Image
-            src="/loomy-logo.png"
+            src="/loomy-logo.svg"
             alt="LOOMY logo"
             width={40}
             height={40}
