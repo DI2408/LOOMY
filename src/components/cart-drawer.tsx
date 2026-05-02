@@ -36,18 +36,26 @@ export function CartDrawer({ onOpen }: CartDrawerProps) {
   } = useLumi();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
+  const [portalReady, setPortalReady] = useState(false);
 
   useLayoutEffect(() => {
     queueMicrotask(() => {
-      setPortalTarget(document.body);
+      setPortalReady(true);
     });
   }, []);
 
   const drawerLayer = (
     <AnimatePresence>
       {cartOpen ? (
-        <>
+        <motion.div
+          key="loomy-cart-layer"
+          role="presentation"
+          className="pointer-events-none fixed inset-0 z-[2147483000] isolate"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: reduceMotion ? 0.1 : 0.18 }}
+        >
           <motion.button
             type="button"
             aria-label="Luk kurv"
@@ -55,7 +63,7 @@ export function CartDrawer({ onOpen }: CartDrawerProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: reduceMotion ? 0.12 : 0.2 }}
-            className="fixed inset-0 z-[100] bg-stone-900/45 backdrop-blur-[2px]"
+            className="pointer-events-auto absolute inset-0 bg-stone-900/45 backdrop-blur-[2px]"
             onClick={() => setCartOpen(false)}
           />
           <motion.aside
@@ -66,7 +74,7 @@ export function CartDrawer({ onOpen }: CartDrawerProps) {
             animate={{ x: 0, opacity: 1 }}
             exit={reduceMotion ? { x: "100%" } : { x: "100%", opacity: 0.98 }}
             transition={drawerSpring}
-            className="fixed inset-y-0 right-0 z-[110] flex w-full max-w-md flex-col border-l-[0.5px] border-stone-200/90 bg-[#faf8f5]/95 shadow-[0_0_60px_rgba(28,25,23,0.12)] backdrop-blur-xl"
+            className="pointer-events-auto absolute inset-y-0 right-0 z-10 flex w-full max-w-md flex-col border-l-[0.5px] border-stone-200/90 bg-[#faf8f5]/95 shadow-[0_0_60px_rgba(28,25,23,0.12)] backdrop-blur-xl"
           >
             <div className="flex items-center justify-between border-b-[0.5px] border-stone-200/90 px-5 py-4">
               <div>
@@ -223,7 +231,7 @@ export function CartDrawer({ onOpen }: CartDrawerProps) {
               </div>
             ) : null}
           </motion.aside>
-        </>
+        </motion.div>
       ) : null}
     </AnimatePresence>
   );
@@ -249,7 +257,9 @@ export function CartDrawer({ onOpen }: CartDrawerProps) {
         ) : null}
       </motion.button>
 
-      {portalTarget ? createPortal(drawerLayer, portalTarget) : null}
+      {portalReady && typeof document !== "undefined"
+        ? createPortal(drawerLayer, document.body)
+        : null}
     </>
   );
 }
