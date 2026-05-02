@@ -33,7 +33,17 @@ Include `supabase/loomy_checkout_payments.sql` **after** `loomy_orders_rpc.sql` 
 
 Then run `supabase/loomy_cart_order.sql` so the **shopping cart** can create **one order** with **multiple `order_items`** and a single `payments` row (`place_loomy_cart_order`).
 
-## 3) Stripe Dashboard
+## 3) Stripe Dashboard — payment methods (MobilePay, cards, wallets)
+
+Checkout sessions are created with **`payment_method_types`: `card`, `link`, `mobilepay`** (see `src/lib/stripe/checkout-payment-methods.ts`). Override with env **`LOOMY_CHECKOUT_PAYMENT_METHOD_TYPES`** as a JSON array, e.g. `["card","link","mobilepay"]`.
+
+- **Kort:** always available when `card` is included. **Apple Pay / Google Pay** appear as wallet buttons on Stripe Checkout when the customer’s device and region support them (not a separate type in Checkout).
+- **MobilePay:** enable **MobilePay** under [Settings → Payment methods](https://dashboard.stripe.com/settings/payment_methods) for your platform (and ensure your Stripe account / Connect setup supports it for Denmark).
+- **Link:** enable **Link** in the same place if you want one-click saved details.
+
+Without enabling these methods in the Dashboard (or if your account is not eligible), Stripe may omit them from the Checkout page.
+
+## 4) Stripe Dashboard — webhooks & Connect
 
 1. Create **Connect** accounts for each merchant (or use Connect Onboarding later).
 2. Add webhook endpoint: `https://your-domain.com/api/stripe/webhook`
@@ -46,7 +56,7 @@ Then run `supabase/loomy_cart_order.sql` so the **shopping cart** can create **o
 - `payment_intent.canceled`
 - `charge.refunded`
 
-## 4) Customer flow (shopping)
+## 5) Customer flow (shopping)
 
 1. Customer must be **logged in** (Supabase session).
 2. Add items to **kurv** (header) → **Gå til betaling** → creates order server-side → redirects to **`/checkout?order_id=…`**
@@ -54,7 +64,7 @@ Then run `supabase/loomy_cart_order.sql` so the **shopping cart** can create **o
 4. Success → return to `/checkout?order_id=…&checkout=success`
 5. Cancel → `/checkout?order_id=…&checkout=cancel` (order cancelled + inventory restored server-side).
 
-## 5) Store flow
+## 6) Store flow
 
 After webhook marks `payments.status = succeeded`, the store can slide/accept to move from `order_placed` → `store_packing`.
 

@@ -8,6 +8,7 @@ import {
   getStripeConnectAccountIdForStore,
 } from "@/lib/stripe/connect-accounts";
 import { getUserFromBearerToken } from "@/lib/stripe/supabase-server-auth";
+import { getCheckoutPaymentMethodTypes } from "@/lib/stripe/checkout-payment-methods";
 
 export const runtime = "nodejs";
 
@@ -101,43 +102,75 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Platform fee er for høj i forhold til ordrebeløbet." }, { status: 400 });
   }
 
-  try {
-    const session = await stripe.checkout.sessions.create({
-      mode: "payment",
-      customer_email: user.email ?? undefined,
-      client_reference_id: orderId,
-      metadata: {
-        order_id: orderId,
-        user_id: user.id,
-        store_id: o.store_id,
-        stripe_mode: useConnect ? "connect" : "platform",
-      },
-      ...(useConnect && destination
-        ? {
-            payment_intent_data: {
-              application_fee_amount: fee,
-              transfer_data: { destination },
-              metadata: { order_id: orderId, user_id: user.id },
-            },
-          }
-        : {
-            payment_intent_data: {
-              metadata: { order_id: orderId, user_id: user.id, stripe_mode: "platform" },
-            },
-          }),
-      line_items: [
-        {
-          quantity: 1,
-          price_data: {
-            currency: (o.currency || "dkk").toLowerCase(),
-            unit_amount: amountMinor,
-            product_data: { name: `LOOMY ordre ${orderId}` },
-          },
+  const paymentIntentMetadata = {
+    order_id: orderId,
+    user_id: user.id,
+    stripe_mode: useConnect ? "connect" : "platform",
+  };
+
+  const paymentIntentData =
+    useConnect && destination
+      ? {
+          application_fee_amount: fee,
+          transfer_data: { destination },
+          metadata: paymentIntentMetadata,
+        }
+      : {
+          metadata: paymentIntentMetadata,
+        };
+
+  type SessionCreate = Parameters<typeof stripe.checkout.sessions.create>[0];
+  type PaymentMethodTypes = NonNullable<SessionCreate>["payment_method_types"];
+
+  const baseSessionParams: Omit<NonNullable<SessionCreate>, "payment_method_types"> = {
+    mode: "payment" as const,
+    customer_email: user.email ?? undefined,
+    client_reference_id: orderId,
+    metadata: {
+      order_id: orderId,
+      user_id: user.id,
+      store_id: o.store_id,
+      stripe_mode: useConnect ? "connect" : "platform",
+    },
+    payment_intent_data: paymentIntentData,
+    line_items: [
+      {
+        quantity: 1,
+        price_data: {
+          currency: (o.currency || "dkk").toLowerCase(),
+          unit_amount: amountMinor,
+          product_data: { name: `LOOMY ordre ${orderId}` },
         },
-      ],
-      success_url: `${appUrl}/checkout?order_id=${encodeURIComponent(orderId)}&checkout=success`,
-      cancel_url: `${appUrl}/checkout?order_id=${encodeURIComponent(orderId)}&checkout=cancel`,
-    });
+      },
+    ],
+    success_url: `${appUrl}/checkout?order_id=${encodeURIComponent(orderId)}&checkout=success`,
+    cancel_url: `${appUrl}/checkout?order_id=${encodeURIComponent(orderId)}&checkout=cancel`,
+  };
+
+  try {
+    const primaryTypes = getCheckoutPaymentMethodTypes();
+    let session: Awaited<ReturnType<typeof stripe.checkout.sessions.create>>;
+    try {
+      session = await stripe.checkout.sessions.create({
+        ...baseSessionParams,
+        payment_method_types: primaryTypes as PaymentMethodTypes,
+      });
+    } catch (firstErr) {
+      const msg = firstErr instanceof Error ? firstErr.message : "";
+      const canRetryWithoutMobilePay =
+        primaryTypes.includes("mobilepay") &&
+        (msg.toLowerCase().includes("mobilepay") ||
+          msg.toLowerCase().includes("payment_method_type") ||
+          msg.toLowerCase().includes("not enabled"));
+      if (canRetryWithoutMobilePay) {
+        session = await stripe.checkout.sessions.create({
+          ...baseSessionParams,
+          payment_method_types: ["card", "link"],
+        });
+      } else {
+        throw firstErr;
+      }
+    }
 
     await admin
       .from("payments")

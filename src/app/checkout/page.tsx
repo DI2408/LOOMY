@@ -485,7 +485,8 @@ export default function CheckoutPage() {
                 <div>
                   <p className="text-sm font-medium text-stone-900">Krypteret betaling</p>
                   <p className="mt-1 text-xs leading-relaxed text-stone-600">
-                    Du sendes til Stripe Checkout. LOOMY behandler aldrig kortdata i browseren.
+                    Du sendes til Stripe Checkout med kort, MobilePay og Link. Apple Pay og Google Pay vises som
+                    wallet på Stripe-siden, når din enhed understøtter det. LOOMY gemmer aldrig kortdata.
                   </p>
                 </div>
               </div>
