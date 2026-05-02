@@ -9,7 +9,8 @@
     "build": "next build",
     "start": "next start",
     "start:socket": "NODE_ENV=production tsx server/socket-server.ts",
-    "lint": "eslint"
+    "lint": "eslint",
+    "simulate:order": "tsx scripts/simulate-order-lifecycle.mts"
   },
   "dependencies": {
     "@splinetool/react-spline": "^4.1.0",
