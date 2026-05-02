@@ -24,6 +24,9 @@
 .DS_Store
 *.pem
 
+# Optional: clone DI2408/loomy-cursor-skills here locally (no longer a git submodule; Vercel does not fetch it)
+.cursor/loomy-cursor-skills/
+
 # debug
 npm-debug.log*
 yarn-debug.log*

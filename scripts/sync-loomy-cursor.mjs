@@ -1,6 +1,6 @@
 /**
- * Copies Cursor rules and agent skills from the loomy-cursor-skills submodule
- * into paths Cursor loads: .cursor/rules/ and .cursor/skills/
+ * Copies Cursor rules and agent skills from .cursor/loomy-cursor-skills/
+ * (clone of DI2408/loomy-cursor-skills) into paths Cursor loads.
  *
  * Preserves other folders under .cursor/skills/ (e.g. project-only skills).
  */
@@ -14,7 +14,7 @@ const subRoot = path.join(root, ".cursor", "loomy-cursor-skills");
 
 if (!fs.existsSync(subRoot)) {
   console.error(
-    "Missing .cursor/loomy-cursor-skills. Run:\n  git submodule update --init --recursive",
+    "Missing .cursor/loomy-cursor-skills. Run:\n  git clone https://github.com/DI2408/loomy-cursor-skills.git .cursor/loomy-cursor-skills",
   );
   process.exit(1);
 }

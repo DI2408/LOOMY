@@ -31,23 +31,23 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 
 ## Cursor: LOOMY app + loomy-cursor-skills
 
-This repo stays the **Next.js app** ([LOOMY](https://github.com/DI2408/LOOMY)). Shared Cursor **rules** and **agent skills** live in a separate repo and are wired in as a **git submodule**:
+Shared Cursor **rules** and **agent skills** live in [DI2408/loomy-cursor-skills](https://github.com/DI2408/loomy-cursor-skills). This is **not** a git submodule: Vercel builds do not need it, and submodule fetch warnings/failures on CI are avoided.
 
-- Submodule: [DI2408/loomy-cursor-skills](https://github.com/DI2408/loomy-cursor-skills) at `.cursor/loomy-cursor-skills/`
-
-After clone, initialize the submodule and sync files into the paths Cursor reads:
+**Optional — after clone, for local Cursor only:**
 
 ```bash
-git submodule update --init --recursive
+git clone https://github.com/DI2408/loomy-cursor-skills.git .cursor/loomy-cursor-skills
 npm run cursor:sync
 ```
 
-`npm run cursor:sync` copies `rules/loomy.mdc` → `.cursor/rules/loomy.mdc` and each skill folder from the submodule into `.cursor/skills/<name>/`. Other skill folders under `.cursor/skills/` that only exist in this repo are left unchanged.
-
-When the skills repo updates: `cd .cursor/loomy-cursor-skills && git pull` (or `git submodule update --remote`) then `npm run cursor:sync` from the project root.
+`npm run cursor:sync` copies `rules/loomy.mdc` → `.cursor/rules/loomy.mdc` and each skill folder from that repo into `.cursor/skills/<name>/`. When the skills repo updates: `cd .cursor/loomy-cursor-skills && git pull`, then `npm run cursor:sync` from the project root.
 
 ## Deploy on Vercel
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+### 403 / “Forbidden” on `*.vercel.app`
+
+That usually means **Deployment Protection** (kun team / ikke-logget ind). Åbn URL’en i en browser hvor du er **logget ind på Vercel** med en bruger der er inviteret til teamet, eller brug **Share** på deployment i Vercel-dashboard. Det er som regel **ikke** relateret til git-submodules.
