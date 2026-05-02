@@ -34,8 +34,9 @@ yarn-error.log*
 .env*
 !.env.example
 
-# vercel
-.vercel
+# vercel (commit project.json so team links to prj_YOClJWrq7l1caof99Y7OWbtO5BX0; ignore local auth output)
+.vercel/*
+!.vercel/project.json
 
 # typescript
 *.tsbuildinfo
