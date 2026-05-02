@@ -1,5 +1,13 @@
 import { getSocketIoServer } from "@/server/socket/ioBridge";
 import type { OrderManagerRepository } from "@/server/orders/orderManagerRepository";
+import type { StoreOrderDetailsJson } from "@/server/events/orderPaidEvents";
+import { getETACalculator } from "./etaCalculator";
+import {
+  getCachedEtaPhrase,
+  setCachedEtaPhrase,
+  shouldRefreshEta,
+} from "./etaRefreshPolicy";
+import { readCustomerLocationFromOrderDetails } from "./orderDetailsCoords";
 import { distanceKm } from "./locationEta";
 import { setCourierLocationMemory, type CourierLocationPoint } from "./locationCache";
 
@@ -78,14 +86,31 @@ export class LocationTrackingService {
       });
       const io = getSocketIoServer();
       if (io) {
-        const payload = {
+        const payloadBase = {
           courierId,
           lat,
           lng,
           ts: new Date().toISOString(),
         };
+        const etaCalc = getETACalculator();
         for (const order of active) {
-          io.to(`order:${order.id}`).emit("location_update", payload);
+          const customer = readCustomerLocationFromOrderDetails(
+            order.orderDetails as StoreOrderDetailsJson
+          );
+          let etaPhrase: string | undefined;
+          if (customer && shouldRefreshEta(order.id, { lat, lng })) {
+            etaPhrase = await etaCalc.getEtaPhrase(
+              { lat, lng },
+              customer
+            );
+            setCachedEtaPhrase(order.id, etaPhrase);
+          } else {
+            etaPhrase = getCachedEtaPhrase(order.id);
+          }
+          io.to(`order:${order.id}`).emit("location_update", {
+            ...payloadBase,
+            ...(etaPhrase ? { etaPhrase } : {}),
+          });
         }
       }
     }

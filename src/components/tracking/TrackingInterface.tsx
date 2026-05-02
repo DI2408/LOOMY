@@ -1,10 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Map, { Layer, Marker, Source } from "react-map-gl/mapbox";
 import { io, type Socket } from "socket.io-client";
 import { Store, UserRound, Bike } from "lucide-react";
-import { estimateEtaMinutesClient } from "@/lib/tracking/etaClient";
+import {
+  distanceKmClient,
+  estimateEtaMinutesClient,
+} from "@/lib/tracking/etaClient";
 
 import "mapbox-gl/dist/mapbox-gl.css";
 
@@ -21,7 +24,11 @@ type LocationUpdate = {
   lat: number;
   lng: number;
   ts: string;
+  etaPhrase?: string;
 };
+
+const ETA_POLL_MS = 60_000;
+const ETA_MOVE_KM = 0.25;
 
 function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t;
@@ -66,6 +73,9 @@ export function TrackingInterface({ bootstrap }: { bootstrap: TrackingBootstrap 
   );
 
   const [etaMinutes, setEtaMinutes] = useState<number | null>(null);
+  const [etaPhrase, setEtaPhrase] = useState<string | null>(null);
+  const lastEtaCourierRef = useRef<{ lat: number; lng: number } | null>(null);
+  const lastEtaFetchAtRef = useRef(0);
 
   const tickInterpolation = useCallback(() => {
     setDisplayCourier((prev) => {
@@ -98,6 +108,60 @@ export function TrackingInterface({ bootstrap }: { bootstrap: TrackingBootstrap 
     );
   }, [displayCourier, bootstrap.customerLat, bootstrap.customerLng]);
 
+  const fetchEtaFromServer = useCallback(
+    async (courier: { lat: number; lng: number }, force: boolean) => {
+      const token =
+        typeof window !== "undefined"
+          ? new URLSearchParams(window.location.search).get("token")
+          : null;
+      if (!token) return;
+
+      const now = Date.now();
+      const prev = lastEtaCourierRef.current;
+      const movedKm = prev
+        ? distanceKmClient(prev, courier)
+        : ETA_MOVE_KM + 1;
+      const timeOk = now - lastEtaFetchAtRef.current >= ETA_POLL_MS;
+      if (!force && !timeOk && movedKm < ETA_MOVE_KM) {
+        return;
+      }
+
+      lastEtaCourierRef.current = { ...courier };
+      lastEtaFetchAtRef.current = now;
+
+      try {
+        const res = await fetch("/api/customer/eta", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            orderId: bootstrap.orderId,
+            courierLat: courier.lat,
+            courierLng: courier.lng,
+            token,
+          }),
+        });
+        const data = (await res.json()) as { etaPhrase?: string; error?: string };
+        if (res.ok && data.etaPhrase) {
+          setEtaPhrase(data.etaPhrase);
+        }
+      } catch {
+        // keep previous phrase / local ETA
+      }
+    },
+    [bootstrap.orderId]
+  );
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      void fetchEtaFromServer(displayCourier, true);
+    }, ETA_POLL_MS);
+    return () => window.clearInterval(id);
+  }, [displayCourier, fetchEtaFromServer]);
+
+  useEffect(() => {
+    void fetchEtaFromServer(displayCourier, false);
+  }, [displayCourier, fetchEtaFromServer]);
+
   useEffect(() => {
     if (!token) return;
     const origin =
@@ -113,6 +177,9 @@ export function TrackingInterface({ bootstrap }: { bootstrap: TrackingBootstrap 
         typeof payload?.lng === "number"
       ) {
         targetRef.current = { lat: payload.lat, lng: payload.lng };
+        if (typeof payload.etaPhrase === "string" && payload.etaPhrase.length) {
+          setEtaPhrase(payload.etaPhrase);
+        }
       }
     });
     return () => {
@@ -141,12 +208,18 @@ export function TrackingInterface({ bootstrap }: { bootstrap: TrackingBootstrap 
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 shadow-sm">
-        <p className="text-sm font-medium">
-          ETA til dig:{" "}
-          <span className="text-lg font-bold tabular-nums">
-            {etaMinutes != null ? `${etaMinutes} min` : "—"}
-          </span>
-        </p>
+        <div className="space-y-1">
+          <p className="text-sm font-medium text-slate-800">
+            {etaPhrase ?? "Beregner ankomsttid…"}
+          </p>
+          <p className="text-xs text-slate-500">
+            Grov ETA:{" "}
+            <span className="font-semibold tabular-nums text-slate-700">
+              {etaMinutes != null ? `ca. ${etaMinutes} min` : "—"}
+            </span>{" "}
+            (fallback)
+          </p>
+        </div>
         <p className="text-xs text-slate-500">
           Socket: {socket?.connected ? "forbundet" : "forbinder…"}
         </p>
