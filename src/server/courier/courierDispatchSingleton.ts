@@ -57,6 +57,19 @@ export function getOrderManager(): OrderManager {
         });
       }
     },
+    onOrderDelivered: async (orderId) => {
+      const row = await repo.getById(orderId);
+      if (!row) return;
+      try {
+        const { getPayoutOrchestrator } = await import("@/server/payout/payoutSingleton");
+        const result = await getPayoutOrchestrator().onOrderDelivered(row);
+        console.info(
+          `[loomy] payout ${orderId}: store=${result.breakdown.storeNetMinorUnits} courier=${result.breakdown.courierHonorariumMinorUnits} loomy=${result.breakdown.loomyCommissionMinorUnits} stripe=${result.stripe.storeTransferId ?? "—"}/${result.stripe.courierTransferId ?? "—"}`
+        );
+      } catch (e) {
+        console.error("[loomy] payout orchestration failed", orderId, e);
+      }
+    },
   });
   return orderManager;
 }
