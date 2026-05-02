@@ -141,39 +141,59 @@ export default function Home() {
               <div className="pointer-events-none absolute -bottom-8 left-1/2 h-12 w-2/3 -translate-x-1/2 rounded-full bg-black/40 blur-2xl" />
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-3 lg:col-span-2 lg:grid-cols-3">
-              {[
-                {
-                  label: "Leveringsvindue",
-                  value: "~36 min",
-                  tone: "from-[#faf8f5]/95 to-stone-100/95",
-                },
-                {
-                  label: "Aktive boutiques",
-                  value: `${stores.length}+`,
-                  tone: "from-stone-100/95 to-stone-50/95",
-                },
-                {
-                  label: "Lager",
-                  value: "Live",
-                  tone: "from-amber-50/95 to-[#faf8f5]/95",
-                },
-              ].map((item) => (
-                <div key={item.label} className="min-w-0">
-                  <TiltCard>
-                    <div
-                      className={`rounded-[1.125rem] border border-white/40 bg-gradient-to-br ${item.tone} px-5 py-[1.125rem] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.5),0_12px_32px_rgba(0,0,0,0.28)] ring-1 ring-inset ring-stone-900/[0.06] backdrop-blur-[10px]`}
-                    >
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-stone-700">
-                        {item.label}
-                      </p>
-                      <p className="mt-2 font-serif text-2xl font-semibold tabular-nums tracking-tight text-stone-950">
-                        {item.value}
-                      </p>
+            <div className="relative lg:col-span-2">
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-x-4 -top-px h-px bg-gradient-to-r from-transparent via-[#d4af37]/55 to-transparent md:inset-x-6"
+              />
+              <div className="relative rounded-[1.65rem] border border-white/[0.14] bg-gradient-to-b from-white/[0.09] to-white/[0.02] p-1 shadow-[0_20px_50px_rgba(0,0,0,0.35),inset_0_1px_0_0_rgba(255,255,255,0.12)] ring-1 ring-inset ring-black/25 backdrop-blur-md md:p-1.5">
+                <div className="absolute inset-[1px] rounded-[1.55rem] bg-gradient-to-br from-white/[0.06] via-transparent to-transparent" />
+                <div className="relative grid gap-2.5 p-2 sm:grid-cols-3 sm:gap-3 md:p-2.5 lg:grid-cols-3">
+                  {[
+                    {
+                      label: "Leveringsvindue",
+                      value: "~36 min",
+                      tone: "from-[#faf8f5]/98 to-stone-100/95",
+                      accent: "from-[#c9a227]/90 to-[#8b6914]/75",
+                    },
+                    {
+                      label: "Aktive boutiques",
+                      value: `${stores.length}+`,
+                      tone: "from-stone-50/98 to-[#faf8f5]/92",
+                      accent: "from-stone-400/80 to-stone-600/70",
+                    },
+                    {
+                      label: "Lager",
+                      value: "Live",
+                      tone: "from-amber-50/98 to-[#faf8f5]/95",
+                      accent: "from-amber-400/85 to-[#8b6914]/70",
+                    },
+                  ].map((item) => (
+                    <div key={item.label} className="min-w-0">
+                      <TiltCard>
+                        <div
+                          className={`group relative overflow-hidden rounded-[1.125rem] border border-white/50 bg-gradient-to-br ${item.tone} px-4 py-4 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.65),0_10px_28px_rgba(0,0,0,0.22)] ring-1 ring-inset ring-stone-900/[0.05] backdrop-blur-[8px] md:px-5 md:py-[1.125rem]`}
+                        >
+                          <div
+                            className={`pointer-events-none absolute left-0 top-0 h-full w-[3px] bg-gradient-to-b ${item.accent} opacity-90`}
+                            aria-hidden
+                          />
+                          <div
+                            className="pointer-events-none absolute -right-6 -top-10 h-24 w-24 rounded-full bg-white/25 blur-2xl opacity-60 transition-opacity duration-500 group-hover:opacity-90"
+                            aria-hidden
+                          />
+                          <p className="pl-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-stone-600">
+                            {item.label}
+                          </p>
+                          <p className="mt-2 pl-2 font-serif text-2xl font-semibold tabular-nums tracking-tight text-stone-950 md:text-[1.65rem]">
+                            {item.value}
+                          </p>
+                        </div>
+                      </TiltCard>
                     </div>
-                  </TiltCard>
+                  ))}
                 </div>
-              ))}
+              </div>
             </div>
           </div>
         </section>
