@@ -5,8 +5,10 @@
   "scripts": {
     "cursor:sync": "node scripts/sync-loomy-cursor.mjs",
     "dev": "next dev",
+    "dev:socket": "tsx server/socket-server.ts",
     "build": "next build",
     "start": "next start",
+    "start:socket": "NODE_ENV=production tsx server/socket-server.ts",
     "lint": "eslint"
   },
   "dependencies": {
@@ -14,9 +16,13 @@
     "@supabase/supabase-js": "^2.104.1",
     "framer-motion": "^12.38.0",
     "lucide-react": "^1.11.0",
+    "mapbox-gl": "^3.16.0",
     "next": "16.2.4",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "react-map-gl": "^8.1.0",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -26,6 +32,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
     "tailwindcss": "^4",
+    "tsx": "^4.19.4",
     "typescript": "^5"
   }
 }
