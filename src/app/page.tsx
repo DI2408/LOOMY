@@ -162,12 +162,14 @@ export default function Home() {
                 <div key={item.label} className="min-w-0">
                   <TiltCard>
                     <div
-                      className={`rounded-2xl border-[0.5px] border-white/25 bg-gradient-to-br ${item.tone} p-5 shadow-[0_16px_40px_rgba(12,10,9,0.2)] backdrop-blur-md`}
+                      className={`rounded-[1.125rem] border border-white/40 bg-gradient-to-br ${item.tone} px-5 py-[1.125rem] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.5),0_12px_32px_rgba(0,0,0,0.28)] ring-1 ring-inset ring-stone-900/[0.06] backdrop-blur-[10px]`}
                     >
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-stone-500">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-stone-700">
                         {item.label}
                       </p>
-                      <p className="mt-2 font-serif text-2xl font-medium text-stone-900">{item.value}</p>
+                      <p className="mt-2 font-serif text-2xl font-semibold tabular-nums tracking-tight text-stone-950">
+                        {item.value}
+                      </p>
                     </div>
                   </TiltCard>
                 </div>
@@ -196,15 +198,15 @@ export default function Home() {
           ].map((item) => (
             <TiltCard key={item.title}>
               <motion.div
-                whileHover={reduceMotion ? undefined : { scale: 1.02 }}
-                transition={{ type: "spring", stiffness: 380, damping: 28 }}
+                whileHover={reduceMotion ? undefined : { y: -2 }}
+                transition={{ type: "spring", stiffness: 380, damping: 32 }}
                 className="h-full"
               >
-                <Card className="h-full border-[0.5px] border-stone-200/90 bg-white/90 p-6 text-stone-900 shadow-[0_12px_40px_rgba(28,25,23,0.06)] backdrop-blur-sm">
-                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-[#8b6914]/[0.08]">
+                <Card className="h-full rounded-[1.125rem] border border-stone-200/95 bg-white p-6 text-stone-900 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.95),0_14px_40px_rgba(28,25,23,0.07)] ring-1 ring-stone-900/[0.04]">
+                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl border-[0.5px] border-stone-200/90 bg-[#faf8f5] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.9)]">
                     {item.icon}
                   </div>
-                  <h3 className="font-serif text-xl font-medium tracking-tight">{item.title}</h3>
+                  <h3 className="font-serif text-xl font-medium tracking-tight text-stone-950">{item.title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-stone-600">{item.text}</p>
                 </Card>
               </motion.div>
