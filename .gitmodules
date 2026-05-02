@@ -1,0 +1,3 @@
+[submodule ".cursor/loomy-cursor-skills"]
+	path = .cursor/loomy-cursor-skills
+	url = https://github.com/DI2408/loomy-cursor-skills.git
