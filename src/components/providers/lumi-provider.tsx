@@ -11,68 +11,26 @@ import {
 } from "react";
 import { getSupabaseClient } from "@/lib/supabase/client";
 import { fetchPartnerProfileByEmail } from "@/lib/partner-profiles";
+import {
+  courierAdvanceOrderApi,
+  fetchCatalogFromApi,
+  fetchOrdersFromApi,
+  patchInventoryApi,
+  placeOrderGuestApi,
+  storeAdvanceOrderApi,
+} from "@/lib/loomy-sync";
+import type { CourierData, OrderData, PartnerProfile, SizeKey, StoreData } from "@/types/lumi";
 
-export type SizeKey = "XS" | "S" | "M" | "L";
-export type OrderStatus =
-  | "order_placed"
-  | "store_packing"
-  | "courier_pickup"
-  | "on_the_way"
-  | "delivered";
-
-export type Product = {
-  id: string;
-  name: string;
-  category: "New In" | "Emergency Outfits" | "Shoes" | "Accessories";
-  description: string;
-  imageUrl: string;
-  price: number;
-  sizes: Record<SizeKey, number>;
-};
-
-export type StoreData = {
-  id: string;
-  name: string;
-  neighborhood: string;
-  address: string;
-  etaMinutes: number;
-  rating: number;
-  products: Product[];
-};
-
-export type CourierData = {
-  id: string;
-  name: string;
-  zone: string;
-  etaMinutes: number;
-  status: "available" | "on_delivery";
-};
-
-export type OrderData = {
-  id: string;
-  storeId: string;
-  storeName: string;
-  storeAddress: string;
-  productId: string;
-  productName: string;
-  size: SizeKey;
-  qty: number;
-  customerName: string;
-  customerAddress: string;
-  nearbyEtaMinutes: number;
-  status: OrderStatus;
-  courierId?: string;
-  createdAt: number;
-};
-
-export type PartnerRole = "store" | "courier";
-
-export type PartnerProfile = {
-  role: PartnerRole;
-  storeId?: string;
-  courierId?: string;
-  email: string;
-};
+export type {
+  CourierData,
+  OrderData,
+  OrderStatus,
+  PartnerProfile,
+  PartnerRole,
+  Product,
+  SizeKey,
+  StoreData,
+} from "@/types/lumi";
 
 type LumiContextValue = {
   stores: StoreData[];
@@ -83,15 +41,15 @@ type LumiContextValue = {
   loginAsPartner: (profile: PartnerProfile) => void;
   logout: () => void;
   partnerProfile: PartnerProfile | null;
-  placeOrder: (params: { storeId: string; productId: string; size: SizeKey }) => void;
+  placeOrder: (params: { storeId: string; productId: string; size: SizeKey }) => void | Promise<void>;
   updateStock: (params: {
     storeId: string;
     productId: string;
     size: SizeKey;
     quantity: number;
-  }) => void;
-  progressOrderByStore: (orderId: string) => void;
-  progressOrderByCourier: (orderId: string) => void;
+  }) => void | Promise<void>;
+  progressOrderByStore: (orderId: string) => void | Promise<void>;
+  progressOrderByCourier: (orderId: string) => void | Promise<void>;
 };
 
 const initialStores: StoreData[] = [
@@ -354,6 +312,7 @@ const customerProfiles = [
 
 const initialOrders: OrderData[] = [
   {
+    rowId: "a1000001-0001-4001-8001-000000000001",
     id: "LMI-1201",
     storeId: "strom-boutique",
     storeName: "Strøm Boutique",
@@ -370,6 +329,7 @@ const initialOrders: OrderData[] = [
     createdAt: 1714064400000,
   },
   {
+    rowId: "a1000001-0001-4001-8001-000000000002",
     id: "LMI-1202",
     storeId: "storm-cph",
     storeName: "STORM Copenhagen",
@@ -386,6 +346,7 @@ const initialOrders: OrderData[] = [
     createdAt: 1714060800000,
   },
   {
+    rowId: "a1000001-0001-4001-8001-000000000003",
     id: "LMI-1203",
     storeId: "naked-copenhagen-edit",
     storeName: "Naked Copenhagen Edit",
@@ -402,6 +363,7 @@ const initialOrders: OrderData[] = [
     createdAt: 1714059000000,
   },
   {
+    rowId: "a1000001-0001-4001-8001-000000000004",
     id: "LMI-1204",
     storeId: "wood-wood-city",
     storeName: "WOOD WOOD City",
@@ -418,6 +380,7 @@ const initialOrders: OrderData[] = [
     createdAt: 1714057200000,
   },
   {
+    rowId: "a1000001-0001-4001-8001-000000000005",
     id: "LMI-1205",
     storeId: "birger-et-mikkelsen-house",
     storeName: "Birger et Mikkelsen House",
@@ -437,12 +400,49 @@ const initialOrders: OrderData[] = [
 
 const LumiContext = createContext<LumiContextValue | undefined>(undefined);
 
+function courierAvailabilityFromOrders(orderList: OrderData[]): CourierData[] {
+  const busy = new Set<string>();
+  for (const o of orderList) {
+    if (
+      (o.status === "courier_pickup" || o.status === "on_the_way") &&
+      o.courierId
+    ) {
+      busy.add(o.courierId);
+    }
+  }
+  return initialCouriers.map((c) => ({
+    ...c,
+    status: busy.has(c.id) ? "on_delivery" : "available",
+  }));
+}
+
 export function LumiProvider({ children }: { children: ReactNode }) {
   const [stores, setStores] = useState<StoreData[]>(initialStores);
   const [couriers, setCouriers] = useState<CourierData[]>(initialCouriers);
   const [orders, setOrders] = useState<OrderData[]>(initialOrders);
   const [role, setRole] = useState<"customer" | "store" | "courier">("customer");
   const [partnerProfile, setPartnerProfile] = useState<PartnerProfile | null>(null);
+  const [useBackend, setUseBackend] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    void (async () => {
+      const [catalog, remoteOrders] = await Promise.all([
+        fetchCatalogFromApi(),
+        fetchOrdersFromApi(),
+      ]);
+      if (!mounted) return;
+      if (catalog && remoteOrders) {
+        setStores(catalog);
+        setOrders(remoteOrders);
+        setCouriers(courierAvailabilityFromOrders(remoteOrders));
+        setUseBackend(true);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -501,7 +501,38 @@ export function LumiProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const placeOrder = useCallback(
-    ({ storeId, productId, size }: { storeId: string; productId: string; size: SizeKey }) => {
+    async ({
+      storeId,
+      productId,
+      size,
+    }: {
+      storeId: string;
+      productId: string;
+      size: SizeKey;
+    }) => {
+      if (useBackend) {
+        const customer =
+          customerProfiles[Math.floor(Math.random() * customerProfiles.length)];
+        const placed = await placeOrderGuestApi({
+          store_id: storeId,
+          product_id: productId,
+          size,
+          customer_name: customer.name,
+          customer_address: customer.address,
+        });
+        if (!placed) return;
+        const [nextCatalog, nextOrders] = await Promise.all([
+          fetchCatalogFromApi(),
+          fetchOrdersFromApi(),
+        ]);
+        if (nextCatalog) setStores(nextCatalog);
+        if (nextOrders) {
+          setOrders(nextOrders);
+          setCouriers(courierAvailabilityFromOrders(nextOrders));
+        }
+        return;
+      }
+
       let canPlace = false;
       let selectedStoreName = "";
       let selectedStoreAddress = "";
@@ -554,11 +585,11 @@ export function LumiProvider({ children }: { children: ReactNode }) {
         ...prev,
       ]);
     },
-    [couriers],
+    [couriers, useBackend],
   );
 
   const updateStock = useCallback(
-    ({
+    async ({
       storeId,
       productId,
       size,
@@ -569,6 +600,62 @@ export function LumiProvider({ children }: { children: ReactNode }) {
       size: SizeKey;
       quantity: number;
     }) => {
+      if (useBackend) {
+        try {
+          const supabase = getSupabaseClient();
+          const { data } = await supabase.auth.getSession();
+          const token = data.session?.access_token;
+          if (!token) {
+            setStores((prev) =>
+              prev.map((store) =>
+                store.id === storeId
+                  ? {
+                      ...store,
+                      products: store.products.map((product) =>
+                        product.id === productId
+                          ? {
+                              ...product,
+                              sizes: { ...product.sizes, [size]: Math.max(0, quantity) },
+                            }
+                          : product,
+                      ),
+                    }
+                  : store,
+              ),
+            );
+            return;
+          }
+          const ok = await patchInventoryApi(token, {
+            product_id: productId,
+            size,
+            quantity,
+          });
+          if (ok) {
+            const next = await fetchCatalogFromApi();
+            if (next) setStores(next);
+          }
+        } catch {
+          setStores((prev) =>
+            prev.map((store) =>
+              store.id === storeId
+                ? {
+                    ...store,
+                    products: store.products.map((product) =>
+                      product.id === productId
+                        ? {
+                            ...product,
+                            sizes: { ...product.sizes, [size]: Math.max(0, quantity) },
+                          }
+                        : product,
+                    ),
+                  }
+                : store,
+            ),
+          );
+        }
+        return;
+      }
+
       setStores((prev) =>
         prev.map((store) =>
           store.id === storeId
@@ -587,52 +674,100 @@ export function LumiProvider({ children }: { children: ReactNode }) {
         ),
       );
     },
-    [],
+    [useBackend],
   );
 
-  const progressOrderByStore = useCallback((orderId: string) => {
-    setOrders((prev) =>
-      prev.map((order) => {
-        if (order.id !== orderId) return order;
-        if (order.status === "order_placed") return { ...order, status: "store_packing" };
-        if (order.status === "store_packing") {
-          if (order.courierId) {
-            setCouriers((courierPrev) =>
-              courierPrev.map((courier) =>
-                courier.id === order.courierId
-                  ? { ...courier, status: "on_delivery" }
-                  : courier,
-              ),
-            );
+  const progressOrderByStore = useCallback(
+    async (orderId: string) => {
+      if (useBackend) {
+        try {
+          const supabase = getSupabaseClient();
+          const { data } = await supabase.auth.getSession();
+          const token = data.session?.access_token;
+          if (!token) return;
+          const row = orders.find((o) => o.id === orderId);
+          if (!row?.rowId) return;
+          const next = await storeAdvanceOrderApi(token, row.rowId);
+          if (!next) return;
+          const nextOrders = await fetchOrdersFromApi();
+          if (nextOrders) {
+            setOrders(nextOrders);
+            setCouriers(courierAvailabilityFromOrders(nextOrders));
           }
-          return { ...order, status: "courier_pickup" };
+        } catch {
+          /* keep local state */
         }
-        return order;
-      }),
-    );
-  }, []);
+        return;
+      }
 
-  const progressOrderByCourier = useCallback((orderId: string) => {
-    setOrders((prev) =>
-      prev.map((order) => {
-        if (order.id !== orderId) return order;
-        if (order.status === "courier_pickup") return { ...order, status: "on_the_way" };
-        if (order.status === "on_the_way") {
-          if (order.courierId) {
-            setCouriers((courierPrev) =>
-              courierPrev.map((courier) =>
-                courier.id === order.courierId
-                  ? { ...courier, status: "available" }
-                  : courier,
-              ),
-            );
+      setOrders((prev) =>
+        prev.map((order) => {
+          if (order.id !== orderId) return order;
+          if (order.status === "order_placed") return { ...order, status: "store_packing" };
+          if (order.status === "store_packing") {
+            if (order.courierId) {
+              setCouriers((courierPrev) =>
+                courierPrev.map((courier) =>
+                  courier.id === order.courierId
+                    ? { ...courier, status: "on_delivery" }
+                    : courier,
+                ),
+              );
+            }
+            return { ...order, status: "courier_pickup" };
           }
-          return { ...order, status: "delivered" };
+          return order;
+        }),
+      );
+    },
+    [orders, useBackend],
+  );
+
+  const progressOrderByCourier = useCallback(
+    async (orderId: string) => {
+      if (useBackend) {
+        try {
+          const supabase = getSupabaseClient();
+          const { data } = await supabase.auth.getSession();
+          const token = data.session?.access_token;
+          if (!token) return;
+          const row = orders.find((o) => o.id === orderId);
+          if (!row?.rowId) return;
+          const next = await courierAdvanceOrderApi(token, row.rowId);
+          if (!next) return;
+          const nextOrders = await fetchOrdersFromApi();
+          if (nextOrders) {
+            setOrders(nextOrders);
+            setCouriers(courierAvailabilityFromOrders(nextOrders));
+          }
+        } catch {
+          /* keep local state */
         }
-        return order;
-      }),
-    );
-  }, []);
+        return;
+      }
+
+      setOrders((prev) =>
+        prev.map((order) => {
+          if (order.id !== orderId) return order;
+          if (order.status === "courier_pickup") return { ...order, status: "on_the_way" };
+          if (order.status === "on_the_way") {
+            if (order.courierId) {
+              setCouriers((courierPrev) =>
+                courierPrev.map((courier) =>
+                  courier.id === order.courierId
+                    ? { ...courier, status: "available" }
+                    : courier,
+                ),
+              );
+            }
+            return { ...order, status: "delivered" };
+          }
+          return order;
+        }),
+      );
+    },
+    [orders, useBackend],
+  );
 
   const value = useMemo(
     () => ({

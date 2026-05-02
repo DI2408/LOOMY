@@ -168,7 +168,7 @@ export default function CourierPage() {
                           ? "Slide to confirm pickup"
                           : "Slide to confirm delivery"
                       }
-                      onComplete={() => progressOrderByCourier(order.id)}
+                      onComplete={() => void progressOrderByCourier(order.id)}
                     />
                     {isDeliveryStep ? (
                       <p className="mt-2 text-xs font-semibold text-indigo-600">

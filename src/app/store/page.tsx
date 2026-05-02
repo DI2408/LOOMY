@@ -368,7 +368,7 @@ export default function StorePage() {
                             min={0}
                             value={product.sizes[size]}
                             onChange={(event) =>
-                              updateStock({
+                              void updateStock({
                                 storeId: store.id,
                                 productId: product.id,
                                 size,
@@ -392,7 +392,7 @@ export default function StorePage() {
                           <button
                             type="button"
                             onClick={() =>
-                              updateStock({
+                              void updateStock({
                                 storeId: store.id,
                                 productId: product.id,
                                 size,
@@ -443,7 +443,7 @@ export default function StorePage() {
                             ? "Slide to accept and start packing"
                             : "Slide when order is ready for pickup"
                         }
-                        onComplete={() => progressOrderByStore(order.id)}
+                        onComplete={() => void progressOrderByStore(order.id)}
                       />
                     </div>
                   ))

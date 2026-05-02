@@ -381,7 +381,7 @@ export default function ShoppingPage() {
                   fullWidth
                   onClick={() => {
                     if (!selectedSize) return;
-                    placeOrder({
+                    void placeOrder({
                       storeId: selected.store.id,
                       productId: selected.product.id,
                       size: selectedSize,
