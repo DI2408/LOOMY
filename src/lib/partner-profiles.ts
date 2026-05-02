@@ -1,6 +1,6 @@
 "use client";
 
-import type { PartnerProfile } from "@/components/providers/lumi-provider";
+import type { PartnerProfile } from "@/types/lumi";
 import { getSupabaseClient } from "@/lib/supabase/client";
 
 type PartnerProfileRow = {

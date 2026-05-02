@@ -1,3 +1,5 @@
+-- Superseded by supabase/migrations/20260202120000_loomy_core_marketplace.sql (full LOOMY schema + partner_profiles).
+-- Kept for reference only.
 -- Run this in Supabase SQL Editor
 -- Purpose: role-based partner mapping for Store and Courier logins
 

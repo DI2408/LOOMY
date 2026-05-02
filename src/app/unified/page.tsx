@@ -97,7 +97,7 @@ export default function UnifiedPage() {
                             min={0}
                             value={product.sizes[size]}
                             onChange={(event) =>
-                              updateStock({
+                              void updateStock({
                                 storeId: store.id,
                                 productId: product.id,
                                 size,
@@ -121,7 +121,7 @@ export default function UnifiedPage() {
                   .map((order) => (
                     <div key={order.id} className="mb-2 flex items-center justify-between rounded-lg bg-white p-2">
                       <span className="text-xs">{order.id}</span>
-                      <Button variant="secondary" onClick={() => progressOrderByStore(order.id)}>
+                      <Button variant="secondary" onClick={() => void progressOrderByStore(order.id)}>
                         {order.status === "order_placed" ? "Pack" : "Ready"}
                       </Button>
                     </div>
@@ -149,7 +149,7 @@ export default function UnifiedPage() {
                   .map((order) => (
                     <div key={order.id} className="mb-2 flex items-center justify-between rounded-lg bg-white p-2">
                       <span className="text-xs">{order.id}</span>
-                      <Button variant="secondary" onClick={() => progressOrderByCourier(order.id)}>
+                      <Button variant="secondary" onClick={() => void progressOrderByCourier(order.id)}>
                         {order.status === "courier_pickup" ? "Picked Up" : "Delivered"}
                       </Button>
                     </div>

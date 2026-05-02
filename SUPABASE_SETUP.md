@@ -9,7 +9,11 @@ Create `.env.local` in project root:
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_project_url
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_publishable_key
+# Server only (never NEXT_PUBLIC_*): used by API routes for catalog/orders and guest checkout RPC
+SUPABASE_SECRET_KEY=your_service_role_or_secret_key
 ```
+
+Apply the database migration once (Supabase SQL Editor: paste `supabase/migrations/20260202120000_loomy_core_marketplace.sql`, or `supabase db push` if you use the CLI linked to the project). The legacy `supabase/partner_profiles.sql` is superseded by that migration.
 
 ## 2) Create auth users in Supabase Dashboard
 
