@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { TrackingInterface } from "@/components/tracking/TrackingInterface";
+import { LiveMap } from "@/components/tracking/LiveMap";
 
 type PageProps = {
   params: Promise<{ orderId: string }>;
@@ -75,7 +75,7 @@ export default async function TrackOrderPage({ params, searchParams }: PageProps
       <p className="mb-6 text-sm text-slate-500">
         Ordre <span className="font-mono">{orderId}</span>
       </p>
-      <TrackingInterface
+      <LiveMap
         bootstrap={{
           orderId,
           storeLat: data.storeLat as number,
