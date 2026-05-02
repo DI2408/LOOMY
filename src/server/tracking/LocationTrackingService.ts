@@ -97,7 +97,7 @@ export class LocationTrackingService {
         } else {
           etaPhrase = getCachedEtaPhrase(order.id);
         }
-        emitLoomyEvent(LoomyEvents.COURIER_LOCATION_UPDATE, {
+        emitLoomyEvent(LoomyEvents.COURIER_POSITION_UPDATE, {
           orderId: order.id,
           courierId,
           lat,

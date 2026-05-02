@@ -17,10 +17,8 @@
 import { EventEmitter } from "node:events";
 import { LoomyEvents, loomyEvents } from "../src/lib/events";
 import { registerAllLoomyAgents } from "../src/services/orchestrationAgent";
-import {
-  getCourierDispatchSystem,
-  getOrderManager,
-} from "../src/server/courier/courierDispatchSingleton";
+import { getOrderManager } from "../src/server/courier/courierDispatchSingleton";
+import { acceptOrder } from "../src/services/CourierAgent";
 import { getDeliveryCompletionFlow } from "../src/server/delivery/deliveryCompletionSingleton";
 
 const ORDER_ID =
@@ -72,7 +70,6 @@ async function main(): Promise<void> {
   };
 
   const om = getOrderManager();
-  const dispatch = getCourierDispatchSystem();
   const delivery = getDeliveryCompletionFlow();
 
   console.log("\n▶ registerPendingOrder\n");
@@ -85,11 +82,11 @@ async function main(): Promise<void> {
   console.log("\n▶ transitionToPaid (emits ORDER_PAID)\n");
   await om.transitionToPaid(ORDER_ID);
 
-  console.log("\n▶ transitionToReady (emits ORDER_READY_FOR_PICKUP → broadcast)\n");
+  console.log("\n▶ transitionToReady (emits ORDER_READY → broadcast)\n");
   await om.transitionToReady(ORDER_ID);
 
-  console.log("\n▶ acceptOrder (emits COURIER_ASSIGNED)\n");
-  await dispatch.acceptOrder(COURIER_ID, ORDER_ID);
+  console.log("\n▶ acceptOrder (emits COURIER_CLAIMED)\n");
+  await acceptOrder(COURIER_ID, ORDER_ID);
 
   console.log("\n▶ transitionToOutForDelivery\n");
   await om.transitionToOutForDelivery(ORDER_ID);

@@ -1,18 +1,20 @@
 /**
- * LOOMY Event System — central enum, typed payloads, and process-wide EventEmitter.
- * Agents subscribe for async handoffs (Customer → Store → Courier → Customer).
+ * LOOMY Nervesystem — central EventEmitter + typed events.
+ * Agenter abonnerer her; de importerer ikke hinanden direkte.
  */
 
 import { EventEmitter } from "node:events";
 import type { StoreOrderDetailsJson } from "@/server/events/orderPaidEvents";
 import type { OrderManagerRow } from "@/server/orders/orderManagerTypes";
 
+/** Domæne-events (streng konstant for logs og evt. Socket-paritet). */
 export const LoomyEvents = {
   ORDER_PAID: "ORDER_PAID",
-  ORDER_READY_FOR_PICKUP: "ORDER_READY_FOR_PICKUP",
-  COURIER_ASSIGNED: "COURIER_ASSIGNED",
-  COURIER_LOCATION_UPDATE: "COURIER_LOCATION_UPDATE",
+  ORDER_READY: "ORDER_READY",
+  COURIER_CLAIMED: "COURIER_CLAIMED",
+  COURIER_POSITION_UPDATE: "COURIER_POSITION_UPDATE",
   ORDER_DELIVERED: "ORDER_DELIVERED",
+  /** Ingen bud kunne matches — butik/kunde kan reagere. */
   ORDER_DISPATCH_FAILED: "ORDER_DISPATCH_FAILED",
 } as const;
 
@@ -31,17 +33,17 @@ export interface OrderPaidPayload {
   order: LoomyOrderSnapshot;
 }
 
-export interface OrderReadyForPickupPayload {
+export interface OrderReadyPayload {
   orderId: string;
 }
 
-export interface CourierAssignedPayload {
+export interface CourierClaimedPayload {
   orderId: string;
   courierId: string;
   status: string;
 }
 
-export interface CourierLocationUpdatePayload {
+export interface CourierPositionUpdatePayload {
   orderId: string;
   courierId: string;
   lat: number;
@@ -62,25 +64,35 @@ export interface OrderDispatchFailedPayload {
 
 export interface LoomyEventPayloadMap {
   [LoomyEvents.ORDER_PAID]: OrderPaidPayload;
-  [LoomyEvents.ORDER_READY_FOR_PICKUP]: OrderReadyForPickupPayload;
-  [LoomyEvents.COURIER_ASSIGNED]: CourierAssignedPayload;
-  [LoomyEvents.COURIER_LOCATION_UPDATE]: CourierLocationUpdatePayload;
+  [LoomyEvents.ORDER_READY]: OrderReadyPayload;
+  [LoomyEvents.COURIER_CLAIMED]: CourierClaimedPayload;
+  [LoomyEvents.COURIER_POSITION_UPDATE]: CourierPositionUpdatePayload;
   [LoomyEvents.ORDER_DELIVERED]: OrderDeliveredPayload;
   [LoomyEvents.ORDER_DISPATCH_FAILED]: OrderDispatchFailedPayload;
 }
 
-const GLOBAL_KEY = "__loomyEventBus";
+const GLOBAL_KEY = "__loomyNervousSystemEmitter";
 
-function getBus(): EventEmitter {
-  const g = globalThis as unknown as Record<string, EventEmitter>;
+export class LoomyEventEmitter extends EventEmitter {
+  constructor() {
+    super();
+    this.setMaxListeners(50);
+  }
+}
+
+function getSingleton(): LoomyEventEmitter {
+  const g = globalThis as unknown as Record<string, LoomyEventEmitter>;
   if (!g[GLOBAL_KEY]) {
-    g[GLOBAL_KEY] = new EventEmitter();
-    g[GLOBAL_KEY].setMaxListeners(50);
+    g[GLOBAL_KEY] = new LoomyEventEmitter();
   }
   return g[GLOBAL_KEY];
 }
 
-export const loomyEvents = getBus();
+/** Process-bred singleton (hot reload: genbruger globalThis). */
+export const loomyEventEmitter = getSingleton();
+
+/** Alias bagudkompatibilitet. */
+export const loomyEvents = loomyEventEmitter;
 
 export function logRelay(event: string, payload: unknown): void {
   const preview =
@@ -88,7 +100,7 @@ export function logRelay(event: string, payload: unknown): void {
       ? JSON.stringify(payload).slice(0, 280)
       : String(payload);
   console.info(
-    `[LOOMY relay] ${event} → ${preview}${preview.length >= 280 ? "…" : ""}`
+    `[NERVESYSTEM] emit ${event} → ${preview}${preview.length >= 280 ? "…" : ""}`
   );
 }
 
@@ -97,7 +109,7 @@ export function emitLoomyEvent<K extends keyof LoomyEventPayloadMap>(
   payload: LoomyEventPayloadMap[K]
 ): void {
   logRelay(event as string, payload);
-  loomyEvents.emit(event as string, payload);
+  loomyEventEmitter.emit(event as string, payload);
 }
 
 export function orderRowToSnapshot(row: OrderManagerRow): LoomyOrderSnapshot {
@@ -117,11 +129,11 @@ export function subscribeLoomyEvent<K extends keyof LoomyEventPayloadMap>(
 ): () => void {
   const fn = (payload: LoomyEventPayloadMap[K]) => {
     void Promise.resolve(handler(payload)).catch((err: unknown) => {
-      console.error(`[LOOMY relay] listener error on ${String(event)}`, err);
+      console.error(`[NERVESYSTEM] listener error on ${String(event)}`, err);
     });
   };
-  loomyEvents.on(event as string, fn);
+  loomyEventEmitter.on(event as string, fn);
   return () => {
-    loomyEvents.off(event as string, fn);
+    loomyEventEmitter.off(event as string, fn);
   };
 }

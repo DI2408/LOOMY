@@ -1,6 +1,6 @@
 /**
  * LOOMY service facade — order lifecycle (server-only).
- * Emits on `@/lib/events` bus: ORDER_PAID, ORDER_READY_FOR_PICKUP, ORDER_DELIVERED (via OrderManager hooks).
+ * Emits on `@/lib/events`: ORDER_PAID, ORDER_READY, ORDER_DELIVERED (via server OrderManager hooks).
  */
 
 import { getOrderManager } from "@/server/courier/courierDispatchSingleton";

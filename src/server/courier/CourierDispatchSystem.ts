@@ -131,13 +131,13 @@ export class CourierDispatchSystem {
       status: claimed.status,
     });
 
-    emitLoomyEvent(LoomyEvents.COURIER_ASSIGNED, {
+    emitLoomyEvent(LoomyEvents.COURIER_CLAIMED, {
       orderId: claimed.id,
       courierId,
       status: claimed.status,
     });
     console.info(
-      `[LOOMY courier] COURIER_ASSIGNED order=${claimed.id} courier=${courierId}`
+      `[COURIER DISPATCH]: COURIER_CLAIMED order=${claimed.id} courier=${courierId}`
     );
 
     return claimed;

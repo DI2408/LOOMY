@@ -1,19 +1,21 @@
 /**
- * Wires all LOOMY agents to the central event bus (call once on server boot).
+ * Registrerer alle LOOMY-agenter på nervesystemet (én gang ved server-start).
  */
 
-import { registerCourierDispatchAgent } from "./courierDispatchAgent";
+import { registerCourierAgent } from "./CourierAgent";
 import { registerCustomerTrackingAgent } from "./customerTrackingAgent";
-import { registerStoreNotificationAgent } from "./storeNotificationAgent";
+import { registerPayoutService } from "./PayoutService";
+import { registerStoreAgent } from "./StoreAgent";
 
 let started = false;
 
 export function registerAllLoomyAgents(): void {
   if (started) return;
   started = true;
-  console.info("[LOOMY orchestration] registering agents on event bus…");
-  registerStoreNotificationAgent();
-  registerCourierDispatchAgent();
+  console.log("[NERVESYSTEM]: Registrerer agenter (Store, Courier, Customer, Payout)…");
+  registerStoreAgent();
+  registerCourierAgent();
   registerCustomerTrackingAgent();
-  console.info("[LOOMY orchestration] agents ready.");
+  registerPayoutService();
+  console.log("[NERVESYSTEM]: Agenter klar.");
 }

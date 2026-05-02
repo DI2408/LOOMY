@@ -1,5 +1,5 @@
 /**
- * Customer agent — mirrors courier assignment and location to the customer's Live Map (Socket.io).
+ * Kunde-agent — spejler COURIER_CLAIMED og COURIER_POSITION_UPDATE til Live Map (Socket.io).
  */
 
 import { LoomyEvents, subscribeLoomyEvent } from "@/lib/events";
@@ -10,9 +10,9 @@ export function registerCustomerTrackingAgent(): void {
   if (unsubs.length) return;
 
   unsubs.push(
-    subscribeLoomyEvent(LoomyEvents.COURIER_ASSIGNED, async (payload) => {
-      console.info(
-        `[LOOMY agent:customer] COURIER_ASSIGNED order=${payload.orderId} courier=${payload.courierId}`
+    subscribeLoomyEvent(LoomyEvents.COURIER_CLAIMED, async (payload) => {
+      console.log(
+        `[CUSTOMER AGENT]: COURIER_CLAIMED order=${payload.orderId} bud=${payload.courierId}`
       );
       const ioMod = await import("@/server/socket/ioBridge");
       const io = ioMod.getSocketIoServer();
@@ -26,7 +26,7 @@ export function registerCustomerTrackingAgent(): void {
   );
 
   unsubs.push(
-    subscribeLoomyEvent(LoomyEvents.COURIER_LOCATION_UPDATE, async (payload) => {
+    subscribeLoomyEvent(LoomyEvents.COURIER_POSITION_UPDATE, async (payload) => {
       const ioMod = await import("@/server/socket/ioBridge");
       const io = ioMod.getSocketIoServer();
       io?.to(`order:${payload.orderId}`).emit("location_update", {
@@ -41,8 +41,8 @@ export function registerCustomerTrackingAgent(): void {
 
   unsubs.push(
     subscribeLoomyEvent(LoomyEvents.ORDER_DELIVERED, async (payload) => {
-      console.info(
-        `[LOOMY agent:customer] ORDER_DELIVERED order=${payload.orderId} → socket`
+      console.log(
+        `[CUSTOMER AGENT]: ORDER_DELIVERED order=${payload.orderId} → socket`
       );
       const ioMod = await import("@/server/socket/ioBridge");
       const io = ioMod.getSocketIoServer();
@@ -56,7 +56,7 @@ export function registerCustomerTrackingAgent(): void {
   unsubs.push(
     subscribeLoomyEvent(LoomyEvents.ORDER_DISPATCH_FAILED, async (payload) => {
       console.warn(
-        `[LOOMY agent:customer] ORDER_DISPATCH_FAILED order=${payload.orderId} reason=${payload.reason} eligible=${payload.eligibleCourierCount}`
+        `[CUSTOMER AGENT]: ORDER_DISPATCH_FAILED order=${payload.orderId} reason=${payload.reason} eligible=${payload.eligibleCourierCount}`
       );
       const ioMod = await import("@/server/socket/ioBridge");
       const io = ioMod.getSocketIoServer();
@@ -69,7 +69,7 @@ export function registerCustomerTrackingAgent(): void {
     })
   );
 
-  console.info(
-    "[LOOMY agent:customer] listening on COURIER_ASSIGNED, COURIER_LOCATION_UPDATE, ORDER_DISPATCH_FAILED"
+  console.log(
+    "[CUSTOMER AGENT]: Lytter på COURIER_CLAIMED, COURIER_POSITION_UPDATE, ORDER_DELIVERED, ORDER_DISPATCH_FAILED"
   );
 }
