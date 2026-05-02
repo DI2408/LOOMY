@@ -11,7 +11,9 @@
     "start:socket": "NODE_ENV=production tsx server/socket-server.ts",
     "lint": "eslint",
     "simulate:order": "tsx scripts/simulate-order-lifecycle.mts",
-    "simulate:flow": "tsx src/scripts/simulateFlow.ts"
+    "simulate:flow": "tsx src/scripts/simulateFlow.ts",
+    "simulate:flow:ts-node": "ts-node -r tsconfig-paths/register --transpile-only src/scripts/simulateFlow.ts",
+    "simulate:flow:esm": "node --import ./register-tsconfig-paths.mjs --loader ts-node/esm src/scripts/simulateFlow.ts"
   },
   "dependencies": {
     "@splinetool/react-spline": "^4.1.0",
@@ -35,6 +37,8 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
     "tailwindcss": "^4",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
     "tsx": "^4.19.4",
     "typescript": "^5"
   }

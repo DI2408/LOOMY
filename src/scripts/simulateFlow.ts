@@ -1,12 +1,16 @@
 /**
  * LOOMY nervesystem — end-to-end simulation med pauser så logs kan læses.
  *
- * Kør fra repo-roden (anbefalet — respekterer @/* paths):
+ * Kør fra repo-roden (anbefalet):
  *   npx tsx src/scripts/simulateFlow.ts
  *   npm run simulate:flow
  *
- * Med ts-node (kræver ofte path-register; eksempel):
- *   npx ts-node --compiler-options '{"module":"CommonJS"}' -r tsconfig-paths/register src/scripts/simulateFlow.ts
+ * CJS ts-node + path-alias:
+ *   npm run simulate:flow:ts-node
+ *
+ * ESM ts-node (kræver --import af path-register — ellers fejler @/):
+ *   npm run simulate:flow:esm
+ *   node --import ./register-tsconfig-paths.mjs --loader ts-node/esm src/scripts/simulateFlow.ts
  *
  * Kræver: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
  */
