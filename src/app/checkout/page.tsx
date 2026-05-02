@@ -8,7 +8,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
-import { CheckCircle2, Loader2, Lock, Package, Sparkles } from "lucide-react";
+import { Loader2, Lock, Package, Sparkles } from "lucide-react";
+import { DemoFullJourney } from "@/components/checkout/demo-full-journey";
 import { LumiHeader } from "@/components/lumi-header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -43,33 +44,29 @@ export default function CheckoutPage() {
   const orderIdParam = searchParams.get("order_id") ?? "";
   const checkoutFlag = searchParams.get("checkout") ?? "";
 
-  const { stores, supabaseDataMode, authUserId, markDemoOrderPaid } = useLumi();
+  const { stores, supabaseDataMode, authUserId, setDemoOrderStatus } = useLumi();
   const [order, setOrder] = useState<OrderRow | null>(null);
   const [loadError, setLoadError] = useState("");
   const [payBusy, setPayBusy] = useState(false);
   const [payError, setPayError] = useState("");
   const [demoSnap, setDemoSnap] = useState<DemoCheckoutSnapshot | null>(null);
-  const [demoPaid, setDemoPaid] = useState(false);
-  const [demoPayBusy, setDemoPayBusy] = useState(false);
   /** Avoid SSR/localStorage mismatch: read snapshot only after mount. */
   const [checkoutMounted, setCheckoutMounted] = useState(false);
+
+  const reloadDemoSnapshot = useCallback(() => {
+    setDemoSnap(loadDemoCheckoutSnapshot());
+  }, []);
 
   useEffect(() => {
     queueMicrotask(() => {
       setCheckoutMounted(true);
-      setDemoSnap(loadDemoCheckoutSnapshot());
+      reloadDemoSnapshot();
     });
-  }, [orderIdParam]);
+  }, [orderIdParam, reloadDemoSnapshot]);
 
-  const isDemoCheckout =
-    Boolean(orderIdParam && demoSnap?.orderId === orderIdParam && demoSnap.status === "order_placed");
-  const isDemoPaidSnapshot =
-    Boolean(
-      !supabaseDataMode &&
-        orderIdParam &&
-        demoSnap?.orderId === orderIdParam &&
-        demoSnap.status !== "order_placed",
-    );
+  const isDemoOrderView = Boolean(
+    !supabaseDataMode && orderIdParam && demoSnap?.orderId === orderIdParam,
+  );
 
   const productImage = useCallback(
     (productId: string) => {
@@ -125,14 +122,14 @@ export default function CheckoutPage() {
   }, [authUserId, orderIdParam, supabaseDataMode]);
 
   useEffect(() => {
-    if (isDemoCheckout) return;
+    if (isDemoOrderView) return;
     queueMicrotask(() => {
       void loadOrder();
     });
-  }, [isDemoCheckout, loadOrder]);
+  }, [isDemoOrderView, loadOrder]);
 
   useEffect(() => {
-    if (checkoutFlag !== "cancel" || !orderIdParam || isDemoCheckout) return;
+    if (checkoutFlag !== "cancel" || !orderIdParam || isDemoOrderView) return;
     void (async () => {
       try {
         const supabase = getSupabaseClient();
@@ -157,7 +154,7 @@ export default function CheckoutPage() {
         void loadOrder();
       }
     })();
-  }, [checkoutFlag, orderIdParam, isDemoCheckout, loadOrder]);
+  }, [checkoutFlag, orderIdParam, isDemoOrderView, loadOrder]);
 
   useEffect(() => {
     if (checkoutFlag === "success" && supabaseDataMode && authUserId) {
@@ -206,150 +203,18 @@ export default function CheckoutPage() {
     );
   }
 
-  // --- Demo checkout (local snapshot after placeCartOrder without Supabase RPC) ---
-  if (isDemoCheckout && demoSnap) {
+  // --- Demo: full simulated purchase (payment choice → wait → status steps to delivered) ---
+  if (isDemoOrderView && demoSnap) {
     return (
       <div className="flex min-h-screen flex-col overflow-x-hidden text-stone-900">
         <LumiHeader />
         <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-10 md:px-6 md:py-12">
-          <motion.section
-            initial={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={springSoft}
-            className="mb-8"
-          >
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#8b6914]">Checkout · Demo</p>
-            <h1 className="mt-2 font-serif text-3xl font-medium tracking-tight text-stone-900">Gennemse og fuldfør</h1>
-            <p className="mt-3 max-w-lg text-sm leading-relaxed text-stone-600">
-              Du kører uden Supabase: her er din ordre fra kurven. Simuler betaling for at fortsætte flowet lokalt.
-            </p>
-          </motion.section>
-
-          {demoPaid ? (
-            <Card className="border-[0.5px] border-emerald-200/90 bg-emerald-50/90 p-8 text-center shadow-sm">
-              <CheckCircle2 className="mx-auto mb-3 text-emerald-700" size={36} strokeWidth={1.5} />
-              <p className="font-medium text-emerald-950">Betaling simuleret — tak!</p>
-              <p className="mt-2 text-sm text-emerald-900/90">
-                Ordren er markeret som betalt i demo. Åbn Mit LOOMY for at se historik.
-              </p>
-              <Button className="mt-6" href="/customer">
-                Se Mit LOOMY
-              </Button>
-              <Button variant="secondary" className="mt-3 w-full sm:w-auto" href="/shopping">
-                Shop videre
-              </Button>
-            </Card>
-          ) : (
-            <div className="space-y-6">
-              <Card className="border-[0.5px] border-stone-200/90 bg-white/95 p-5 shadow-sm">
-                <div className="mb-4 flex items-center justify-between gap-2">
-                  <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-stone-500">Ordre</p>
-                    <p className="font-mono text-sm font-medium text-stone-900">{demoSnap.orderId}</p>
-                  </div>
-                  <span className="rounded-full border-[0.5px] border-[#7c5a10]/30 bg-[#7c5a10]/10 px-3 py-1 text-[11px] font-medium text-[#6b4f0a]">
-                    {demoSnap.storeName}
-                  </span>
-                </div>
-                <ul className="space-y-3">
-                  {demoSnap.lines.map((line) => (
-                    <li
-                      key={line.id}
-                      className="flex gap-3 rounded-xl border-[0.5px] border-stone-100 bg-stone-50/80 p-3"
-                    >
-                      <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border-[0.5px] border-stone-200/80 bg-white">
-                        <Image
-                          src={line.imageUrl}
-                          alt=""
-                          fill
-                          className="object-cover"
-                          sizes="64px"
-                        />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium text-stone-900">{line.productName}</p>
-                        <p className="text-xs text-stone-500">
-                          Str. {line.size} · {line.qty} stk.
-                        </p>
-                        <p className="mt-1 text-sm tabular-nums text-stone-800">{line.unitPriceKr * line.qty} kr</p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-4 flex items-center justify-between border-t-[0.5px] border-stone-200/80 pt-4">
-                  <span className="text-xs font-medium uppercase tracking-[0.14em] text-stone-500">Total</span>
-                  <span className="font-serif text-2xl font-medium tabular-nums text-stone-900">{demoSnap.subtotalKr} kr</span>
-                </div>
-              </Card>
-
-              <Card className="border-[0.5px] border-stone-200/90 bg-gradient-to-br from-white to-stone-50/90 p-5 shadow-sm">
-                <p className="text-sm font-medium text-stone-900">Levering</p>
-                <p className="mt-1 text-xs leading-relaxed text-stone-600">{demoSnap.deliveryAddress}</p>
-                <Link href="/customer" className="mt-2 inline-block text-[11px] font-medium text-[#6b4f0a] underline-offset-2 hover:underline">
-                  Redigér i Mit LOOMY
-                </Link>
-              </Card>
-
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <Button
-                  fullWidth
-                  disabled={demoPayBusy}
-                  onClick={() => {
-                    setDemoPayBusy(true);
-                    window.setTimeout(() => {
-                      markDemoOrderPaid(demoSnap.orderId);
-                      setDemoPaid(true);
-                      setDemoPayBusy(false);
-                    }, 420);
-                  }}
-                >
-                  {demoPayBusy ? (
-                    <>
-                      <Loader2 size={15} className="mr-2 animate-spin" />
-                      Behandler…
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles size={15} className="mr-2 text-[#faf8f5]" />
-                      Simuler betaling (demo)
-                    </>
-                  )}
-                </Button>
-                <Button variant="secondary" fullWidth href="/shopping">
-                  <Package size={15} className="mr-2" />
-                  Tilbage til shop
-                </Button>
-              </div>
-
-              <p className="text-center text-[11px] text-stone-500">
-                Med Supabase + Stripe Connect kan du bruge rigtig betaling her i stedet.
-              </p>
-            </div>
-          )}
-        </main>
-      </div>
-    );
-  }
-
-  if (isDemoPaidSnapshot && demoSnap) {
-    return (
-      <div className="flex min-h-screen flex-col overflow-x-hidden text-stone-900">
-        <LumiHeader />
-        <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-10 md:px-6 md:py-12">
-          <Card className="border-[0.5px] border-emerald-200/90 bg-emerald-50/90 p-8 text-center shadow-sm">
-            <CheckCircle2 className="mx-auto mb-3 text-emerald-700" size={36} strokeWidth={1.5} />
-            <p className="font-medium text-emerald-950">Demo-ordre registreret</p>
-            <p className="mt-2 font-mono text-sm text-emerald-900/90">{demoSnap.orderId}</p>
-            <p className="mt-3 text-sm text-emerald-900/85">
-              Status i demo: <span className="font-medium">{demoSnap.status.replaceAll("_", " ")}</span>
-            </p>
-            <Button className="mt-6" href="/customer">
-              Mit LOOMY
-            </Button>
-            <Button variant="secondary" className="mt-3 w-full sm:w-auto" href="/shopping">
-              Shop videre
-            </Button>
-          </Card>
+          <DemoFullJourney
+            key={demoSnap.orderId}
+            initialSnapshot={demoSnap}
+            setDemoOrderStatus={setDemoOrderStatus}
+            reloadSnapshot={reloadDemoSnapshot}
+          />
         </main>
       </div>
     );

@@ -154,8 +154,12 @@ type LumiContextValue = {
   cartItemCount: number;
   cartSubtotalKr: number;
   placeCartOrder: () => Promise<PlaceCartOrderResult>;
-  /** Demo/local orders only: advance order after simulated payment. */
-  markDemoOrderPaid: (orderId: string) => void;
+  /** Demo/local orders only: set order status and persist demo checkout snapshot. */
+  setDemoOrderStatus: (
+    orderId: string,
+    status: OrderStatus,
+    options?: { simulatedPaymentMethod?: string },
+  ) => void;
   placeOrder: (params: { storeId: string; productId: string; size: SizeKey }) => Promise<PlaceOrderResult>;
   updateStock: (params: {
     storeId: string;
@@ -497,16 +501,23 @@ export function LumiProvider({ children }: { children: ReactNode }) {
     setCartLines([]);
   }, []);
 
-  const markDemoOrderPaid = useCallback((orderId: string) => {
-    const snap = loadDemoCheckoutSnapshot();
-    if (!snap || snap.orderId !== orderId || snap.status !== "order_placed") return;
-    saveDemoCheckoutSnapshot({ ...snap, status: "store_packing" });
-    setOrders((prev) =>
-      prev.map((o) =>
-        o.id === orderId ? { ...o, status: "store_packing" as OrderStatus } : o,
-      ),
-    );
-  }, []);
+  const setDemoOrderStatus = useCallback(
+    (orderId: string, status: OrderStatus, options?: { simulatedPaymentMethod?: string }) => {
+      const snap = loadDemoCheckoutSnapshot();
+      if (!snap || snap.orderId !== orderId) return;
+      saveDemoCheckoutSnapshot({
+        ...snap,
+        status,
+        ...(options?.simulatedPaymentMethod
+          ? { simulatedPaymentMethod: options.simulatedPaymentMethod }
+          : {}),
+      });
+      setOrders((prev) =>
+        prev.map((o) => (o.id === orderId ? { ...o, status } : o)),
+      );
+    },
+    [],
+  );
 
   const placeCartOrder = useCallback(async (): Promise<PlaceCartOrderResult> => {
     if (cartLines.length === 0) {
@@ -980,7 +991,7 @@ export function LumiProvider({ children }: { children: ReactNode }) {
       cartItemCount,
       cartSubtotalKr,
       placeCartOrder,
-      markDemoOrderPaid,
+      setDemoOrderStatus,
       placeOrder,
       updateStock,
       progressOrderByStore,
@@ -1011,7 +1022,7 @@ export function LumiProvider({ children }: { children: ReactNode }) {
       cartItemCount,
       cartSubtotalKr,
       placeCartOrder,
-      markDemoOrderPaid,
+      setDemoOrderStatus,
       placeOrder,
       updateStock,
       progressOrderByStore,

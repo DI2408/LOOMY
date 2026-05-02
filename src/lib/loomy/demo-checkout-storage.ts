@@ -7,10 +7,12 @@ export type DemoCheckoutSnapshot = {
   storeId: string;
   storeName: string;
   deliveryAddress: string;
-  /** Mirrors OrderStatus after simulated payment */
+  /** Mirrors OrderStatus in demo flow */
   status: string;
   lines: PersistedCartLine[];
   subtotalKr: number;
+  /** Set after simulated payment succeeds */
+  simulatedPaymentMethod?: string;
 };
 
 export function saveDemoCheckoutSnapshot(snapshot: DemoCheckoutSnapshot): void {
