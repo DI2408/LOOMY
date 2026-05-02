@@ -1,28 +1,48 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f3f6fb;
-  --foreground: #0f172a;
+  --background: #f6f4ef;
+  --foreground: #171412;
+  --loomy-accent: #7c5a10;
+  --loomy-accent-soft: rgba(124, 90, 16, 0.14);
+  --loomy-ink: #0b0908;
+  --loomy-mist: rgba(255, 255, 255, 0.76);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-playfair), ui-serif, Georgia, serif;
 }
 
 * {
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
 body {
-  background:
-    radial-gradient(circle at 10% 0%, rgba(249, 162, 108, 0.18), transparent 35%),
-    radial-gradient(circle at 85% 18%, rgba(88, 111, 158, 0.2), transparent 35%),
-    #f3f6fb;
+  background-color: var(--background);
+  background-image:
+    radial-gradient(ellipse 130% 75% at 50% -15%, rgba(124, 90, 16, 0.11), transparent 52%),
+    radial-gradient(circle at 92% 2%, rgba(58, 53, 49, 0.08), transparent 38%),
+    radial-gradient(circle at 8% 96%, rgba(214, 205, 189, 0.42), transparent 46%);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+::selection {
+  background-color: rgba(124, 90, 16, 0.2);
+  color: var(--loomy-ink);
 }
 
 @keyframes shimmer {
@@ -48,4 +68,35 @@ body {
 
 .mesh-float {
   animation: meshFloat 10s ease-in-out infinite;
+}
+
+/* Slide-to-confirm: larger touch target on mobile */
+.slide-action-range {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+}
+
+.slide-action-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 56px;
+  height: 52px;
+  border-radius: 1rem;
+  border: none;
+  background: transparent;
+  cursor: grab;
+}
+
+.slide-action-range::-moz-range-thumb {
+  width: 56px;
+  height: 52px;
+  border-radius: 1rem;
+  border: none;
+  background: transparent;
+  cursor: grab;
+}
+
+.slide-action-range:focus-visible {
+  outline: none;
 }

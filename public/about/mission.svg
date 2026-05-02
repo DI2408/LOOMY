@@ -1,16 +1,69 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900">
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900" role="img" aria-label="LOOMY mission — connection and flow">
   <defs>
-    <linearGradient id="m" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#f7e0b4"/>
-      <stop offset="100%" stop-color="#f8be73"/>
+    <linearGradient id="m-base" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#efe9df"/>
+      <stop offset="50%" stop-color="#f6f4ef"/>
+      <stop offset="100%" stop-color="#e5ddd2"/>
+    </linearGradient>
+    <radialGradient id="m-warm" cx="28%" cy="22%" r="55%">
+      <stop offset="0%" stop-color="#d4af37" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#d4af37" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="m-cool" cx="88%" cy="70%" r="45%">
+      <stop offset="0%" stop-color="#78716c" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#78716c" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="m-path" x1="0%" y1="50%" x2="100%" y2="50%">
+      <stop offset="0%" stop-color="#7c5a10" stop-opacity="0.25"/>
+      <stop offset="50%" stop-color="#7c5a10" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#a67c1a" stop-opacity="0.4"/>
+    </linearGradient>
+    <linearGradient id="m-panel" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1c1917"/>
+      <stop offset="100%" stop-color="#292524"/>
     </linearGradient>
   </defs>
-  <rect width="1400" height="900" fill="url(#m)"/>
-  <rect x="180" y="160" width="1040" height="580" rx="40" fill="#ffffff" opacity="0.9"/>
-  <rect x="280" y="250" width="840" height="390" rx="28" fill="#1f2a49"/>
-  <path d="M340 430h720" stroke="#f5ca7d" stroke-width="12" stroke-linecap="round"/>
-  <path d="M460 520h480" stroke="#f5ca7d" stroke-width="12" stroke-linecap="round"/>
-  <circle cx="420" cy="430" r="18" fill="#f5ca7d"/>
-  <circle cx="500" cy="520" r="18" fill="#f5ca7d"/>
-  <text x="700" y="808" text-anchor="middle" font-family="Arial, sans-serif" font-size="54" fill="#2d2d2d">MISSION</text>
+  <rect width="1400" height="900" fill="url(#m-base)"/>
+  <rect width="1400" height="900" fill="url(#m-warm)"/>
+  <rect width="1400" height="900" fill="url(#m-cool)"/>
+  <!-- floating panel -->
+  <rect x="200" y="140" width="1000" height="620" rx="44" fill="#fdfcfa" stroke="#e7e0d6" stroke-width="1"/>
+  <rect x="260" y="200" width="880" height="500" rx="32" fill="url(#m-panel)" stroke="#44403c" stroke-width="0.5"/>
+  <!-- journey curve -->
+  <path
+    d="M 340 480 C 480 320, 620 620, 760 420 S 980 360, 1060 480"
+    fill="none"
+    stroke="url(#m-path)"
+    stroke-width="3"
+    stroke-linecap="round"
+  />
+  <path
+    d="M 340 480 C 480 320, 620 620, 760 420 S 980 360, 1060 480"
+    fill="none"
+    stroke="#d4af37"
+    stroke-opacity="0.15"
+    stroke-width="16"
+    stroke-linecap="round"
+  />
+  <!-- nodes -->
+  <circle cx="340" cy="480" r="14" fill="#faf8f5" stroke="#7c5a10" stroke-width="2"/>
+  <circle cx="760" cy="420" r="12" fill="#7c5a10" fill-opacity="0.9"/>
+  <circle cx="1060" cy="480" r="14" fill="#faf8f5" stroke="#c9a227" stroke-width="1.8"/>
+  <!-- abstract city silhouette -->
+  <g fill="#faf8f5" fill-opacity="0.08">
+    <rect x="420" y="560" width="28" height="90" rx="2"/>
+    <rect x="458" y="520" width="36" height="130" rx="2"/>
+    <rect x="506" y="540" width="22" height="110" rx="2"/>
+    <rect x="900" y="550" width="32" height="100" rx="2"/>
+    <rect x="942" y="500" width="44" height="150" rx="2"/>
+    <rect x="996" y="570" width="24" height="80" rx="2"/>
+  </g>
+  <!-- hairline divider -->
+  <line x1="320" y1="620" x2="1080" y2="620" stroke="#78716c" stroke-opacity="0.25" stroke-width="1"/>
+  <!-- small sparkle accents -->
+  <g fill="#c9a227" fill-opacity="0.55">
+    <circle cx="520" cy="360" r="2.5"/>
+    <circle cx="880" cy="340" r="2"/>
+    <circle cx="640" cy="300" r="1.8"/>
+  </g>
 </svg>

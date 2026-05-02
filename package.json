@@ -4,10 +4,17 @@
   "private": true,
   "scripts": {
     "cursor:sync": "node scripts/sync-loomy-cursor.mjs",
-    "dev": "next dev",
+    "dev": "next dev --turbo -H 0.0.0.0 -p 3000",
     "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
+    "postbuild": "node scripts/verify-site.mjs",
+    "start": "next start -H 0.0.0.0 -p 3000",
+    "verify:site": "node scripts/verify-site.mjs",
+    "lint": "eslint",
+    "supabase:start": "npx --yes supabase@latest start",
+    "supabase:stop": "npx --yes supabase@latest stop",
+    "supabase:db:reset": "npx --yes supabase@latest db reset",
+    "supabase:migrate:remote": "npx --yes supabase@latest db push",
+    "supabase:link": "npx --yes supabase@latest link"
   },
   "dependencies": {
     "@splinetool/react-spline": "^4.1.0",
@@ -16,7 +23,9 @@
     "lucide-react": "^1.11.0",
     "next": "16.2.4",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "stripe": "^22.1.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

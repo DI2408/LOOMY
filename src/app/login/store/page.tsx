@@ -19,43 +19,37 @@ export default function StoreLoginPage() {
   const [error, setError] = useState("");
 
   return (
-    <div className="min-h-screen text-slate-900">
+    <div className="min-h-screen text-stone-900">
       <LumiHeader />
       <main className="mx-auto w-full max-w-xl px-4 py-10 md:px-6">
-        <Card className="border border-slate-200 bg-white text-slate-900 shadow-sm">
+        <Card className="border border-stone-200 bg-white text-stone-900 shadow-sm">
           <div className="mb-4 flex items-center gap-2">
-            <Building2 size={18} className="text-[#d97745]" />
+            <Building2 size={18} className="text-[#8b6914]" />
             <h1 className="text-xl font-bold">Store Partner Login</h1>
           </div>
-          <p className="mb-4 text-sm text-slate-600">
+          <p className="mb-4 text-sm text-stone-600">
             Sign in as store partner to accept orders, prepare pickup, and update catalog stock.
           </p>
-          <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-3 py-3 text-xs text-amber-800">
-            <p className="font-semibold">Demo credentials</p>
-            <p className="mt-1">Store ID: <span className="font-mono">strom-boutique</span></p>
-            <p>Email: <span className="font-mono">store.demo@loomy.dk</span></p>
-            <p>Password: <span className="font-mono">Demo1234!</span></p>
-          </div>
           <div className="space-y-3">
             <input
               value={storeId}
               onChange={(event) => setStoreId(event.target.value)}
               placeholder="Store ID"
-              className="h-12 w-full rounded-xl border border-slate-300 px-3 text-sm"
+              className="h-12 w-full rounded-xl border border-stone-300 px-3 text-sm"
             />
             <input
               value={staffEmail}
               onChange={(event) => setStaffEmail(event.target.value)}
               placeholder="Staff email"
               type="email"
-              className="h-12 w-full rounded-xl border border-slate-300 px-3 text-sm"
+              className="h-12 w-full rounded-xl border border-stone-300 px-3 text-sm"
             />
             <input
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               placeholder="Password"
               type="password"
-              className="h-12 w-full rounded-xl border border-slate-300 px-3 text-sm"
+              className="h-12 w-full rounded-xl border border-stone-300 px-3 text-sm"
             />
             <Button
               fullWidth
