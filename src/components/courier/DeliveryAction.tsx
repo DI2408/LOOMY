@@ -36,13 +36,28 @@ export function DeliveryAction({ orderId, courierId, secret }: Props) {
 
   useEffect(() => {
     if (!navigator.geolocation) return;
+    // DOM PositionOptions has no distanceFilter (unlike some native SDKs); throttle ~20 m in userland.
+    const minMoveM = 20;
+    const last = { lat: null as number | null, lng: null as number | null };
+
     const id = navigator.geolocation.watchPosition(
       (pos) => {
-        setLat(pos.coords.latitude);
-        setLng(pos.coords.longitude);
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        if (last.lat != null && last.lng != null) {
+          const dLat = lat - last.lat;
+          const dLng = lng - last.lng;
+          const cosLat = Math.cos((lat * Math.PI) / 180);
+          const approxM = Math.hypot(dLat * 111_320, dLng * 111_320 * cosLat);
+          if (approxM < minMoveM) return;
+        }
+        last.lat = lat;
+        last.lng = lng;
+        setLat(lat);
+        setLng(lng);
       },
       () => {},
-      { enableHighAccuracy: true, maximumAge: 10_000, distanceFilter: 20 }
+      { enableHighAccuracy: true, maximumAge: 10_000 }
     );
     return () => navigator.geolocation.clearWatch(id);
   }, []);
