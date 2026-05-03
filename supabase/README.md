@@ -22,6 +22,7 @@ I **Supabase SQL Editor** kør **i denne rækkefølge** (se også `MIGRATION_ORD
 5. `stripe_events.sql` (webhook idempotency-log + RLS deny-all for klientroller)
 6. `loomy_checkout_payments.sql` (Checkout + betaling før butik kan pakke)
 7. `loomy_cart_order.sql` (kurv: flere linjer i én ordre)
+8. `loomy_order_pricing_breakdown.sql` (samme som migration `20260502120008_*`: fragt + moms på ordre; total = varer + fragt)
 
 `partner_profiles.sql` opretter `public.partner_profiles` (butik + bud).
 
