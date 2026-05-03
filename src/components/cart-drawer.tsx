@@ -12,6 +12,7 @@ import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { useLumi } from "@/components/providers/lumi-provider";
 import { springSoft } from "@/components/motion-config";
+import { computeOrderPricingBreakdown } from "@/lib/loomy/pricing-display";
 
 const drawerSpring = { type: "spring" as const, stiffness: 420, damping: 36 };
 
@@ -36,6 +37,8 @@ export function CartDrawer({ onOpen }: CartDrawerProps) {
   } = useLumi();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const cartSubtotalMinor = cartSubtotalKr * 100;
+  const cartPricing = computeOrderPricingBreakdown(cartSubtotalMinor);
   const [portalReady, setPortalReady] = useState(false);
 
   useLayoutEffect(() => {
@@ -169,10 +172,24 @@ export function CartDrawer({ onOpen }: CartDrawerProps) {
 
             {cartLines.length > 0 ? (
               <div className="border-t-[0.5px] border-stone-200/90 bg-[#f6f4ef]/90 px-5 py-4 backdrop-blur-md">
-                <div className="mb-3 flex items-baseline justify-between">
-                  <span className="text-xs font-medium uppercase tracking-[0.16em] text-stone-500">Subtotal</span>
+                <div className="mb-3 space-y-1.5 text-xs text-stone-600">
+                  <div className="flex justify-between gap-3">
+                    <span>Varer (inkl. moms)</span>
+                    <span className="tabular-nums font-medium text-stone-900">{cartSubtotalKr} kr</span>
+                  </div>
+                  <div className="flex justify-between gap-3">
+                    <span>Fragt</span>
+                    <span className="tabular-nums font-medium text-stone-900">{cartPricing.deliveryKr} kr</span>
+                  </div>
+                  <div className="flex justify-between gap-3">
+                    <span>Heraf moms (25 %)</span>
+                    <span className="tabular-nums">{cartPricing.vatKr} kr</span>
+                  </div>
+                </div>
+                <div className="mb-3 flex items-baseline justify-between border-t-[0.5px] border-stone-200/80 pt-3">
+                  <span className="text-xs font-medium uppercase tracking-[0.16em] text-stone-500">Total inkl. moms</span>
                   <span className="font-serif text-xl font-medium tabular-nums text-stone-900">
-                    {cartSubtotalKr} kr
+                    {cartPricing.totalKr} kr
                   </span>
                 </div>
                 {error ? (

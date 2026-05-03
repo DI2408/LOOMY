@@ -9,6 +9,7 @@ import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { Check, CheckCircle2, Loader2, Package, Sparkles, Truck } from "lucide-react";
 import type { OrderStatus } from "@/components/providers/lumi-provider";
+import { OrderPricingSummary } from "@/components/checkout/order-pricing-summary";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { springSoft } from "@/components/motion-config";
@@ -146,10 +147,7 @@ export function DemoFullJourney({
             </li>
           ))}
         </ul>
-        <div className="mt-4 flex items-center justify-between border-t-[0.5px] border-stone-200/80 pt-4">
-          <span className="text-xs font-medium uppercase tracking-[0.14em] text-stone-500">Total</span>
-          <span className="font-serif text-2xl font-medium tabular-nums text-stone-900">{snap.subtotalKr} kr</span>
-        </div>
+        <OrderPricingSummary subtotalMinor={snap.subtotalKr * 100} />
       </Card>
 
       <Card className="border-[0.5px] border-stone-200/90 bg-gradient-to-br from-white to-stone-50/90 p-5 shadow-sm">
