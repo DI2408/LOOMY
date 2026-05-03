@@ -36,6 +36,7 @@ type OrderRow = {
   delivery_address: string;
   stores?: { name: string } | { name: string }[] | null;
   order_items?: OrderItemRow[] | null;
+  payments?: { status: string } | { status: string }[] | null;
 };
 
 export default function CheckoutPage() {
@@ -49,6 +50,7 @@ export default function CheckoutPage() {
   const [loadError, setLoadError] = useState("");
   const [payBusy, setPayBusy] = useState(false);
   const [payError, setPayError] = useState("");
+  const [paymentPollBusy, setPaymentPollBusy] = useState(false);
   const [demoSnap, setDemoSnap] = useState<DemoCheckoutSnapshot | null>(null);
   /** Avoid SSR/localStorage mismatch: read snapshot only after mount. */
   const [checkoutMounted, setCheckoutMounted] = useState(false);
@@ -102,7 +104,8 @@ export default function CheckoutPage() {
           currency,
           delivery_address,
           stores ( name ),
-          order_items ( product_id, product_name, size, qty, unit_price_minor )
+          order_items ( product_id, product_name, size, qty, unit_price_minor ),
+          payments ( status )
         `,
         )
         .eq("id", orderIdParam)
@@ -163,6 +166,39 @@ export default function CheckoutPage() {
       });
     }
   }, [checkoutFlag, authUserId, supabaseDataMode, loadOrder]);
+
+  const paymentStatus = useMemo(() => {
+    const p = order?.payments;
+    if (!p) return null;
+    const row = Array.isArray(p) ? p[0] : p;
+    return row?.status ?? null;
+  }, [order?.payments]);
+
+  useEffect(() => {
+    if (!supabaseDataMode || !authUserId || checkoutFlag !== "success" || !orderIdParam) return;
+    if (paymentStatus === "succeeded" || paymentStatus === "cancelled") return;
+    const shouldPoll = paymentStatus === "processing" || paymentStatus === null;
+    if (!shouldPoll) return;
+
+    let ticks = 0;
+    const maxTicks = paymentStatus === "processing" ? 30 : 8;
+    queueMicrotask(() => {
+      setPaymentPollBusy(true);
+    });
+    const id = window.setInterval(() => {
+      ticks += 1;
+      void loadOrder();
+      if (ticks >= maxTicks) {
+        clearInterval(id);
+        setPaymentPollBusy(false);
+      }
+    }, 2000);
+
+    return () => {
+      clearInterval(id);
+      setPaymentPollBusy(false);
+    };
+  }, [authUserId, checkoutFlag, loadOrder, orderIdParam, paymentStatus, supabaseDataMode]);
 
   const items = order?.order_items ?? [];
   const storeName = useMemo(() => {
@@ -271,9 +307,19 @@ export default function CheckoutPage() {
           <p className="mt-3 max-w-lg text-sm leading-relaxed text-stone-600">
             Gennemse din ordre og fuldfør med Stripe. Butikken kan først pakke, når betalingen er gennemført.
           </p>
-          {checkoutFlag === "success" ? (
+          {checkoutFlag === "success" && paymentStatus === "processing" ? (
+            <p className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border-[0.5px] border-amber-200/90 bg-amber-50/90 px-3 py-2 text-xs text-amber-950">
+              {paymentPollBusy ? <Loader2 size={14} className="animate-spin text-[#8b6914]" /> : null}
+              Afventer bekræftelse fra Stripe — siden opdateres automatisk (asynk betaling kan tage lidt).
+            </p>
+          ) : null}
+          {paymentStatus === "succeeded" ? (
             <p className="mt-3 rounded-xl border-[0.5px] border-emerald-200/90 bg-emerald-50/90 px-3 py-2 text-xs text-emerald-900">
-              Tak — vi opdaterer betalingsstatus. Genindlæser ordre…
+              Betaling gennemført. Butikken kan nu pakke din ordre.
+            </p>
+          ) : checkoutFlag === "success" && paymentStatus && paymentStatus !== "succeeded" ? (
+            <p className="mt-3 rounded-xl border-[0.5px] border-stone-200/90 bg-stone-50 px-3 py-2 text-xs text-stone-700">
+              Betalingsstatus: {paymentStatus.replaceAll("_", " ")}
             </p>
           ) : null}
         </motion.section>
@@ -297,6 +343,26 @@ export default function CheckoutPage() {
               Tilbage til shop
             </Button>
           </Card>
+        ) : paymentStatus === "succeeded" ? (
+          <div className="space-y-6">
+            <Card className="border-[0.5px] border-emerald-200/90 bg-emerald-50/90 p-6 text-center shadow-sm">
+              <p className="font-medium text-emerald-950">Tak — din betaling er registreret</p>
+              <p className="mt-2 text-sm text-emerald-900/90">
+                Ordre <span className="font-mono">{order.id}</span> er klar til næste trin hos butikken.
+              </p>
+              <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-center">
+                <Button href="/customer">Mit LOOMY</Button>
+                <Button variant="secondary" href="/shopping">
+                  Shop videre
+                </Button>
+              </div>
+            </Card>
+            <Card className="border-[0.5px] border-stone-200/90 bg-white/95 p-5 shadow-sm">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-stone-500">Ordre</p>
+              <p className="font-mono text-sm font-medium text-stone-900">{order.id}</p>
+              <p className="mt-2 text-sm text-stone-600">Total {subtotalKr} kr · {storeName || "Butik"}</p>
+            </Card>
+          </div>
         ) : (
           <div className="space-y-6">
             <Card className="border-[0.5px] border-stone-200/90 bg-white/95 p-5 shadow-sm">

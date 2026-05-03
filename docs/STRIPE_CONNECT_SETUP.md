@@ -46,15 +46,20 @@ Without enabling these methods in the Dashboard (or if your account is not eligi
 ## 4) Stripe Dashboard — webhooks & Connect
 
 1. Create **Connect** accounts for each merchant (or use Connect Onboarding later).
-2. Add webhook endpoint: `https://your-domain.com/api/stripe/webhook`
+2. Add webhook endpoint: `https://your-domain.com/api/stripe/webhook` (use the **signing secret** as `STRIPE_WEBHOOK_SECRET` in Vercel).
 3. Subscribe to at least:
 
 - `checkout.session.completed`
+- `checkout.session.async_payment_succeeded` (MobilePay / delayed methods)
+- `checkout.session.async_payment_failed`
 - `checkout.session.expired`
 - `payment_intent.succeeded`
+- `payment_intent.processing`
 - `payment_intent.payment_failed`
 - `payment_intent.canceled`
 - `charge.refunded`
+
+**Vercel:** redeploy after changing env vars. **Stripe test mode** uses a different webhook secret than live — use the matching `whsec_…` per endpoint.
 
 ## 5) Customer flow (shopping)
 

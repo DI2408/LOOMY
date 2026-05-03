@@ -4,6 +4,13 @@ import type Stripe from "stripe";
 import { getSupabaseServiceRoleClient } from "@/lib/supabase/admin";
 import { getStripeServerClient } from "@/lib/stripe/server";
 import { cancelUnpaidOrderById } from "@/lib/stripe/cancel-unpaid-order";
+import {
+  handleChargeRefunded,
+  handleCheckoutSessionAsyncPaymentFailed,
+  handleCheckoutSessionAsyncPaymentSucceeded,
+  handleCheckoutSessionCompleted,
+  handlePaymentIntentSucceeded,
+} from "@/lib/stripe/webhook-handlers";
 
 export const runtime = "nodejs";
 
@@ -71,104 +78,72 @@ export async function POST(request: Request) {
   }
 
   try {
-    if (event.type === "checkout.session.completed") {
-      const session = event.data.object as Stripe.Checkout.Session;
-      const orderId = session.metadata?.order_id ?? session.client_reference_id ?? "";
-      const paymentIntentId =
-        typeof session.payment_intent === "string"
-          ? session.payment_intent
-          : session.payment_intent?.id ?? "";
-
-      if (!orderId) {
-        throw new Error("checkout.session.completed missing order_id metadata.");
+    switch (event.type) {
+      case "checkout.session.completed": {
+        const session = event.data.object as Stripe.Checkout.Session;
+        await handleCheckoutSessionCompleted(admin, session, event.type);
+        break;
       }
-
-      await admin
-        .from("payments")
-        .update({
-          status: "succeeded",
-          stripe_payment_intent_id: paymentIntentId || null,
-          stripe_checkout_session_id: session.id,
-          updated_at: new Date().toISOString(),
-          metadata: {
-            source: "stripe-webhook",
-            eventType: event.type,
-            checkout_session_id: session.id,
-          },
-        })
-        .eq("order_id", orderId);
-    } else if (event.type === "checkout.session.expired") {
-      const session = event.data.object as Stripe.Checkout.Session;
-      const orderId = session.metadata?.order_id ?? session.client_reference_id ?? "";
-      if (orderId) {
-        await cancelUnpaidOrderById(admin, orderId);
+      case "checkout.session.async_payment_succeeded": {
+        const session = event.data.object as Stripe.Checkout.Session;
+        await handleCheckoutSessionAsyncPaymentSucceeded(admin, session, event.type);
+        break;
       }
-    } else if (event.type === "payment_intent.succeeded") {
-      const pi = event.data.object as Stripe.PaymentIntent;
-      const orderId = pi.metadata?.order_id ?? "";
-      if (orderId) {
-        await admin
-          .from("payments")
-          .update({
-            status: "succeeded",
-            stripe_payment_intent_id: pi.id,
-            updated_at: new Date().toISOString(),
-            metadata: { source: "stripe-webhook", eventType: event.type },
-          })
-          .eq("order_id", orderId);
-      } else {
-        await admin
-          .from("payments")
-          .update({
-            status: "succeeded",
-            updated_at: new Date().toISOString(),
-            metadata: { source: "stripe-webhook", eventType: event.type },
-          })
-          .eq("stripe_payment_intent_id", pi.id);
+      case "checkout.session.async_payment_failed": {
+        const session = event.data.object as Stripe.Checkout.Session;
+        await handleCheckoutSessionAsyncPaymentFailed(admin, session);
+        break;
       }
-    } else if (
-      event.type === "payment_intent.payment_failed" ||
-      event.type === "payment_intent.canceled"
-    ) {
-      const pi = event.data.object as Stripe.PaymentIntent;
-      const orderId = pi.metadata?.order_id ?? "";
-      if (orderId) {
-        await cancelUnpaidOrderById(admin, orderId);
-      } else {
-        const { data: pay } = await admin
-          .from("payments")
-          .select("order_id")
-          .eq("stripe_payment_intent_id", pi.id)
-          .maybeSingle();
-        const oid = (pay as { order_id?: string } | null)?.order_id;
-        if (oid) await cancelUnpaidOrderById(admin, oid);
+      case "checkout.session.expired": {
+        const session = event.data.object as Stripe.Checkout.Session;
+        const orderId = session.metadata?.order_id ?? session.client_reference_id ?? "";
+        if (orderId) await cancelUnpaidOrderById(admin, orderId);
+        break;
       }
-    } else if (event.type === "charge.refunded") {
-      const charge = event.data.object as Stripe.Charge;
-      const piId = typeof charge.payment_intent === "string" ? charge.payment_intent : charge.payment_intent?.id;
-      if (piId) {
-        await admin
-          .from("payments")
-          .update({
-            status: "refunded",
-            updated_at: new Date().toISOString(),
-            metadata: { source: "stripe-webhook", eventType: event.type },
-          })
-          .eq("stripe_payment_intent_id", piId);
+      case "payment_intent.succeeded": {
+        const pi = event.data.object as Stripe.PaymentIntent;
+        await handlePaymentIntentSucceeded(admin, pi, event.type);
+        break;
       }
-    } else if (event.type === "payment_intent.processing") {
-      const pi = event.data.object as Stripe.PaymentIntent;
-      const orderId = pi.metadata?.order_id ?? "";
-      if (orderId) {
-        await admin
-          .from("payments")
-          .update({
-            status: "processing",
-            stripe_payment_intent_id: pi.id,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("order_id", orderId);
+      case "payment_intent.payment_failed":
+      case "payment_intent.canceled": {
+        const pi = event.data.object as Stripe.PaymentIntent;
+        const orderId = pi.metadata?.order_id ?? "";
+        if (orderId) {
+          await cancelUnpaidOrderById(admin, orderId);
+        } else {
+          const { data: pay } = await admin
+            .from("payments")
+            .select("order_id")
+            .eq("stripe_payment_intent_id", pi.id)
+            .maybeSingle();
+          const oid = (pay as { order_id?: string } | null)?.order_id;
+          if (oid) await cancelUnpaidOrderById(admin, oid);
+        }
+        break;
       }
+      case "payment_intent.processing": {
+        const pi = event.data.object as Stripe.PaymentIntent;
+        const orderId = pi.metadata?.order_id ?? "";
+        if (orderId) {
+          await admin
+            .from("payments")
+            .update({
+              status: "processing",
+              stripe_payment_intent_id: pi.id,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("order_id", orderId);
+        }
+        break;
+      }
+      case "charge.refunded": {
+        const charge = event.data.object as Stripe.Charge;
+        await handleChargeRefunded(admin, charge);
+        break;
+      }
+      default:
+        break;
     }
 
     await admin
@@ -179,10 +154,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Webhook processing failed";
-    await admin
-      .from("stripe_events")
-      .update({ error_message: message })
-      .eq("stripe_event_id", event.id);
+    await admin.from("stripe_events").update({ error_message: message }).eq("stripe_event_id", event.id);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

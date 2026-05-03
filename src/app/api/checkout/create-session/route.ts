@@ -95,6 +95,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Ordren er allerede betalt." }, { status: 409 });
   }
 
+  const existingSessionId = pay.stripe_checkout_session_id?.trim();
+  if (existingSessionId && pay.status !== "succeeded") {
+    try {
+      const existing = await stripe.checkout.sessions.retrieve(existingSessionId);
+      if (existing.status === "open" && existing.url) {
+        return NextResponse.json({ url: existing.url, reused: true });
+      }
+    } catch {
+      // fall through: create a new session
+    }
+  }
+
   const bps = getApplicationFeeBps();
   const fee = useConnect ? applicationFeeAmountMinor(amountMinor, bps) : 0;
 
