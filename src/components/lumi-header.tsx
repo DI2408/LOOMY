@@ -29,17 +29,17 @@ export function LumiHeader() {
     role === "customer" ? "Kunde" : role === "store" ? "Butik" : "Bud";
 
   return (
-    <header className="sticky top-0 z-50 border-b-[0.5px] border-stone-200/80 bg-[#f6f4ef]/80 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b-[0.5px] border-stone-200/70 bg-[#f7f5f2]/88 backdrop-blur-md">
       <div className="mx-auto flex w-full max-w-7xl items-center gap-2 px-4 py-3 md:gap-3 md:px-8 md:py-4">
         <Link
           href="/"
-          className="group flex min-h-11 shrink-0 items-center rounded-lg px-1.5 text-stone-900 transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7c5a10]/30 focus-visible:ring-offset-2 focus-visible:ring-offset-[#f6f4ef]"
+          className="group flex min-h-11 shrink-0 items-center rounded-lg px-1.5 text-stone-900 transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c5a059]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#f7f5f2]"
         >
           <span className="font-serif text-lg font-medium tracking-[0.12em] sm:text-xl">LOOMY</span>
         </Link>
 
         <nav
-          className="ml-1 hidden items-center gap-1 rounded-2xl border-[0.5px] border-stone-200/70 bg-white/70 p-1 md:flex"
+          className="ml-1 hidden items-center gap-1 rounded-2xl border-[0.5px] border-stone-200/60 bg-stone-100/80 p-1 md:flex"
           aria-label="Hovedmenu"
         >
           {mainNav.map((item) => {
@@ -56,7 +56,7 @@ export function LumiHeader() {
                   {active ? (
                     <motion.span
                       layoutId="nav-pill"
-                      className="absolute inset-0 rounded-xl bg-[#f6f4ef] shadow-[inset_0_0_0_1px_rgba(124,90,16,0.14)]"
+                      className="absolute inset-0 rounded-xl bg-white shadow-[inset_0_0_0_1px_rgba(197,160,89,0.12)]"
                       transition={menuSpring}
                     />
                   ) : null}
@@ -67,7 +67,7 @@ export function LumiHeader() {
           })}
         </nav>
 
-        <div className="hidden min-h-11 min-w-0 flex-1 items-center gap-2 rounded-xl border-[0.5px] border-stone-200/90 bg-white/90 px-4 backdrop-blur-sm lg:flex">
+        <div className="hidden min-h-11 min-w-0 flex-1 items-center gap-2 rounded-xl border-[0.5px] border-stone-200/80 bg-white px-4 shadow-sm backdrop-blur-sm lg:flex">
           <Search size={17} className="shrink-0 text-stone-400" aria-hidden />
           <input
             placeholder="Søg butikker eller styles…"
@@ -83,7 +83,7 @@ export function LumiHeader() {
           transition={menuSpring}
           className="hidden min-h-11 shrink-0 items-center gap-2 rounded-xl border-[0.5px] border-stone-200/90 bg-white/90 px-3 text-sm font-medium text-stone-800 backdrop-blur-sm transition hover:bg-white xl:flex"
         >
-          <MapPin size={16} className="text-[#7c5a10]" aria-hidden />
+          <MapPin size={16} className="text-[#b8923f]" aria-hidden />
           <span className="max-w-[8rem] truncate">København K</span>
         </motion.button>
 

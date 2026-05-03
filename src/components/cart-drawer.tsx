@@ -263,10 +263,10 @@ export function CartDrawer({ onOpen }: CartDrawerProps) {
           onOpen?.();
           setCartOpen(true);
         }}
-        className="relative flex min-h-11 min-w-11 items-center justify-center rounded-xl border-[0.5px] border-stone-200/90 bg-white/90 text-stone-800 shadow-sm backdrop-blur-sm transition hover:bg-white"
+        className="relative flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-stone-300/90 bg-white text-stone-800 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.95)] transition hover:border-stone-400 hover:bg-stone-50"
         aria-label={`Kurv, ${cartItemCount} varer`}
       >
-        <ShoppingBag size={18} strokeWidth={1.75} className="text-[#7c5a10]" aria-hidden />
+        <ShoppingBag size={18} strokeWidth={1.75} className="text-[#9a7a3a]" aria-hidden />
         {cartItemCount > 0 ? (
           <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-stone-900 px-1 text-[10px] font-semibold text-[#faf8f5]">
             {cartItemCount > 9 ? "9+" : cartItemCount}
