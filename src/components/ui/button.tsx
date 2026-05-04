@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import type { HTMLMotionProps } from "framer-motion";
 import type { ReactNode } from "react";
 
-type ButtonVariant = "primary" | "secondary" | "ghost";
+type ButtonVariant = "primary" | "secondary" | "ghost" | "outlineLight";
 
 type ButtonProps = Omit<HTMLMotionProps<"button">, "children"> & {
   children: ReactNode;
@@ -19,6 +19,9 @@ const variantClasses: Record<ButtonVariant, string> = {
     "bg-white/10 text-white border border-white/20 shadow-[0_8px_20px_rgba(15,23,42,0.20)] hover:bg-white/20 hover:shadow-[0_12px_26px_rgba(15,23,42,0.24)] active:scale-95 active:shadow-[0_5px_12px_rgba(15,23,42,0.18)] focus-visible:ring-white/30",
   ghost:
     "bg-transparent text-slate-300 hover:bg-white/10 hover:text-white active:scale-95 focus-visible:ring-white/20",
+  /** For toolbars on light backgrounds (avoids dark-theme secondary looking wrong in production CSS order) */
+  outlineLight:
+    "bg-white text-slate-900 border border-slate-300 shadow-sm hover:bg-slate-50 hover:shadow-md active:scale-95 focus-visible:ring-slate-400/50",
 };
 
 export function Button({
