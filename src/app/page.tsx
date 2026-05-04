@@ -94,7 +94,8 @@ export default function Home() {
               <div className="mt-8 flex flex-wrap gap-3">
                 <Button
                   type="button"
-                  className="rounded-full bg-[#c5a059] text-[#121212] shadow-[0_12px_36px_rgba(197,160,89,0.35)] hover:bg-[#d4b068]"
+                  variant="gold"
+                  className="rounded-full"
                   onClick={() => router.push("/shopping")}
                 >
                   Start shopping
