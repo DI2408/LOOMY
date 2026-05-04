@@ -1,15 +1,21 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f3f6fb;
-  --foreground: #0f172a;
+  /* LOOMY Modern Luxe — matches deploy / Google Fonts (Playfair + Geist) */
+  --background: #fdfcf8;
+  --foreground: #121212;
+  --loomy-gold: #c5a059;
+  --loomy-gold-muted: #f4c57a;
+  --loomy-hero: #121212;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-loomy-gold: var(--loomy-gold);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-loomy: var(--font-loomy-display), ui-serif, Georgia, "Times New Roman", serif;
 }
 
 * {
@@ -17,12 +23,9 @@
 }
 
 body {
-  background:
-    radial-gradient(circle at 10% 0%, rgba(249, 162, 108, 0.18), transparent 35%),
-    radial-gradient(circle at 85% 18%, rgba(88, 111, 158, 0.2), transparent 35%),
-    #f3f6fb;
+  background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
 
 @keyframes shimmer {

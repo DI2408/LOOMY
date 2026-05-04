@@ -3,36 +3,34 @@
 import { motion } from "framer-motion";
 import { Building2, Mail, Phone, Sparkles, Truck } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { SplineScene } from "@/components/hero/spline-scene";
+import { LoomyHeroStudioCard } from "@/components/hero/loomy-hero-studio-card";
 import { TiltCard } from "@/components/hero/tilt-card";
-import { LumiHeader } from "@/components/lumi-header";
-import { useLumi } from "@/components/providers/lumi-provider";
+import { LoomyHeader } from "@/components/loomy-header";
 
 const heroSlides = [
   {
-    title: "Your favorite boutiques, delivered in 60 minutes.",
+    title: "Én elegant platform for kunde, butik og bud.",
     subtitle:
-      "Browse curated catalogues from Copenhagen K and get same-hour delivery with live tracking.",
+      "Fra køb til dør er hvert trin synligt og afstemt, så oplevelsen føles enkel og premium.",
   },
   {
-    title: "One platform. Customer, store, and courier in one flow.",
+    title: "Dine yndlingsbutikker — leveret på under en time.",
     subtitle:
-      "Orders move automatically to the right team, so every step is fast, visible, and reliable.",
+      "Gennemse kuraterede kataloger fra København K med levering samme dag og live tracking.",
   },
   {
-    title: "Live stock by size before you buy.",
+    title: "Live lager pr. størrelse før du betaler.",
     subtitle:
-      "See exactly how many pieces are left in each size and secure your fit instantly.",
+      "Se præcis hvor mange stykker der er tilbage i hver størrelse og sikr dit fit med det samme.",
   },
 ];
 
-const SPLINE_SCENE_URL = "";
-
 export default function Home() {
-  const { stores } = useLumi();
+  const router = useRouter();
   const [slideIndex, setSlideIndex] = useState(0);
 
   useEffect(() => {
@@ -44,32 +42,27 @@ export default function Home() {
 
   return (
     <div className="min-h-screen text-slate-900">
-      <LumiHeader />
+      <LoomyHeader />
 
       <main className="mx-auto w-full max-w-7xl space-y-6 px-4 py-6 md:px-6 md:py-10">
-        <section className="relative overflow-hidden rounded-3xl border border-white/25 bg-[#090f1f] p-6 shadow-[0_25px_80px_rgba(10,14,26,0.45)] md:p-10">
-          <div className="pointer-events-none absolute inset-0 opacity-90">
-            <div className="mesh-float absolute -left-10 -top-10 h-72 w-72 rounded-full bg-[radial-gradient(circle,#5b3b98_0%,transparent_70%)] blur-3xl" />
-            <div className="mesh-float absolute right-0 top-16 h-80 w-80 rounded-full bg-[radial-gradient(circle,#1d3c7f_0%,transparent_70%)] blur-3xl [animation-delay:1.4s]" />
-            <div className="mesh-float absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-[radial-gradient(circle,#c58f2a_0%,transparent_70%)] blur-3xl [animation-delay:2.4s]" />
-          </div>
+        <section className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#121212] p-6 shadow-[0_32px_90px_rgba(0,0,0,0.35)] md:rounded-[2.25rem] md:p-10 lg:p-12">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_0%_0%,rgba(197,160,89,0.16),transparent_50%)]" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_90%_20%,rgba(70,80,120,0.12),transparent_45%)]" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
 
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/70 to-transparent" />
-          <div className="pointer-events-none absolute left-1/2 top-8 h-28 w-72 -translate-x-1/2 rounded-full bg-amber-300/20 blur-3xl" />
-
-          <div className="relative grid gap-8 md:grid-cols-[1.05fr_0.95fr]">
+          <div className="relative grid gap-10 md:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)] md:gap-12 md:items-start">
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
               className="space-y-4"
             >
-              <p className="text-xs uppercase tracking-[0.3em] text-[#f4c57a]">
-                Copenhagen K Fashion Delivery
+              <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-[#c5a059]">
+                LOOMY · ATELIER DELIVERY
               </p>
-              <div className="relative">
-                <p className="pointer-events-none absolute -top-5 left-0 text-6xl font-black tracking-tight text-white/8 md:text-8xl">
-                  LUMI
+              <div className="relative min-h-[4.5rem] md:min-h-[6rem]">
+                <p className="pointer-events-none absolute -top-2 left-0 font-loomy text-[clamp(3.5rem,12vw,6rem)] font-semibold leading-none tracking-tight text-white/[0.09]">
+                  LOOMY
                 </p>
               </div>
               <motion.div
@@ -78,10 +71,10 @@ export default function Home() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.35 }}
               >
-                <h1 className="relative z-10 max-w-3xl text-3xl font-black leading-tight text-white md:text-6xl">
+                <h1 className="relative z-10 max-w-3xl font-loomy text-3xl font-semibold leading-[1.15] text-white md:text-5xl lg:text-[3.25rem]">
                   {heroSlides[slideIndex].title}
                 </h1>
-                <p className="mt-4 max-w-2xl text-base text-slate-200/90 md:text-lg">
+                <p className="mt-4 max-w-2xl text-base leading-relaxed text-white/85 md:text-lg">
                   {heroSlides[slideIndex].subtitle}
                 </p>
               </motion.div>
@@ -89,21 +82,27 @@ export default function Home() {
                 {heroSlides.map((slide, index) => (
                   <button
                     key={slide.title}
+                    type="button"
                     onClick={() => setSlideIndex(index)}
                     className={`h-2.5 rounded-full transition ${
                       slideIndex === index ? "w-8 bg-white" : "w-2.5 bg-white/35"
                     }`}
-                    aria-label={`Go to slide ${index + 1}`}
+                    aria-label={`Gå til slide ${index + 1}`}
                   />
                 ))}
               </div>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <Button onClick={() => window.open("/shopping", "_blank", "noopener,noreferrer")}>
-                  Start Shopping
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Button
+                  type="button"
+                  variant="gold"
+                  className="rounded-full"
+                  onClick={() => router.push("/shopping")}
+                >
+                  Start shopping
                 </Button>
                 <Button
                   variant="secondary"
-                  className="border border-white/40 bg-white/10 text-white backdrop-blur-2xl"
+                  className="rounded-full border border-white/35 bg-transparent text-white backdrop-blur-md hover:bg-white/10"
                   onClick={() =>
                     document.getElementById("about")?.scrollIntoView({
                       behavior: "smooth",
@@ -111,47 +110,14 @@ export default function Home() {
                     })
                   }
                 >
-                  Learn More
+                  Læs mere
                 </Button>
               </div>
             </motion.div>
 
-            <div className="relative hidden min-h-[360px] md:block">
-              <div className="absolute inset-0 rounded-3xl border border-white/20 bg-white/10 p-2 backdrop-blur-[34px]">
-                <SplineScene sceneUrl={SPLINE_SCENE_URL} />
-              </div>
-              <div className="pointer-events-none absolute -bottom-6 left-1/2 h-10 w-3/4 -translate-x-1/2 rounded-full bg-black/45 blur-2xl" />
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-3 md:grid-cols-1">
-              {[
-                {
-                  label: "Avg. delivery",
-                  value: "36 min",
-                  tone: "from-[#f7d08f]/95 to-[#f7e0b8]/95",
-                },
-                {
-                  label: "Inner-city stores",
-                  value: `${stores.length}+`,
-                  tone: "from-[#8eb0ff]/95 to-[#b7ccff]/95",
-                },
-                {
-                  label: "Live stock sync",
-                  value: "Real-time",
-                  tone: "from-[#8de8ca]/95 to-[#c2f8e6]/95",
-                },
-              ].map((item) => (
-                <TiltCard key={item.label}>
-                  <div
-                    className={`rounded-2xl border border-white/35 bg-gradient-to-br ${item.tone} p-4 shadow-[0_16px_36px_rgba(15,23,42,0.25)] backdrop-blur-2xl`}
-                  >
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-700">
-                      {item.label}
-                    </p>
-                    <p className="mt-1 text-2xl font-black text-slate-900">{item.value}</p>
-                  </div>
-                </TiltCard>
-              ))}
+            <div className="relative min-h-[360px] md:min-h-[460px]">
+              <LoomyHeroStudioCard />
+              <div className="pointer-events-none absolute -bottom-3 left-1/2 h-14 w-[85%] -translate-x-1/2 rounded-full bg-black/40 blur-3xl" />
             </div>
           </div>
         </section>

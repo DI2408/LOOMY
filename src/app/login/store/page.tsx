@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Building2, KeyRound } from "lucide-react";
-import { LumiHeader } from "@/components/lumi-header";
+import { LoomyHeader } from "@/components/loomy-header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLumi } from "@/components/providers/lumi-provider";
@@ -20,7 +20,7 @@ export default function StoreLoginPage() {
 
   return (
     <div className="min-h-screen text-slate-900">
-      <LumiHeader />
+      <LoomyHeader />
       <main className="mx-auto w-full max-w-xl px-4 py-10 md:px-6">
         <Card className="border border-slate-200 bg-white text-slate-900 shadow-sm">
           <div className="mb-4 flex items-center gap-2">

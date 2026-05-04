@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useMemo, useRef, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { LumiHeader } from "@/components/lumi-header";
+import { LoomyHeader } from "@/components/loomy-header";
 import {
   useLumi,
   type OrderStatus,
@@ -54,7 +54,7 @@ export default function ShoppingPage() {
 
   return (
     <div className="min-h-screen text-slate-900">
-      <LumiHeader />
+      <LoomyHeader />
 
       <main className="mx-auto w-full max-w-7xl space-y-6 px-4 py-6 md:px-6 md:py-10">
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">

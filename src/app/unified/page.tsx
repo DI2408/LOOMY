@@ -1,7 +1,7 @@
 "use client";
 
 import { CheckCircle2, Clock3 } from "lucide-react";
-import { LumiHeader } from "@/components/lumi-header";
+import { LoomyHeader } from "@/components/loomy-header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLumi, type OrderStatus, type SizeKey } from "@/components/providers/lumi-provider";
@@ -29,10 +29,10 @@ export default function UnifiedPage() {
 
   return (
     <div className="min-h-screen text-slate-900">
-      <LumiHeader />
+      <LoomyHeader />
       <main className="mx-auto w-full max-w-7xl space-y-6 px-4 py-6 md:px-6 md:py-10">
         <Card className="border border-slate-200 bg-white text-slate-900 shadow-sm">
-          <h1 className="text-2xl font-bold">LUMI Unified Operations View</h1>
+          <h1 className="text-2xl font-bold">LOOMY samlet drift</h1>
           <p className="mt-1 text-sm text-slate-600">
             One live view for Customer, Store, and Courier in the same flow.
           </p>

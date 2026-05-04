@@ -13,7 +13,7 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
-import { LumiHeader } from "@/components/lumi-header";
+import { LoomyHeader } from "@/components/loomy-header";
 import { Card } from "@/components/ui/card";
 import { useLumi, type SizeKey } from "@/components/providers/lumi-provider";
 import { SlideAction } from "@/components/ui/slide-action";
@@ -153,7 +153,7 @@ export default function StorePage() {
   if (role !== "store") {
     return (
       <div className="min-h-screen text-slate-900">
-        <LumiHeader />
+        <LoomyHeader />
         <main className="mx-auto w-full max-w-7xl px-4 py-10 md:px-6">
           <Card className="border border-slate-200 bg-white text-slate-900 shadow-sm">
             <h1 className="text-xl font-bold">Store access required</h1>
@@ -174,7 +174,7 @@ export default function StorePage() {
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_right,#eef2ff_0%,#f8fafc_45%,#ffffff_100%)] text-slate-900">
-      <LumiHeader />
+      <LoomyHeader />
       <main className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-6 md:grid-cols-[1.2fr_0.8fr] md:px-6 md:py-10">
         <section className="space-y-4">
           <div className="rounded-2xl border border-indigo-100 bg-white/80 p-5 shadow-[0_12px_30px_-20px_rgba(30,41,59,0.45)] backdrop-blur">

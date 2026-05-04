@@ -2,13 +2,13 @@
 
 import Image from "next/image";
 import { CheckCircle2, Gem, Target, Users } from "lucide-react";
-import { LumiHeader } from "@/components/lumi-header";
+import { LoomyHeader } from "@/components/loomy-header";
 import { Card } from "@/components/ui/card";
 
 export default function AboutPage() {
   return (
     <div className="min-h-screen text-slate-900">
-      <LumiHeader />
+      <LoomyHeader />
 
       <main className="mx-auto w-full max-w-7xl space-y-6 px-4 py-6 md:px-6 md:py-10">
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-10">
