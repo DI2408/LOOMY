@@ -5,6 +5,7 @@
   "scripts": {
     "cursor:sync": "node scripts/sync-loomy-cursor.mjs",
     "dev": "next dev --turbo -H 0.0.0.0 -p 3000",
+    "dev:webpack": "next dev -H 0.0.0.0 -p 3000",
     "build": "next build",
     "postbuild": "node scripts/verify-site.mjs",
     "start": "next start -H 0.0.0.0 -p 3000",
