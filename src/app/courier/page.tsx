@@ -2,7 +2,7 @@
 
 import { Bike, CheckCircle2, Sparkles, Zap } from "lucide-react";
 import Link from "next/link";
-import { LumiHeader } from "@/components/lumi-header";
+import { LoomyHeader } from "@/components/loomy-header";
 import { Card } from "@/components/ui/card";
 import { useLumi } from "@/components/providers/lumi-provider";
 import { SlideAction } from "@/components/ui/slide-action";
@@ -15,7 +15,7 @@ export default function CourierPage() {
   if (role !== "courier") {
     return (
       <div className="min-h-screen text-slate-900">
-        <LumiHeader />
+        <LoomyHeader />
         <main className="mx-auto w-full max-w-7xl px-4 py-10 md:px-6">
           <Card className="border border-slate-200 bg-white text-slate-900 shadow-sm">
             <h1 className="text-xl font-bold">Courier access required</h1>
@@ -45,7 +45,7 @@ export default function CourierPage() {
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_right,#e0f2fe_0%,#f8fafc_45%,#ffffff_100%)] text-slate-900">
-      <LumiHeader />
+      <LoomyHeader />
       <main className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-6 md:grid-cols-[0.8fr_1.2fr] md:px-6 md:py-10">
         <Card className="border border-slate-200 bg-white/90 text-slate-900 shadow-sm">
           <h1 className="mb-3 text-xl font-bold">Courier Hub</h1>
