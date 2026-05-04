@@ -10,6 +10,7 @@ import { useSearchParams } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
 import { Loader2, Lock, Package, Sparkles } from "lucide-react";
 import { DemoFullJourney } from "@/components/checkout/demo-full-journey";
+import { OrderPricingSummary } from "@/components/checkout/order-pricing-summary";
 import { LumiHeader } from "@/components/lumi-header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -32,6 +33,9 @@ type OrderRow = {
   store_id: string;
   status: string;
   total_minor: number | null;
+  subtotal_minor?: number | null;
+  delivery_fee_minor?: number | null;
+  vat_included_minor?: number | null;
   currency: string;
   delivery_address: string;
   stores?: { name: string } | { name: string }[] | null;
@@ -101,6 +105,9 @@ export default function CheckoutPage() {
           store_id,
           status,
           total_minor,
+          subtotal_minor,
+          delivery_fee_minor,
+          vat_included_minor,
           currency,
           delivery_address,
           stores ( name ),
@@ -207,7 +214,12 @@ export default function CheckoutPage() {
     return Array.isArray(s) ? (s[0]?.name ?? "") : (s.name ?? "");
   }, [order?.stores]);
 
-  const subtotalKr = order?.total_minor != null ? Math.round(order.total_minor / 100) : 0;
+  const itemsSubtotalMinor = useMemo(() => {
+    if (!order?.order_items?.length) return 0;
+    return order.order_items.reduce((sum, line) => sum + line.unit_price_minor * line.qty, 0);
+  }, [order]);
+
+  const totalKr = order?.total_minor != null ? Math.round(order.total_minor / 100) : 0;
 
   const loginNextHref = `/login/customer?next=${encodeURIComponent(`/checkout?order_id=${orderIdParam}`)}`;
 
@@ -360,7 +372,9 @@ export default function CheckoutPage() {
             <Card className="border-[0.5px] border-stone-200/90 bg-white/95 p-5 shadow-sm">
               <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-stone-500">Ordre</p>
               <p className="font-mono text-sm font-medium text-stone-900">{order.id}</p>
-              <p className="mt-2 text-sm text-stone-600">Total {subtotalKr} kr · {storeName || "Butik"}</p>
+              <p className="mt-2 text-sm text-stone-600">
+                Total {totalKr} kr · {storeName || "Butik"}
+              </p>
             </Card>
           </div>
         ) : (
@@ -402,10 +416,12 @@ export default function CheckoutPage() {
                   </li>
                 ))}
               </ul>
-              <div className="mt-4 flex items-center justify-between border-t-[0.5px] border-stone-200/80 pt-4">
-                <span className="text-xs font-medium uppercase tracking-[0.14em] text-stone-500">Total</span>
-                <span className="font-serif text-2xl font-medium tabular-nums text-stone-900">{subtotalKr} kr</span>
-              </div>
+              <OrderPricingSummary
+                subtotalMinor={order.subtotal_minor != null ? order.subtotal_minor : itemsSubtotalMinor}
+                deliveryMinor={order.delivery_fee_minor}
+                vatIncludedMinor={order.vat_included_minor}
+                totalMinor={order.total_minor}
+              />
             </Card>
 
             <Card className="border-[0.5px] border-stone-200/90 bg-gradient-to-br from-white to-stone-50/90 p-5 shadow-sm">

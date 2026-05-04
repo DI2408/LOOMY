@@ -22,9 +22,9 @@ export function LumiShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-[#f6f4ef]">
+    <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-[#f7f5f2]">
       <div
-        className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(ellipse_100%_60%_at_50%_-10%,rgba(139,105,20,0.07),transparent_50%),radial-gradient(circle_at_100%_0%,rgba(120,113,108,0.05),transparent_42%),radial-gradient(circle_at_0%_100%,rgba(214,211,209,0.28),transparent_48%)]"
+        className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(ellipse_100%_60%_at_50%_-10%,rgba(197,160,89,0.06),transparent_50%),radial-gradient(circle_at_100%_0%,rgba(120,113,108,0.04),transparent_42%),radial-gradient(circle_at_0%_100%,rgba(214,211,209,0.22),transparent_48%)]"
         aria-hidden
       />
       <div className="flex min-h-0 flex-1 flex-col pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:pb-0">
@@ -32,7 +32,7 @@ export function LumiShell({ children }: { children: React.ReactNode }) {
       </div>
 
       <nav
-        className="fixed inset-x-0 bottom-0 z-40 border-t-[0.5px] border-stone-300/80 bg-[#f6f4ef]/90 py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] backdrop-blur-md md:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 border-t-[0.5px] border-stone-300/80 bg-[#f7f5f2]/92 py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] backdrop-blur-md md:hidden"
         aria-label="Primær navigation"
       >
         <div className="mx-auto flex max-w-lg items-stretch justify-around gap-1 px-2">

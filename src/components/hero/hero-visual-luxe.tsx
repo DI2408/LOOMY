@@ -63,7 +63,7 @@ export function HeroVisualLuxe() {
         <div className="space-y-4">
           <motion.p
             variants={itemVariants}
-            className="text-[10px] font-semibold uppercase tracking-[0.32em] text-[#e8d89a]"
+            className="text-[10px] font-semibold uppercase tracking-[0.32em] text-[#c5a059]"
           >
             LOOMY Studio
           </motion.p>
@@ -83,7 +83,7 @@ export function HeroVisualLuxe() {
           <motion.div variants={itemVariants} className="pt-1">
             <Link
               href="/shopping"
-              className="group inline-flex min-h-11 items-center gap-2 rounded-full border-[0.5px] border-[#d4af37]/45 bg-[#d4af37]/10 px-5 text-xs font-semibold uppercase tracking-[0.18em] text-[#faf8f5] transition hover:border-[#d4af37]/65 hover:bg-[#d4af37]/18 active:scale-[0.98]"
+              className="group inline-flex min-h-11 items-center gap-2 rounded-full border border-[#c5a059]/55 bg-[#151311]/90 px-5 text-xs font-semibold uppercase tracking-[0.2em] text-[#e8d5a8] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] transition hover:border-[#c5a059]/80 hover:bg-[#1c1916] active:scale-[0.98]"
             >
               Udforsk udvalget
               <span
@@ -109,7 +109,7 @@ export function HeroVisualLuxe() {
                 transition={springSoft}
                 className="rounded-2xl border-[0.5px] border-white/12 bg-white/[0.06] px-3 py-3 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-md"
               >
-                <Icon className="mb-2 text-[#e8d89a]" size={18} strokeWidth={1.5} aria-hidden />
+                <Icon className="mb-2 text-[#c5a059]" size={18} strokeWidth={1.5} aria-hidden />
                 <p className="text-[11px] font-semibold tracking-wide text-[#faf8f5]">{title}</p>
                 <p className="mt-0.5 text-[10px] leading-snug text-stone-400">{hint}</p>
               </motion.div>

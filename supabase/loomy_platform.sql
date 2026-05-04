@@ -317,6 +317,9 @@ create table if not exists public.orders (
   eta_minutes int not null default 25 check (eta_minutes >= 0),
   currency text not null default 'DKK',
   total_minor int check (total_minor is null or total_minor >= 0),
+  subtotal_minor int,
+  delivery_fee_minor int not null default 4900,
+  vat_included_minor int,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
